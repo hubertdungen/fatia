@@ -37,9 +37,14 @@ O Fatia calcula as duas coisas em paralelo: **o que te custa** e **o que cobras*
 
 **Várias impressoras no mesmo trabalho.** Cada mesa escolhe a sua máquina. O custo horário é o dessa máquina e o total sai da média ponderada pelo tempo de cada mesa. Se retificares o tempo real, todas as mesas escalam na mesma proporção — regra de três simples. O painel mostra o €/h de cada máquina e a média resultante.
 
+**Gestor de filamentos.** Cada filamento é um nome e os seus preços — preço/kg e portes do fornecedor. Acrescentas e removes os teus, e ficam guardados nos presets e dentro do ficheiro do Exportar. Cada mesa escolhe que filamentos usou, e pode levar mais do que um.
+
+**Vários filamentos na mesma mesa.** Quando uma mesa leva mais do que um filamento e não tem o custo do slicer, não há como saber quantos gramas são de cada: o Fatia estima pela média dos preços dessa mesa — e avisa-te, porque basta meteres o custo do slicer nessa mesa para o valor ficar exato. O orçamento do cliente mostra os filamentos usados, e discrimina-os por mesa quando há mais do que um.
+
 **Orçamento do cliente.** Vista limpa e imprimível, com logo mini do Fatia, ficha técnica e sem uma única margem à vista. Opcionalmente:
 
 - **as impressoras usadas** — interruptor geral, e um visto por mesa para escolher quais aparecem;
+- **a nota de rodapé** — "Valores em euros. Orçamento válido por 30 dias." é texto teu, editável e desligável;
 - **a tua marca** — logótipo, nome de quem fatura, NIF, contactos, morada, slogan em itálico e uma mensagem destacada ao cliente;
 - **imposto de faturação** — presets para Portugal IVA 23%, 13% e 6%, Espanha IVA 21%, França TVA 20%, Alemanha MwSt. 19%, Itália IVA 22%, Países Baixos btw 21%, Reino Unido VAT 20%, ou uma taxa personalizada/geral. O total do cliente mantém-se igual e o orçamento separa subtotal antes de imposto e imposto incluído;
 - **QR codes** — desligados por omissão. O QR é gerado do endereço que escreveres, sem rede nem serviços externos, e qualquer um pode ser substituído por uma imagem tua (PNG/JPEG).

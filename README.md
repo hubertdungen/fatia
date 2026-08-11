@@ -39,9 +39,14 @@ Fatia computes both sides in parallel: **what it costs you** and **what you char
 
 **Several printers in one job.** Each plate picks its own machine. The hourly cost is that machine's, and the total is the time-weighted average across plates. Reconcile the real print time and every plate scales by the same ratio — plain rule of three. The panel shows each machine's €/h and the resulting average.
 
+**Filament manager.** A filament is a name and its prices — price/kg and the supplier's shipping. Add your own, remove them, and they travel with your presets and inside the Export file. Each plate picks which filaments it used, and can use more than one.
+
+**Several filaments on one plate.** When a plate carries more than one filament and has no slicer cost, there is no way to know how many grams are of each: Fatia estimates from the average of that plate's prices — and warns you, because entering the slicer cost for that plate is all it takes to make the figure exact. The client quote lists the filaments used, and breaks them down per plate when there is more than one.
+
 **Client quote.** A clean printable view with the Fatia mini logo, a spec box and not a single margin in sight. Optionally:
 
 - **the printers used** — one master switch, plus a per-plate tick for which ones show;
+- **the footer note** — "Prices in euros. Quote valid for 30 days." is your own text, editable and switchable;
 - **your brand** — logo, billing name, tax number, contacts, address, an italic tagline and a highlighted note to the client;
 - **invoice tax** — presets for Portugal IVA 23%, 13% and 6%, Spain IVA 21%, France TVA 20%, Germany MwSt. 19%, Italy IVA 22%, Netherlands btw 21%, UK VAT 20%, or a custom/general rate. The customer total stays fixed and the quote splits subtotal before tax and tax included;
 - **QR codes** — off by default. The QR is generated from whatever address you type, with no network and no third-party service, and any of them can be replaced by your own PNG/JPEG.
