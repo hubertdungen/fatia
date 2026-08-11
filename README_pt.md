@@ -11,7 +11,7 @@
 
 ---
 
-Metes o que o slicer te dá — gramas, tempo, custo — e o Fatia devolve o preço, o lucro real e um orçamento pronto a enviar ao cliente. Um único ficheiro HTML, sem servidor e sem conta — e instalável como aplicação com um clique.
+Metes o que o slicer te dá — gramas, tempo, custo — e o Fatia devolve o preço, o lucro real e um orçamento pronto a enviar ao cliente. Como app local é um único ficheiro HTML, sem servidor e sem conta — e instalável como aplicação com um clique. Para uso permanente, o servidor Python incluído acrescenta login e memória partilhada por utilizador.
 
 **[▶ Abrir o Fatia](https://hubertdungen.github.io/fatia/)**
 
@@ -37,10 +37,11 @@ O Fatia calcula as duas coisas em paralelo: **o que te custa** e **o que cobras*
 
 **Várias impressoras no mesmo trabalho.** Cada mesa escolhe a sua máquina. O custo horário é o dessa máquina e o total sai da média ponderada pelo tempo de cada mesa. Se retificares o tempo real, todas as mesas escalam na mesma proporção — regra de três simples. O painel mostra o €/h de cada máquina e a média resultante.
 
-**Orçamento do cliente.** Vista limpa e imprimível, com ficha técnica e sem uma única margem à vista. Opcionalmente:
+**Orçamento do cliente.** Vista limpa e imprimível, com logo mini do Fatia, ficha técnica e sem uma única margem à vista. Opcionalmente:
 
 - **as impressoras usadas** — interruptor geral, e um visto por mesa para escolher quais aparecem;
 - **a tua marca** — logótipo, nome de quem fatura, NIF, contactos, morada, slogan em itálico e uma mensagem destacada ao cliente;
+- **imposto de faturação** — presets para Portugal IVA 23%, 13% e 6%, Espanha IVA 21%, França TVA 20%, Alemanha MwSt. 19%, Itália IVA 22%, Países Baixos btw 21%, Reino Unido VAT 20%, ou uma taxa personalizada/geral. O total do cliente mantém-se igual e o orçamento separa subtotal antes de imposto e imposto incluído;
 - **QR codes** — desligados por omissão. O QR é gerado do endereço que escreveres, sem rede nem serviços externos, e qualquer um pode ser substituído por uma imagem tua (PNG/JPEG).
 
 **Presets e memória.** Guarda configurações com nome, exporta e importa em JSON. Tudo entra no template: impressoras por mesa, logótipo, textos e QR codes. Ele lembra-se de onde ficaste.
@@ -77,6 +78,7 @@ Continua a servir a mesma PWA, mas acrescenta `/api/*` para login e memória por
 | Portes CTT | [CTT](https://www.ctt.pt/particulares/enviar/para-portugal/encomenda-postal) | ago 2026 |
 | Portes InPost | [InPost](https://www.inpost.pt/faz-um-envio/nossas-tarifas-de-envio) | ago 2026 |
 | Preço de mercado da eletricidade | [energy-charts.info](https://api.energy-charts.info/) (OMIE / zona PT) | ao vivo |
+| Presets de IVA / imposto | [Your Europe](https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm) e [GOV.UK](https://www.gov.uk/vat-rates) | jul 2026 |
 
 Estes valores são **estimativas informativas**, não cotações. Confirma-os antes de os usares num orçamento real.
 

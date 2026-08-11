@@ -11,7 +11,7 @@
 
 ---
 
-Feed it what your slicer already tells you — grams, time, cost — and Fatia gives you the price, your real profit, and a quote ready to send. One HTML file, no server, no account — and installable as an app in one click.
+Feed it what your slicer already tells you — grams, time, cost — and Fatia gives you the price, your real profit, and a quote ready to send. As a local app it is one HTML file, no server, no account — and installable as an app in one click. For always-on use, the bundled Python server adds login and shared per-user memory.
 
 **[▶ Open Fatia](https://hubertdungen.github.io/fatia/)**
 
@@ -39,10 +39,11 @@ Fatia computes both sides in parallel: **what it costs you** and **what you char
 
 **Several printers in one job.** Each plate picks its own machine. The hourly cost is that machine's, and the total is the time-weighted average across plates. Reconcile the real print time and every plate scales by the same ratio — plain rule of three. The panel shows each machine's €/h and the resulting average.
 
-**Client quote.** A clean printable view with a spec box and not a single margin in sight. Optionally:
+**Client quote.** A clean printable view with the Fatia mini logo, a spec box and not a single margin in sight. Optionally:
 
 - **the printers used** — one master switch, plus a per-plate tick for which ones show;
 - **your brand** — logo, billing name, tax number, contacts, address, an italic tagline and a highlighted note to the client;
+- **invoice tax** — presets for Portugal IVA 23%, 13% and 6%, Spain IVA 21%, France TVA 20%, Germany MwSt. 19%, Italy IVA 22%, Netherlands btw 21%, UK VAT 20%, or a custom/general rate. The customer total stays fixed and the quote splits subtotal before tax and tax included;
 - **QR codes** — off by default. The QR is generated from whatever address you type, with no network and no third-party service, and any of them can be replaced by your own PNG/JPEG.
 
 **Presets and memory.** Save named configurations, export and import as JSON. Everything goes into the template: per-plate printers, logo, copy and QR codes. It remembers where you left off.
@@ -79,6 +80,7 @@ It still serves the same PWA, but also adds `/api/*` endpoints for login and per
 | CTT shipping | [CTT](https://www.ctt.pt/particulares/enviar/para-portugal/encomenda-postal) | Aug 2026 |
 | InPost shipping | [InPost](https://www.inpost.pt/faz-um-envio/nossas-tarifas-de-envio) | Aug 2026 |
 | Electricity spot price | [energy-charts.info](https://api.energy-charts.info/) (OMIE / PT zone) | live |
+| VAT / invoice tax presets | [Your Europe](https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm) and [GOV.UK](https://www.gov.uk/vat-rates) | Jul 2026 |
 
 These are **informational estimates, not quotations.** Verify them before relying on any figure in a real quote.
 

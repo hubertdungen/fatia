@@ -51,8 +51,10 @@ Ficheiros envolvidos: `manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512
 - [ ] Escolher uma impressora preenche preço, vida útil e consumo
 - [ ] Cada mesa deixa escolher a sua impressora, e o painel de custos mostra a média ponderada
 - [ ] O painel de eletricidade puxa o preço de mercado sozinho
+- [ ] O seletor de imposto tem Portugal IVA 23% por omissão e permite uma taxa personalizada
 - [ ] "Procurar atualizações" diz *Dados atualizados para a versão de 2026-08-11*
 - [ ] O botão do orçamento do cliente abre a vista limpa e imprime bem
+- [ ] O orçamento mostra o logo mini do Fatia, subtotal antes de IVA/imposto, imposto incluído e total
 - [ ] Com a marca ligada, o logótipo e os contactos saem no topo do orçamento
 - [ ] Com os QR ligados, os códigos aparecem no rodapé e leem-se com o telemóvel
 - [ ] Aparece o botão **Instalar app** (ou a opção de instalar no menu do browser)
