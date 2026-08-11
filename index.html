@@ -195,6 +195,7 @@ tr.msub td{padding:0 3px 9px;border-bottom:1px solid var(--line)}
 .mchk:hover{color:var(--accent2)}
 
 /* ---- marca / faturação ---- */
+#cardMarca{margin-top:16px}
 #cardMarca .sec{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 @media(max-width:820px){#cardMarca .sec{grid-template-columns:1fr}}
 .logobox{display:flex;align-items:center;gap:12px;background:var(--panel2);
@@ -225,7 +226,8 @@ footer a{color:var(--blue);text-decoration:none}
 #pvclose{position:fixed;top:16px;right:16px;z-index:100;display:none;
   background:#111;color:#fff;border:none;padding:10px 16px;border-radius:10px}
 #printable.show ~ #pvclose{display:block}
-  .pq{max-width:640px;margin:0 auto;padding:34px 30px;font-family:-apple-system,"Segoe UI",sans-serif}
+  .pq{max-width:640px;margin:0 auto;padding:34px 30px;font-family:-apple-system,"Segoe UI",sans-serif;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
   .pq .hd{display:flex;justify-content:space-between;align-items:flex-end;
     border-bottom:3px solid #ff9f2e;padding-bottom:12px;margin-bottom:22px}
   .pq h1{font-size:30px;margin:0;letter-spacing:-.8px;font-weight:800}
@@ -1076,6 +1078,17 @@ function impInfo(nome){
 }
 /* custo por hora de impressão dessa máquina: amortização + eletricidade (máquina + PC) */
 const horaImp=(info,kwh)=> info.p/Math.max(info.h,1)+(info.kw+num('s_pc_kw'))*kwh;
+
+/* junta as mesas por máquina, somando tempo e guardando que mesas lhe pertencem */
+function agrupaMaquinas(lista){
+  const out=[];
+  lista.forEach(m=>{
+    const e=out.find(x=>x.n===m.imp.n);
+    if(e){ e.t+=m.t; e.mesas.push(m.i); }
+    else out.push({n:m.imp.n, t:m.t, hImp:m.hImp, mesas:[m.i]});
+  });
+  return out;
+}
 function aplicaImpressora(){
   const m=todasImp().find(x=>x.n===el('s_printer').value);
   if(m){ el('s_imp_preco').value=m.p; el('s_imp_vida').value=m.h; el('s_imp_kw').value=m.kw; }
@@ -1279,13 +1292,7 @@ function calc(){
     det.push({i:i+1, g, t, cm, imp:info, hImp:horaImp(info,kwh), mostrar:m[4]!==false});
   });
   const mBruto=det.reduce((a,m)=>a+m.t,0);              /* tempo somado, antes de desvios e retificação */
-  /* máquinas distintas em uso, para leitura e para o orçamento */
-  const maquinas=[];
-  det.forEach(m=>{
-    const e=maquinas.find(x=>x.n===m.imp.n);
-    if(e){ e.t+=m.t; e.mesas.push(m.i); e.mostrar=e.mostrar||m.mostrar; }
-    else maquinas.push({n:m.imp.n, t:m.t, hImp:m.hImp, mesas:[m.i], mostrar:m.mostrar});
-  });
+  const maquinas=agrupaMaquinas(det);                   /* máquinas distintas em uso */
 
   el('d_set').innerHTML=
     `<div><span>Filamento — custo real</span><b>${eur(custoKgReal)}/kg</b></div>
@@ -1457,7 +1464,9 @@ function calc(){
     acabamento: pAcab,
     portes:pPortes, desc, promo, arred, total, pecas, gTot, mTot, nMesas,
     temAcab: pAcab>0,
-    maquinas: el('j_mostrar_maq').checked ? maquinas.filter(q=>q.mostrar) : [],
+    /* só as mesas com o visto entram — uma máquina que também fez mesas escondidas
+       não pode levar o tempo dessas para o orçamento */
+    maquinas: el('j_mostrar_maq').checked ? agrupaMaquinas(det.filter(m=>m.mostrar)) : [],
     material: el('s_fil_nome').value||'PLA',
     minutosAcab: minM+minP+minT, prepMin,
     detAcab: [minM>0?'montagem':'',minP>0?'polimento':'',minT>0?'pintura':'']
