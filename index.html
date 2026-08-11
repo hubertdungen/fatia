@@ -221,14 +221,6 @@ tr.msub td{padding:0 3px 9px;border-bottom:1px solid var(--line)}
 .qritem .qb{display:flex;flex-direction:column;gap:5px}
 .qritem .qb button{padding:5px 9px;font-size:10.5px;white-space:nowrap}
 body.marca-off #marcaCampos,body.qr-off #qrCampos{opacity:.35;pointer-events:none}
-
-/* ---- assinatura DL X ---- */
-.dlxsig{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px}
-.dlxsig .pw{font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;opacity:.55}
-.dlxmark{height:19px;width:auto;color:var(--txt);opacity:.92}
-.dlxsig b{font-size:13.5px;letter-spacing:2.5px;color:var(--txt)}
-.dlxd{max-width:620px;margin:8px auto 0;font-size:11px;line-height:1.6;opacity:.7}
-.dlxd i{font-style:italic}
 footer a{color:var(--blue);text-decoration:none}
 
 /* ---- orçamento do cliente (pré-visualização + impressão) ---- */
@@ -276,12 +268,11 @@ footer a{color:var(--blue);text-decoration:none}
   .pq .maq b{color:#555 !important;font-weight:600}
   .pq .msg{margin-top:22px;font-size:12px;color:#555 !important;line-height:1.65;
     background:#fafafa;border-left:3px solid #ff9f2e;padding:11px 14px}
-  /* rodapé DL X + QR */
+  /* rodapé + QR */
   .pq .sig{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
     margin-top:26px;padding-top:12px;border-top:1px solid #eee}
   .pq .sig .st{font-size:10px;color:#a0a0a0 !important;line-height:1.65;flex:1}
   .pq .sig .st .pw{color:#666 !important;font-size:10.5px;letter-spacing:.3px;margin-bottom:4px}
-  .pq .sig .st .pw svg{height:13px;width:auto;vertical-align:-2px;margin:0 4px 0 2px;color:#11363f}
   .pq .sig .st .pw b{letter-spacing:2px}
   .pq .sig .st i{font-style:italic}
   .pq .qrs{display:flex;gap:12px;flex:none}
@@ -371,7 +362,7 @@ footer a{color:var(--blue);text-decoration:none}
     <label class="toggle"><input type="checkbox" id="lic_ok"> <span data-i18n="licAccept">Li e aceito os termos da licença</span></label>
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
       <button class="primary" onclick="aceitarLicenca()" style="flex:1" data-i18n="licContinue">Continuar</button>
-      <button class="ghost" onclick="window.open('https://github.com/hubertdungen/fatia#licen%C3%A7a','_blank')" data-i18n="licRead">Ler a licença completa ↗</button>
+      <button class="ghost" onclick="window.open('LICENCA.md','_blank')" data-i18n="licRead">Ler a licença completa ↗</button>
     </div>
   </div>
 </div>
@@ -384,7 +375,7 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
     <div class="row">
       <label data-i18n="memUser">Utilizador</label>
-      <input id="mem_user" autocomplete="username" placeholder="hubert">
+      <input id="mem_user" autocomplete="username" placeholder="utilizador">
     </div>
     <div class="row">
       <label data-i18n="memPass">Password</label>
@@ -410,12 +401,6 @@ footer a{color:var(--blue);text-decoration:none}
   <symbol id="fmark" viewBox="0 0 64 64">
     <path d="M32 33 L48.97 16.03 A24 24 0 1 1 25.79 9.82 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
     <path d="M32.67 30.49 L26.46 7.31 A24 24 0 0 1 49.64 13.52 Z" fill="#ff9f2e"/>
-  </symbol>
-  <!-- marca DL X reduzida ao essencial: o "D/L" toma a cor do texto, o "X" fica coral da identidade -->
-  <symbol id="dlxmark" viewBox="275 385 742 510">
-    <path fill="#ec826c" d="M1006.26,832.53h-79.87s-40.39-41.13-40.39-41.13l-44.71-45.96-28.35,29.11-66.72,68.41-30.51,30.66-.21-101.85-39.92-.14c-.51-3.83-.69-7.22.03-10.23l44.31-45.3,37.57-38.47c3.49-3.57,6.83-6.55,10.03-10.83l-59.03-60.39-33.32-33.94.07-66.07h87.27s21.41,22.01,21.41,22.01l8.67,9.12,48.62,50.94,18.68-19.82,29.72-31.01,30.09-31.21,86.56-.04-.02,66.51-54.67,56.19-37.06,37.92c4.04,4.73,7.83,8.65,12,12.88l26.85,27.24,48.17,48.95,4.71,5.05.04,71.4Z"/>
-    <path fill="currentColor" d="M426.43,394.71h-140.66v375.51h235.5v-268.41l-94.85-107.11ZM426.43,675.37h-45.81v-185.82h45.81v185.82Z"/>
-    <polygon fill="#ec826c" points="521.28 788.93 521.28 596.66 426.43 489.55 426.43 788.93 426.43 883.78 521.28 883.78 699.36 883.78 699.36 788.93 521.28 788.93"/>
   </symbol>
 </svg>
 
@@ -573,7 +558,7 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="suffix"><input type="number" id="s_taxa_maq" step="0.25" min="0"><i>€/h</i></div></div>
     </div>
     <div class="hint" style="margin-top:-4px"><b>Preparação por mesa</b> é o trabalho fixo de cada impressão — fatiar, preparar e limpar a base, arrancar as peças. Não depende de quantas peças cabem lá dentro, e é por isso que encher a mesa compensa. Cobrada à tua tarifa de mão de obra.</div>
-    <div class="hint" style="margin-top:-4px">A <b>0 €/h</b> só repassas o custo de eletricidade e amortização — é o que a folha original fazia. Qualquer valor acima disso passa a cobrar o tempo da impressora, que é onde os trabalhos longos ganham ou perdem dinheiro.</div>
+    <div class="hint" style="margin-top:-4px">A <b>0 €/h</b> só repassa o custo de eletricidade e amortização. Qualquer valor acima disso passa a cobrar o tempo da impressora, que é onde os trabalhos longos ganham ou perdem dinheiro.</div>
 
     <h3 data-i18n="taxTitle">Imposto no orçamento</h3>
     <label class="toggle"><input type="checkbox" id="s_tax_on" checked> <span data-i18n="taxOn">Mostrar imposto no orçamento do cliente</span></label>
@@ -749,7 +734,7 @@ footer a{color:var(--blue);text-decoration:none}
         <input type="file" id="b_logo_f" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none" onchange="carregarLogo(event)">
 
         <div class="row r2">
-          <div><label>Nome / empresa que fatura</label><input id="b_nome" placeholder="Ex.: DungenLabs, Lda."></div>
+          <div><label>Nome / empresa que fatura</label><input id="b_nome" placeholder="Ex.: Empresa, Lda."></div>
           <div><label>NIF / NIPC</label><input id="b_nif" placeholder="Ex.: 500 000 000"></div>
         </div>
         <div class="row"><div><label>Mensagem ou slogan (sai em itálico por baixo do nome)</label>
@@ -780,18 +765,7 @@ footer a{color:var(--blue);text-decoration:none}
 
 <footer>
   <div><b style="color:var(--accent2)">Fatia</b> <span id="ver"></span> · uso pessoal livre · uso comercial sob consulta · <a href="#" onclick="mostrarLicenca(1);return false">ver licença</a></div>
-  <div class="dlxsig">
-    <span class="pw">powered by</span>
-    <!-- o viewBox do símbolo já enquadra a marca; aqui basta a caixa com a mesma proporção -->
-    <svg class="dlxmark" viewBox="0 0 742 510" role="img" aria-label="DL X"><use href="#dlxmark"/></svg>
-    <b>DL X</b>
-  </div>
-  <p class="dlxd"><i>DL X é a divisão de investigação e produto da <b>DungenLabs</b>, laboratório de engenharia
-    em Lisboa — a metade do laboratório que constrói para si própria: protótipos experimentais, produtos
-    próprios fabricados em casa (extrusão FDM, filamento reforçado com fibra e fundição em resina),
-    parcerias e tecnologia à procura de uso.</i></p>
-  <div style="margin-top:6px"><a href="https://dlx.dungenlabs.com" target="_blank" rel="noopener">dlx.dungenlabs.com</a>
-    · <a href="https://dungenlabs.com" target="_blank" rel="noopener">dungenlabs.com</a></div>
+  <div style="margin-top:6px;opacity:.68">Calculadora de preços para impressão 3D.</div>
 </footer>
 <div id="printable"></div>
 <button id="pvclose" onclick="preview(false)">Fechar ✕</button>
@@ -812,7 +786,7 @@ function preview(on=true){
 </script>
 
 <script>
-/* ============ defaults (da tua folha) ============ */
+/* ============ valores iniciais ============ */
 const DEF = {
   data:'2026-08-11', fil_nome:'PLA+ Reprap',
   kwh:0.2377, kwh_add:0.078, iva:23, auto_kwh:false,
@@ -1801,7 +1775,7 @@ function marketPanel(x){
 let ALVO=0, ALVO_HORA=0, LAST={};
 function aplicarAlvo(){
   /* a alavanca certa é a hora de máquina, não a margem final:
-     é o tempo de impressora que os trabalhos longos consomem e que a folha original não cobrava */
+     é o tempo de impressora que os trabalhos longos consomem. */
   if(LAST.hTot>0){
     el('s_taxa_maq').value=Math.round(ALVO_HORA*100)/100;
   } else {
@@ -1887,8 +1861,7 @@ function aprenderDesvio(){
 /* ============ marca da empresa + QR codes ============ */
 const B_TXT=['nome','slogan','nif','contacto','morada','site','msg'];
 let LOGO='';                                  /* dataURI do logótipo, já reduzido */
-let QRS=[{t:'DL X', u:'https://dlx.dungenlabs.com', img:''},
-         {t:'DungenLabs', u:'https://dungenlabs.com', img:''}];
+let QRS=[];
 
 /* reduz a imagem antes de a guardar — um dataURI grande enche o localStorage e mata os presets */
 function reduzImagem(file,maxLado,cb){
@@ -1932,7 +1905,7 @@ function drawQRs(){
     const vis=document.createElement('div'); vis.className='qv';
     vis.innerHTML = q.img ? `<img src="${q.img}" alt="">` : (qrSVG(q.u)||'<span style="font-size:9px;color:#900">endereço longo de mais</span>');
     const campos=document.createElement('div'); campos.className='qf';
-    const t=document.createElement('input'); t.value=q.t; t.placeholder='Legenda (ex.: DL X)';
+    const t=document.createElement('input'); t.value=q.t; t.placeholder='Legenda (ex.: Site)';
     const u=document.createElement('input'); u.value=q.u; u.placeholder='https://…';
     u.disabled=!!q.img;
     t.addEventListener('input',()=>{ QRS[i].t=t.value; calc(); guardaEstado(); });
@@ -2028,12 +2001,6 @@ function buildPrint(x){
         return im?`<div class="q">${im}${q.t?esc(q.t):''}</div>`:'';
       }).join('')}</div>` : '';
 
-  const dlx=`<svg viewBox="275 385 742 510" xmlns="http://www.w3.org/2000/svg">
-      <path fill="#ec826c" d="M1006.26,832.53h-79.87s-40.39-41.13-40.39-41.13l-44.71-45.96-28.35,29.11-66.72,68.41-30.51,30.66-.21-101.85-39.92-.14c-.51-3.83-.69-7.22.03-10.23l44.31-45.3,37.57-38.47c3.49-3.57,6.83-6.55,10.03-10.83l-59.03-60.39-33.32-33.94.07-66.07h87.27s21.41,22.01,21.41,22.01l8.67,9.12,48.62,50.94,18.68-19.82,29.72-31.01,30.09-31.21,86.56-.04-.02,66.51-54.67,56.19-37.06,37.92c4.04,4.73,7.83,8.65,12,12.88l26.85,27.24,48.17,48.95,4.71,5.05.04,71.4Z"/>
-      <path fill="currentColor" d="M426.43,394.71h-140.66v375.51h235.5v-268.41l-94.85-107.11ZM426.43,675.37h-45.81v-185.82h45.81v185.82Z"/>
-      <polygon fill="#ec826c" points="521.28 788.93 521.28 596.66 426.43 489.55 426.43 788.93 426.43 883.78 521.28 883.78 699.36 883.78 699.36 788.93 521.28 788.93"/>
-    </svg>`;
-
   el('printable').innerHTML=`<div class="pq">
     ${empresa}
     <div class="hd">
@@ -2056,9 +2023,7 @@ function buildPrint(x){
     Peso e tempo indicados são estimativas do fatiamento e podem variar ligeiramente na produção.</div>
     <div class="sig">
       <div class="st">
-        <div class="pw">Orçamento gerado com <b style="letter-spacing:0">Fatia</b> · powered by ${dlx} <b>DL X</b></div>
-        <i>DL X é a divisão de investigação e produto da DungenLabs — protótipos experimentais,
-        produtos próprios e fabrico aditivo por encomenda. dlx.dungenlabs.com</i>
+        <div class="pw">Orçamento gerado com <b style="letter-spacing:0">Fatia</b></div>
       </div>
       ${qrs}
     </div>
@@ -2115,7 +2080,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.1.3';
+const VERSAO='1.1.4';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -2480,7 +2445,7 @@ function ligaDobras(){
 }
 
 /* ---- atualização dos dados de mercado ---- */
-let DADOS_URL='https://hubertdungen.github.io/fatia/dados.json';
+let DADOS_URL='dados.json';
 async function procurarAtualizacoes(silencioso){
   const box=el('upd');
   if(location.protocol==='file:'){

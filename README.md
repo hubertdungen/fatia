@@ -13,7 +13,7 @@
 
 Feed it what your slicer already tells you — grams, time, cost — and Fatia gives you the price, your real profit, and a quote ready to send. As a local app it is one HTML file, no server, no account — and installable as an app in one click. For always-on use, the bundled Python server adds login and shared per-user memory.
 
-**[▶ Open Fatia](https://hubertdungen.github.io/fatia/)**
+Open `index.html` locally, or deploy the repository to any static host.
 
 *"Fatia" is Portuguese for slice — both the slicer's kind and your slice of the profit.*
 
@@ -99,15 +99,10 @@ These are **informational estimates, not quotations.** Verify them before relyin
 | Up to €10,000 | €10/month |
 | Above €10,000 | €100/month |
 
-Contact **hubertkenobi@gmail.com** before you start. Full terms in [`LICENSE`](LICENSE); a Portuguese translation is in [`LICENCA.md`](LICENCA.md).
+Contact the project maintainer before you start. Full terms in [`LICENSE`](LICENSE); a Portuguese translation is in [`LICENCA.md`](LICENCA.md).
 
 ---
 
 <p align="center">
-  <i>Fatia — powered by <b>DL X</b></i><br>
-  <sub><i>DL X is the research and product division of <b>DungenLabs</b>, an engineering lab in Lisbon —
-  the half of the lab that builds for itself: experimental prototypes, in-house manufactured products
-  (FDM extrusion, fibre-reinforced filament and resin casting), partnerships, and technology looking
-  for a use.</i></sub><br>
-  <sub><a href="https://dlx.dungenlabs.com">dlx.dungenlabs.com</a> · <a href="https://dungenlabs.com">dungenlabs.com</a></sub>
+  <i>Fatia — 3D printing quote calculator</i>
 </p>

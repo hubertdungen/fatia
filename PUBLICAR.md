@@ -25,12 +25,12 @@ gh repo create fatia --public --source=. --remote=origin --push
 Depois liga o Pages:
 
 ```bash
-gh api -X POST repos/hubertdungen/fatia/pages -f "source[branch]=main" -f "source[path]=/"
+gh api -X POST repos/<owner>/fatia/pages -f "source[branch]=main" -f "source[path]=/"
 ```
 
 Ou pela interface: **Settings → Pages → Source: Deploy from a branch → `main` / `(root)` → Save**.
 
-Um ou dois minutos depois fica em **<https://hubertdungen.github.io/fatia/>**.
+Um ou dois minutos depois fica em **<https://<owner>.github.io/fatia/>**.
 
 ## Instalar como aplicação
 
