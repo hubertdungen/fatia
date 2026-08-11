@@ -1,7 +1,7 @@
 /* Fatia — service worker.
    A app tem de abrir sem rede: o essencial fica em cache.
    A página em si vai primeiro à rede, para que uma versão nova apareça sem truques. */
-const CACHE = 'fatia-1.5.1';
+const CACHE = 'fatia-1.6.0';
 const SHELL = ['./', './index.html', './manifest.webmanifest',
                './icon-192.png', './icon-512.png', './fatia-logo.svg'];
 

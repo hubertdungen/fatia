@@ -42,6 +42,10 @@ button:hover{border-color:var(--accent);color:var(--accent2)}
 button.primary{background:var(--accent);color:#1a1206;border-color:var(--accent)}
 button.primary:hover{background:var(--accent2)}
 button.ghost{background:transparent}
+/* ghost + primary: sem isto o fundo transparente do .ghost ganhava ao laranja do
+   .primary (mesma especificidade, vem depois) e ficava texto escuro sobre painel escuro */
+button.ghost.primary{background:var(--accent);color:#1a1206;border-color:var(--accent)}
+button.ghost.primary:hover{background:var(--accent2);color:#1a1206}
 
 .grid{display:grid;grid-template-columns:1fr 1fr 400px;gap:16px;align-items:start}
 @media(max-width:1180px){.grid{grid-template-columns:1fr 1fr}}
@@ -355,6 +359,7 @@ footer a{color:var(--blue);text-decoration:none}
     <input type="file" id="imp" accept=".json" style="display:none" onchange="importSettings(event)">
     <button class="ghost" id="b_memoria" onclick="mostrarMemoria()" data-i18n="bMemoria">Memória</button>
     <button class="ghost" id="b_instalar" style="display:none" onclick="instalarApp()" data-i18n="bInstalar">⤓ Instalar app</button>
+    <button class="ghost" id="b_dobrar" onclick="dobrarTudo()" title="Fechar ou abrir todas as secções">⌃ Fechar secções</button>
     <button class="ghost" id="b_simples" onclick="toggleSimples()">Modo simples</button>
     <button class="ghost" onclick="resetJob()" data-i18n="bNovo">Novo orçamento</button>
     <button class="primary" onclick="preview()" data-i18n="bOrcamento">👁 Orçamento do cliente</button>
@@ -566,7 +571,7 @@ footer a{color:var(--blue);text-decoration:none}
           Os preços dele são os de baixo — ou usa o <b>✎</b>.</div></div>
     </div>
 
-    <h3 style="margin-top:14px">⚡ Eletricidade</h3>
+    <h3 class="fechada" style="margin-top:14px">⚡ Eletricidade</h3>
     <label class="toggle"><input type="checkbox" id="s_auto_kwh"> Atualizar automaticamente (mercado PT, OMIE)</label>
     <div class="row r3 avancado">
       <div><label>€/kWh em uso</label><div class="suffix"><input type="number" id="s_kwh" step="0.0001"><i>€</i></div></div>
@@ -577,7 +582,7 @@ footer a{color:var(--blue);text-decoration:none}
       <span class="st">Modo manual — liga o automático se tiveres tarifa indexada.</span>
     </div>
 
-    <h3>Filamento</h3>
+    <h3 class="fechada">Filamento</h3>
     <div class="row r3 avancado">
       <div><label>Preço/kg</label><div class="suffix"><input type="number" id="s_fil_kg" step="0.01"><i>€</i></div></div>
       <div><label>Portes forn.</label><div class="suffix"><input type="number" id="s_fil_portes" step="0.01"><i>€</i></div></div>
@@ -587,7 +592,7 @@ footer a{color:var(--blue);text-decoration:none}
       mexer neles atualiza-o. O <b>+</b> guarda os valores atuais como filamento novo. O desperdício é da casa, não da bobine,
       por isso aplica-se a todos.</div>
 
-    <h3>Impressora + PC · por hora de impressão</h3>
+    <h3 class="fechada">Impressora + PC · por hora de impressão</h3>
     <div class="row"><div><label>Modelo</label>
       <div style="display:flex;gap:6px"><select id="s_printer" style="flex:1"></select>
         <button id="b_fav" title="Marcar como favorita" onclick="toggleFav()" style="padding:8px 11px">★</button>
@@ -613,7 +618,7 @@ footer a{color:var(--blue);text-decoration:none}
       <div><label>Consumo de tinta</label><div class="suffix"><input type="number" id="s_tinta_ml" step="0.5"><i>ml/h</i></div></div>
     </div>
 
-    <h3>O que cobras</h3>
+    <h3 class="fechada">O que cobras</h3>
     <div class="row r4">
       <div><label>Base/peça</label><div class="suffix"><input type="number" id="s_base" step="0.5"><i>€</i></div></div>
       <div><label style="color:var(--accent2)">Base por mesa</label>
@@ -626,7 +631,7 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="hint" style="margin-top:-4px"><b>Preparação por mesa</b> é o trabalho fixo de cada impressão — fatiar, preparar e limpar a base, arrancar as peças. Não depende de quantas peças cabem lá dentro, e é por isso que encher a mesa compensa. Cobrada à tua tarifa de mão de obra.</div>
     <div class="hint" style="margin-top:-4px">A <b>0 €/h</b> só repassa o custo de eletricidade e amortização. Qualquer valor acima disso passa a cobrar o tempo da impressora, que é onde os trabalhos longos ganham ou perdem dinheiro.</div>
 
-    <h3 data-i18n="taxTitle">Imposto no orçamento</h3>
+    <h3 class="fechada" data-i18n="taxTitle">Imposto no orçamento</h3>
     <label class="toggle"><input type="checkbox" id="s_tax_on" checked> <span data-i18n="taxOn">Mostrar imposto no orçamento do cliente</span></label>
     <div class="row r3">
       <div><label data-i18n="taxPreset">País / regra</label><select id="s_tax_preset"></select></div>
@@ -650,7 +655,7 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="suffix"><input type="number" id="s_modh" step="1" min="0"><i>€/h</i></div></div>
     </div>
     <div class="hint" style="margin-top:-4px" data-i18n="modRateHint">A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.</div>
-    <h3>💰 Margens de lucro</h3>
+    <h3 class="fechada">💰 Margens de lucro</h3>
     <div class="row r3 avancado">
       <div><label>Material</label><div class="suffix"><input type="number" id="s_mmat" step="0.25"><i>%</i></div></div>
       <div><label>Impressão</label><div class="suffix"><input type="number" id="s_mimp" step="0.25"><i>%</i></div></div>
@@ -2463,7 +2468,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.5.1';
+const VERSAO='1.6.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -2481,6 +2486,8 @@ const I18N={
     bInstalar:'⤓ Instalar app',
     bSimples:'Modo simples',
     bCompleto:'Modo completo',
+    bFecharSec:'⌃ Fechar secções',
+    bAbrirSec:'⌄ Abrir secções',
     bNovo:'Novo orçamento',
     bOrcamento:'👁 Orçamento do cliente',
     energyVat:'IVA energia',
@@ -2573,6 +2580,8 @@ const I18N={
     bInstalar:'⤓ Install app',
     bSimples:'Simple mode',
     bCompleto:'Full mode',
+    bFecharSec:'⌃ Collapse sections',
+    bAbrirSec:'⌄ Expand sections',
     bNovo:'New quote',
     bOrcamento:'👁 Customer quote',
     energyVat:'Energy VAT',
@@ -2671,6 +2680,7 @@ function aplicarIdioma(){
   if(typeof aplicaSimples==='function') aplicaSimples();
   if(typeof estadoMemoria==='function') estadoMemoria();
   if(typeof drawPresets==='function') drawPresets();
+  if(typeof atualizaBotaoDobrar==='function') atualizaBotaoDobrar();
   if(typeof drawTaxPresets==='function') drawTaxPresets();
   document.querySelectorAll('.card h2').forEach(h=>{ h.title=tr('foldTitle'); });
   /* traduzir um h3 reescreve-lhe o texto todo: o chevron tem de voltar */
@@ -2895,6 +2905,20 @@ function ligaSubdobras(){
 function aplicaFechados(){
   document.querySelectorAll('.card').forEach(c=>c.classList.toggle('fechado',FECHADOS.has(c.id)));
   document.querySelectorAll('.card h3[data-sub]').forEach(h=>h.classList.toggle('dobrado',FECHADOS.has(h.dataset.sub)));
+  atualizaBotaoDobrar();
+}
+const subtitulos = () => [...document.querySelectorAll('.card h3[data-sub]')];
+/* um só botão: fecha tudo enquanto houver secções abertas, senão abre tudo */
+function dobrarTudo(){
+  const subs=subtitulos(), abertas=subs.filter(h=>!FECHADOS.has(h.dataset.sub));
+  if(abertas.length) abertas.forEach(h=>FECHADOS.add(h.dataset.sub));
+  else subs.forEach(h=>FECHADOS.delete(h.dataset.sub));
+  aplicaFechados(); guardaEstado();
+}
+function atualizaBotaoDobrar(){
+  const b=el('b_dobrar'); if(!b) return;
+  const subs=subtitulos(), tudoFechado=subs.length>0&&subs.every(h=>FECHADOS.has(h.dataset.sub));
+  b.textContent=tr(tudoFechado?'bAbrirSec':'bFecharSec');
 }
 function ligaDobras(){
   document.querySelectorAll('.card').forEach((c,i)=>{

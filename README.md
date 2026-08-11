@@ -59,7 +59,7 @@ Fatia computes both sides in parallel: **what it costs you** and **what you char
 
 **Presets and memory.** Save named configurations, export and import as JSON. Everything goes into the template: per-plate printers, logo, copy and QR codes. It remembers where you left off.
 
-**Simple mode.** Hides everything you aren't using. Click any panel heading to fold it — or any sub-heading to fold just that section. Whatever you leave closed stays closed next time.
+**Simple mode.** Hides everything you aren't using. Click any panel heading to fold it — or any sub-heading to fold just that section. The **⌃ Collapse sections** button does them all at once. Cost settings start folded — you tune them once and forget them — while the job panel starts open. Whatever you leave closed stays closed next time.
 
 ## Running it
 
