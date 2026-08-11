@@ -39,6 +39,10 @@ Fatia computes both sides in parallel: **what it costs you** and **what you char
 
 **Several printers in one job.** Each plate picks its own machine. The hourly cost is that machine's, and the total is the time-weighted average across plates. Reconcile the real print time and every plate scales by the same ratio — plain rule of three. The panel shows each machine's €/h and the resulting average.
 
+**3D modelling, before anything prints.** Design is work and it gets paid. Add the models you made — a name and a time each, with **+** and **−** — and Fatia charges them at the modelling hourly rate, separate from printing and carrying the labour margin. It deliberately stays out of the quantity discount: you draw it once whether you print 1 or 100. With no models nothing shows on the quote; with models the client sees the line and, if you want, each name and its hours.
+
+**Tax: included or added.** Two ways for tax to enter the price. **Included** — the total is what the client pays and the tax comes out of it, so it lands before your profit. **Added** — the total is your clean price, the tax goes on top and the client pays it, leaving your margin untouched. Either way the quote shows subtotal and tax separately.
+
 **Parts are counted per plate.** Each plate states how many parts come off it and the field up top shows the running total — 2 parts across 2 plates is 2 parts, not 4. The quantity discount tier follows that total.
 
 **Filament manager.** A filament is a name and its prices — price/kg and the supplier's shipping. Add your own, remove them, and they travel with your presets and inside the Export file. Each plate picks which filaments it used, and can use more than one.
@@ -50,7 +54,7 @@ Fatia computes both sides in parallel: **what it costs you** and **what you char
 - **the printers used** — one master switch, plus a per-plate tick for which ones show;
 - **the footer note** — "Prices in euros. Quote valid for 30 days." is your own text, editable and switchable;
 - **your brand** — logo, billing name, tax number, contacts, address, an italic tagline and a highlighted note to the client;
-- **invoice tax** — presets for Portugal IVA 23%, 13% and 6%, Spain IVA 21%, France TVA 20%, Germany MwSt. 19%, Italy IVA 22%, Netherlands btw 21%, UK VAT 20%, or a custom/general rate. The customer total stays fixed and the quote splits subtotal before tax and tax included;
+- **invoice tax** — presets for Portugal IVA 23%, 13% and 6%, Spain IVA 21%, France TVA 20%, Germany MwSt. 19%, Italy IVA 22%, Netherlands btw 21%, UK VAT 20%, or a custom/general rate, either included in the total or added on top. The quote always splits subtotal and tax;
 - **QR codes** — off by default. The QR is generated from whatever address you type, with no network and no third-party service, and any of them can be replaced by your own PNG/JPEG.
 
 **Presets and memory.** Save named configurations, export and import as JSON. Everything goes into the template: per-plate printers, logo, copy and QR codes. It remembers where you left off.

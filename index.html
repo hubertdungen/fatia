@@ -444,6 +444,26 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="hint">Somado das mesas. As peças contam-se uma vez: 2 peças em 2 mesas são 2 peças, não 4.</div></div>
     </div>
 
+    <h3 style="margin-top:14px" data-i18n="modTitle">Modelação 3D — pré-processamento</h3>
+    <table id="tbl_mod"><thead><tr>
+      <th style="width:56%" data-i18n="modName">Modelo</th>
+      <th style="width:30%" data-i18n="modHours">Tempo</th>
+      <th></th>
+    </tr></thead><tbody></tbody></table>
+    <div class="mrow" style="gap:6px;margin-top:6px">
+      <button class="ghost" style="flex:1" onclick="addModelo()" data-i18n="modAdd">+ Adicionar modelo</button>
+      <button class="ghost" style="flex:none;padding:8px 14px" onclick="delModelo()"
+              data-i18n-title="modDelTitle" title="Remover o último modelo">−</button>
+    </div>
+    <label class="toggle" style="margin-top:4px">
+      <input type="checkbox" id="j_mostrar_mod" checked>
+      <span data-i18n="modShow">Detalhar os modelos no orçamento do cliente</span>
+    </label>
+    <div class="hint" data-i18n-html="modHint">Tempo de desenho antes de imprimir — CAD, reparar malhas, preparar suportes.
+      Sem modelos, nada disto aparece no orçamento. O tempo aceita <b>2h30</b>, <b>2:30</b> ou minutos (<b>150</b>),
+      e é cobrado à tarifa de <b>Modelação 3D</b> das Definições. Como é trabalho de uma vez, não entra no desconto por quantidade.</div>
+    <div class="derived" id="d_mod"></div>
+
     <h3 style="margin-top:14px">Mesas (dados do slicer)</h3>
     <table id="tbl_mesas"><thead><tr>
       <th style="width:22%">Peso (g)</th>
@@ -604,13 +624,23 @@ footer a{color:var(--blue);text-decoration:none}
       <div><label data-i18n="taxDocName">Nome no documento</label><input id="s_tax_nome" placeholder="IVA, VAT, TVA"></div>
       <div><label data-i18n="taxRate">Taxa</label><div class="suffix"><input type="number" id="s_tax_rate" min="0" max="100" step="0.1"><i>%</i></div></div>
     </div>
+    <div class="row" style="margin-top:6px"><div><label data-i18n="taxMode">Como entra no preço</label>
+      <select id="s_tax_modo">
+        <option value="incluido" data-i18n="taxModeIncl">Incluído no total — sai de dentro do teu preço</option>
+        <option value="acrescentado" data-i18n="taxModeAdd">Acrescentado ao total — vai por cima, paga-o o cliente</option>
+      </select></div></div>
+    <div class="hint" data-i18n-html="taxModeHint"><b>Incluído</b>: o total é o que o cliente paga e o imposto sai de lá de dentro — vem antes do teu lucro.
+      <b>Acrescentado</b>: o total é o teu preço limpo e o imposto vai por cima — o teu lucro é o mesmo e o cliente é que paga o imposto.</div>
     <div class="hint" data-i18n="taxHint">O total final mantém-se igual: o orçamento separa subtotal antes de imposto e imposto incluído. Usa “Personalizado” para outros países ou regimes.</div>
 
-    <div class="row r3" style="margin-top:10px">
+    <div class="row r4" style="margin-top:10px">
       <div><label>Mão de obra</label><div class="suffix"><input type="number" id="s_mao" step="1"><i>€/h</i></div></div>
       <div><label>Polimento</label><div class="suffix"><input type="number" id="s_polh" step="1"><i>€/h</i></div></div>
       <div><label>Pintura</label><div class="suffix"><input type="number" id="s_pinth" step="1"><i>€/h</i></div></div>
+      <div><label style="color:var(--accent2)" data-i18n="modRate">Modelação 3D</label>
+        <div class="suffix"><input type="number" id="s_modh" step="1" min="0"><i>€/h</i></div></div>
     </div>
+    <div class="hint" style="margin-top:-4px" data-i18n="modRateHint">A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.</div>
     <h3>💰 Margens de lucro</h3>
     <div class="row r3 avancado">
       <div><label>Material</label><div class="suffix"><input type="number" id="s_mmat" step="0.25"><i>%</i></div></div>
@@ -846,7 +876,7 @@ const DEF = {
   data:'2026-08-11', fil_nome:'PLA+ Reprap',
   kwh:0.2377, kwh_add:0.078, iva:23, auto_kwh:false,
   tax_rate:23, tax_on:true, tax_nome:'IVA', tax_preset:'PT_23',
-  fil_kg:17.56, fil_portes:3.50, desp:1.25, mmat:3.50,
+  fil_kg:17.56, fil_portes:3.50, desp:1.25, mmat:3.50, modh:35,
   imp_preco:250, imp_vida:5000, imp_kw:0.12, pc_kw:0.08, pc_kw2:0.15,
   fer_preco:200, fer_vida:7500, fer_kw:0.10, tinta_l:30, tinta_ml:1,
   emb_peso:150, emb_custo:0.50, prep_min:0, base_mesa:0,
@@ -857,7 +887,7 @@ const DEF = {
 };
 const S_NUM = ['data','fil_nome','kwh','kwh_add','iva','tax_rate','fil_kg','fil_portes','desp','mmat',
   'imp_preco','imp_vida','imp_kw','pc_kw','pc_kw2','fer_preco','fer_vida','fer_kw',
-  'tinta_l','tinta_ml','emb_peso','emb_custo','prep_min','base','base_mesa','taxa_maq','mao','polh','pinth','tiers',
+  'tinta_l','tinta_ml','emb_peso','emb_custo','prep_min','base','base_mesa','taxa_maq','mao','polh','pinth','modh','tiers',
   'mimp','mmao','margem','mmin','dev_mat','dev_t'];
 
 const eur = n => (isFinite(n)?n:0).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
@@ -909,17 +939,24 @@ function marcarTaxCustom(){
   if(sel && sel.value!=='CUSTOM') sel.value='CUSTOM';
   updateTaxFieldState();
 }
+/* Duas maneiras de o imposto entrar no preço:
+   incluído     — o total calculado é o que o cliente paga e o imposto sai de dentro dele,
+                  por isso come da tua receita (o imposto vem antes do teu lucro);
+   acrescentado — o total calculado é o teu preço limpo e o imposto vai por cima,
+                  por isso a tua receita não muda e é o cliente que o paga. */
 function impostoFaturacao(total){
   const on=el('s_tax_on') ? el('s_tax_on').checked : false;
   const rate=Math.max(0,num('s_tax_rate'));
   const nome=((el('s_tax_nome')&&el('s_tax_nome').value)||tr('taxGeneric')).trim()||tr('taxGeneric');
+  const inc=!(el('s_tax_modo') && el('s_tax_modo').value==='acrescentado');
   const active=on&&rate>0;
-  const base=active ? total/(1+rate/100) : total;
-  const valor=active ? total-base : 0;
-  return {on,active,nome,rate,base,valor,total};
+  const base=active&&inc ? total/(1+rate/100) : total;
+  const valor=active ? (inc ? total-base : total*rate/100) : 0;
+  return {on,active,inc,nome,rate,base,valor,total:base+valor};
 }
+/* com o imposto acrescentado, as rubricas já estão sem imposto e não há nada a tirar */
 function semImposto(v,tax){
-  return tax&&tax.active ? v/(1+tax.rate/100) : v;
+  return tax&&tax.active&&tax.inc!==false ? v/(1+tax.rate/100) : v;
 }
 
 /* ============ QR codes ============
@@ -1104,6 +1141,40 @@ function qrSVG(texto,px){
   return `<svg viewBox="0 0 ${t} ${t}"${px?` width="${px}" height="${px}"`:''} shape-rendering="crispEdges" `
     +`xmlns="http://www.w3.org/2000/svg"><rect width="${t}" height="${t}" fill="#fff"/>`
     +`<path d="${d}" fill="#111"/></svg>`;
+}
+
+/* ============ MODELAÇÃO 3D (pré-processamento) ============
+   Cada modelo é {nome, tempo}. O tempo é uma string como as mesas ("2h30", "2:30", "150"),
+   lida pelo parseT. Lista vazia = trabalho sem modelação, e nada disto aparece no orçamento. */
+let MODELOS=[];
+const normModelo = m => ({n:String(m&&m.n||''), t:String(m&&m.t||'')});
+const minutosModelacao = () => MODELOS.reduce((a,m)=>a+parseT(m.t),0);
+
+function drawModelos(){
+  const tb=el('tbl_mod').querySelector('tbody'); tb.innerHTML='';
+  MODELOS.forEach((mo,i)=>{
+    const linha=document.createElement('tr');
+    const [tdN,inN]=cell(mo.n,{type:'text',placeholder:tr('modNamePh')});
+    inN.addEventListener('input',()=>{ MODELOS[i].n=inN.value; calc(); guardaEstado(); });
+    const [tdT,inT]=cell(mo.t,{type:'text',placeholder:'0h00'});
+    inT.addEventListener('input',()=>{ MODELOS[i].t=inT.value; calc(); guardaEstado(); });
+    const td=document.createElement('td'), b=document.createElement('button');
+    b.className='del'; b.textContent='×'; b.title=tr('modDelTitle');
+    b.addEventListener('click',()=>{ MODELOS.splice(i,1); drawModelos(); calc(); guardaEstado(); });
+    td.appendChild(b);
+    linha.appendChild(tdN); linha.appendChild(tdT); linha.appendChild(td); tb.appendChild(linha);
+  });
+  el('tbl_mod').style.display=MODELOS.length?'':'none';
+}
+function addModelo(){
+  MODELOS.push({n:'', t:''});
+  drawModelos(); calc(); guardaEstado();
+  const ins=el('tbl_mod').querySelectorAll('tbody input');
+  if(ins.length) ins[ins.length-2].focus();          /* cai logo no nome do modelo novo */
+}
+function delModelo(){
+  if(!MODELOS.length) return;
+  MODELOS.pop(); drawModelos(); calc(); guardaEstado();
 }
 
 /* ============ FILAMENTOS ============
@@ -1658,6 +1729,11 @@ function calc(){
   const pPrep=nMesas*prepMin/60*num('s_mao')*fMao;     /* preparação: fixa por mesa */
   const pMan=minM/60*num('s_mao')*fMao, pPol=minP/60*num('s_polh')*fMao, pPin=minT/60*num('s_pinth')*fMao;
   const pAcab=pPrep+pMan+pPol+pPin;
+  /* modelação 3D: trabalho de uma vez, à tarifa própria e com a margem de mão de obra.
+     Fora do desconto por quantidade de propósito — desenha-se uma vez, imprimam-se 1 ou 100. */
+  const minMod=minutosModelacao(), hMod=minMod/60;
+  const pMod=hMod*num('s_modh')*fMao;
+  const cMod=hMod*num('s_pc_kw2')*kwh;                 /* o custo real é o PC ligado */
   const pMarg=(pMat+pImp+pBase)*num('s_margem')/100;
   const desc=(pBase+pPrep+pMan+pPol+pPin)*num('j_desc')/100;
   const promo=(pMat+pImp)*num('j_promo')/100;
@@ -1694,27 +1770,30 @@ function calc(){
         ? `<div style="margin-top:6px;font-size:11px;opacity:.8"><span>Alternativas: ${
             todos.slice(0,3).map(s=>`${s.n} ${eur(s.p)}`).join(' · ')}</span></div>`:'');
 
-  const bruto=pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg-desc-promo+pPortes;
+  const bruto=pMod+pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg-desc-promo+pPortes;
   const total=el('j_round').checked?Math.floor(bruto*2)/2:bruto;
   const arred=total-bruto;
   const tax=impostoFaturacao(total);
+  const totalCliente=tax.total;      /* com imposto acrescentado, é mais alto do que o total calculado */
   const taxNome=htmlEsc(tax.nome);
   const taxRate=pct(tax.rate);
 
   /* custo real */
   const cPrep=nMesas*prepMin/60*hManualReal;
   const cImp=cImpBase, cMan=minM/60*hManualReal, cPol=minP/60*hManualReal, cPin=minT/60*hPinturaReal;
-  const custo=cMat+cImp+cPrep+cMan+cPol+cPin+pPortes;
+  const custo=cMat+cImp+cPrep+cMan+cPol+cPin+cMod+pPortes;
   const receita=tax.base;
   const lucro=receita-custo, marg=receita?lucro/receita*100:0;
 
   /* leitura das margens parciais */
   el('m_res').innerHTML=
-    `Material <b>+${eur(pMat-cMat)}</b> · Impressão <b>+${eur(pImp-cImp)}</b> · Acabamento <b>+${eur(pAcab-cPrep-cMan-cPol-cPin)}</b><br>
+    `Material <b>+${eur(pMat-cMat)}</b> · Impressão <b>+${eur(pImp-cImp)}</b> · Acabamento <b>+${eur(pAcab-cPrep-cMan-cPol-cPin)}</b>`
+    + (pMod>0?` · Modelação <b>+${eur(pMod-cMod)}</b>`:'')+`<br>
      Margem final <b>+${eur(pMarg)}</b>${tax.active?' · '+taxNome+' <b>'+eur(tax.valor)+'</b>':''} → lucro total <b>${eur(lucro)}</b> (<b>${marg.toFixed(1)} %</b>)`;
 
   /* render */
   const L=[
+    [tr('modLine',{n:MODELOS.length})+' — '+hm(minMod), pMod, minMod===0],
     ['Material — '+gTot+' g'+(nSlic?'<span class="tag">SLICER</span>':''), pMat, false],
     ['Impressão — '+hm(mTot)+(taxaMaq>0?' @ '+taxaMaq.toFixed(2).replace('.',',')+' €/h':''), pImp, false],
     ['Base — '+pecas+' peça(s)'+(num('s_base_mesa')>0?' + '+nMesas+' mesa(s)':''), pBase, false],
@@ -1732,15 +1811,15 @@ function calc(){
   if(tax.on){
     if(tax.active){
       html+=`<div class="li muted"><span>${tr('taxSubtotal',{name:taxNome})}</span><b>${eur(tax.base)}</b></div>`;
-      html+=`<div class="li muted"><span>${tr('taxIncluded',{name:taxNome,rate:taxRate})}</span><b>${eur(tax.valor)}</b></div>`;
+      html+=`<div class="li muted"><span>${tr(tax.inc?'taxIncluded':'taxAdded',{name:taxNome,rate:taxRate})}</span><b>${eur(tax.valor)}</b></div>`;
     } else {
       html+=`<div class="li muted"><span>${tr('taxFree',{name:taxNome})}</span><b>${eur(0)}</b></div>`;
     }
   }
-  html+=`<div class="li strong"><span>Total</span><b>${eur(total)}</b></div>`;
+  html+=`<div class="li strong"><span>Total</span><b>${eur(totalCliente)}</b></div>`;
   el('o_linhas').innerHTML=html;
-  el('o_total').textContent=eur(total);
-  el('o_unit').innerHTML=[pecas>1?eur(total/pecas)+' / peça':'', nMesas>1||pecas>1?eur(total/nMesas)+' / mesa':'']
+  el('o_total').textContent=eur(totalCliente);
+  el('o_unit').innerHTML=[pecas>1?eur(totalCliente/pecas)+' / peça':'', nMesas>1||pecas>1?eur(totalCliente/nMesas)+' / mesa':'']
     .filter(Boolean).join(' &nbsp;·&nbsp; ');
 
   el('k_custo').textContent=eur(custo);
@@ -1751,7 +1830,7 @@ function calc(){
   el('k_margem').className='v '+(marg>=mMin?'good':marg>=mMin*0.6?'blue':'bad');
 
   const segs=[['Material',cMat,'#5aa9ff'],['Energia + máquina',cImp,'#8b6bff'],
-              ['Outros custos',cPrep+cMan+cPol+cPin+pPortes,'#ff6b6b'],
+              ['Outros custos',cPrep+cMan+cPol+cPin+cMod+pPortes,'#ff6b6b'],
               [taxNome,tax.valor,'#ffbd55'],['Lucro',Math.max(lucro,0),'#3ecf8e']];
   const tt=segs.reduce((s,x)=>s+x[1],0)||1;
   el('bar').innerHTML=segs.map(s=>`<i style="width:${s[1]/tt*100}%;background:${s[2]}"></i>`).join('');
@@ -1760,6 +1839,7 @@ function calc(){
   el('d_custo').innerHTML=
     `<div><span>Filamento</span><b>${eur(cMat)}</b></div>
      <div><span>Eletricidade + amortização</span><b>${eur(cImp)}</b></div>
+     ${minMod>0?`<div><span>${tr('modLine',{n:MODELOS.length})} — ${hm(minMod)}</span><b>${eur(cMod)}</b></div>`:''}
      <div><span>Preparação + pós-processamento</span><b>${eur(cPrep+cMan+cPol+cPin)}</b></div>
      <div><span>Portes</span><b>${eur(pPortes)}</b></div>
      ${tax.active?`<div><span>${tr('taxIncluded',{name:taxNome,rate:taxRate})}</span><b>${eur(tax.valor)}</b></div>`:''}
@@ -1780,16 +1860,27 @@ function calc(){
     ? `<div class="warn">⚠️ Margem de ${marg.toFixed(1)}% — abaixo do teu mínimo de ${mMin}%. Sobe a margem final ou reduz o desconto.</div>`
     : (dias>90 ? `<div class="warn">⚠️ Definições sem revisão há <b>${dias} dias</b>. Confirma o preço do filamento antes de enviar.</div>` : ''));
 
-  LAST={pMat,pImp,pBase,pAcab,pMarg,desc,promo,pPortes,total,tax,hTot,pecas,
-        taxa: hTot>0?(total-pMat-pAcab-pPortes)/hTot:0};
-  marketPanel({total,pMat,pAcab,pPortes,pBase,desc,hTot,pecas,det,nMesas,
+  /* a régua horária é do tempo de máquina: modelação e acabamento saem de fora */
+  LAST={pMat,pImp,pBase,pAcab,pMod,pMarg,desc,promo,pPortes,total,tax,hTot,pecas,
+        taxa: hTot>0?(total-pMat-pAcab-pMod-pPortes)/hTot:0};
+  marketPanel({total,pMat,pAcab,pMod,pPortes,pBase,desc,hTot,pecas,det,nMesas,
     pPrepMesa:nMesas?pPrep/nMesas:0, taxaCobrada: taxaMaq>0?taxaMaq:hImpMedia});
+
+  el('d_mod').innerHTML = minMod>0
+    ? `<div><span>${MODELOS.length} modelo(s) · ${hm(minMod)} de modelação</span><b>${eur(pMod)}</b></div>`
+      + `<div><span>À tarifa de ${eur(num('s_modh'))}/h${num('s_mmao')>0?` + ${num('s_mmao')}% de margem`:''}</span>`
+      + `<b>${eur(pMod/Math.max(hMod,.0001))}/h</b></div>`
+    : '';
 
   drawTiers();
   buildPrint({
     impressao: pMat+pImp+pBase+pMarg,
+    modelacao: pMod, nModelos: MODELOS.length, modMin: minMod,
+    modDet: el('j_mostrar_mod').checked
+      ? MODELOS.map(m=>({n:(m.n||'').trim(), t:parseT(m.t)})).filter(m=>m.n||m.t>0)
+      : [],
     acabamento: pAcab,
-    portes:pPortes, desc, promo, arred, total, tax, pecas, gTot, mTot, nMesas,
+    portes:pPortes, desc, promo, arred, total:totalCliente, tax, pecas, gTot, mTot, nMesas,
     temAcab: pAcab>0,
     /* só as mesas com o visto entram — uma máquina que também fez mesas escondidas
        não pode levar o tempo dessas para o orçamento */
@@ -1866,9 +1957,9 @@ function marketPanel(x){
   const B=bandasAtuais();
   const horas=x.hTot, pecas=x.pecas;
 
-  /* taxa horária de máquina: o que sobra depois de material, acabamento e portes */
-  const taxa = horas>0 ? (x.total - x.pMat - x.pAcab - x.pPortes)/horas : 0;
-  const porPeca = x.total/pecas;
+  /* taxa horária de máquina: o que sobra depois de material, acabamento, modelação e portes */
+  const taxa = horas>0 ? (x.total - x.pMat - x.pAcab - (x.pMod||0) - x.pPortes)/horas : 0;
+  const porPeca = (x.total-(x.pMod||0))/pecas;   /* a modelação é do trabalho, não de cada peça */
 
   el('g1v').textContent = horas>0 ? taxa.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €/h' : '—';
   el('g2v').textContent = eur(porPeca);
@@ -2170,6 +2261,12 @@ function buildPrint(x){
   const esc=htmlEsc;
   const tax=x.tax||{on:false,active:false,nome:tr('taxGeneric'),rate:0,base:x.total,valor:0,total:x.total};
   const rows=[];
+  if(x.modelacao>0.004)
+    rows.push([tr('modLine',{n:x.nModelos}),
+               x.modDet && x.modDet.length
+                 ? x.modDet.map(m=>`${esc(m.n||tr('modNamePh'))}${m.t>0?` · ${hm(m.t)}`:''}`).join(' · ')
+                 : `${hm(x.modMin)} ${tr('modWork')}`,
+               x.modelacao]);
   rows.push([`Impressão 3D — ${x.pecas} peça(s)`,
              `${x.material} · ${Math.round(x.gTot)} g de material · ${hm(x.mTot)} de impressão`
              + (x.nMesas>1?` · ${x.nMesas} ciclos de máquina`:''),
@@ -2188,7 +2285,7 @@ function buildPrint(x){
   const taxHtml=tax.on
     ? (tax.active
       ? `<tr class="subtot"><td><b>${tr('taxSubtotal',{name:taxName})}</b></td><td>${eur(tax.base)}</td></tr>
-         <tr class="tax"><td><b>${tr('taxIncluded',{name:taxName,rate:taxRate})}</b></td><td>${eur(tax.valor)}</td></tr>`
+         <tr class="tax"><td><b>${tr(tax.inc!==false?'taxIncluded':'taxAdded',{name:taxName,rate:taxRate})}</b></td><td>${eur(tax.valor)}</td></tr>`
       : `<tr class="tax"><td><b>${tr('taxFree',{name:taxName})}</b></td><td>${eur(0)}</td></tr>`)
     : '';
 
@@ -2295,9 +2392,11 @@ function buildPrint(x){
 /* ============ guardar / carregar ============ */
 function collect(){
   const o={portes,mesas,hist,banda:bandaEscolhida,printer:el('s_printer').value,auto_kwh:el('s_auto_kwh').checked,
-           tax_on:el('s_tax_on').checked,tax_preset:el('s_tax_preset').value,tax_nome:el('s_tax_nome').value};
+           tax_on:el('s_tax_on').checked,tax_preset:el('s_tax_preset').value,tax_nome:el('s_tax_nome').value,
+           tax_modo:el('s_tax_modo').value};
   S_NUM.forEach(k=>o[k]=el('s_'+k).value);
   o.fils=FILS.map(f=>({...f}));
+  o.modelos=MODELOS.map(m=>({...m}));
   o.marca={on:el('b_on').checked, qr:el('q_on').checked, nota_on:el('f_on').checked,
            logo:LOGO, qrs:QRS.map(q=>({...q}))};
   B_TXT.forEach(k=>o.marca[k]=el('b_'+k).value);
@@ -2315,6 +2414,8 @@ function apply(o){
   if(o.auto_kwh!==undefined){ el('s_auto_kwh').checked=!!o.auto_kwh; toggleAuto(); }
   if(o.tax_on!==undefined) el('s_tax_on').checked=!!o.tax_on;
   if(o.tax_preset!==undefined) el('s_tax_preset').value=o.tax_preset;
+  if(o.tax_modo!==undefined) el('s_tax_modo').value=o.tax_modo;
+  if(Array.isArray(o.modelos)){ MODELOS=o.modelos.map(normModelo); drawModelos(); }
   if(o.tax_nome!==undefined) el('s_tax_nome').value=o.tax_nome;
   updateTaxFieldState();
   if(o.portes){ portes=o.portes; drawPortes(); drawPortesSel(); }
@@ -2346,13 +2447,14 @@ function importSettings(e){
 function resetJob(){
   el('j_cliente').value=''; el('j_pecas').value=1;
   mesas=[[0,'','',el('s_printer').value||'',true,[],1]]; drawMesas();
+  MODELOS=[]; drawModelos();
   ['j_manual','j_pol','j_pint','j_desc','j_promo'].forEach(i=>el(i).value=0);
   ['r_g','r_t','r_e'].forEach(i=>el(i).value=''); el('r_usar').checked=true;
   el('j_portes').value='0'; calc(); guardaEstado();
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.3.1';
+const VERSAO='1.4.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -2384,6 +2486,23 @@ const I18N={
     taxIncluded:'{name} {rate}% incluído',
     taxFree:'{name} 0% / isento',
     taxNetRevenue:'Receita antes de imposto',
+    taxAdded:'{name} {rate}% acrescentado',
+    taxMode:'Como entra no preço',
+    taxModeIncl:'Incluído no total — sai de dentro do teu preço',
+    taxModeAdd:'Acrescentado ao total — vai por cima, paga-o o cliente',
+    taxModeHint:'<b>Incluído</b>: o total é o que o cliente paga e o imposto sai de lá de dentro — vem antes do teu lucro. <b>Acrescentado</b>: o total é o teu preço limpo e o imposto vai por cima — o teu lucro é o mesmo e o cliente é que paga o imposto.',
+    modTitle:'Modelação 3D — pré-processamento',
+    modName:'Modelo',
+    modNamePh:'Ex.: Suporte do sensor',
+    modHours:'Tempo',
+    modAdd:'+ Adicionar modelo',
+    modDelTitle:'Remover modelo',
+    modShow:'Detalhar os modelos no orçamento do cliente',
+    modHint:'Tempo de desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Sem modelos, nada disto aparece no orçamento. O tempo aceita <b>2h30</b>, <b>2:30</b> ou minutos (<b>150</b>), e é cobrado à tarifa de <b>Modelação 3D</b> das Definições. Como é trabalho de uma vez, não entra no desconto por quantidade.',
+    modRate:'Modelação 3D',
+    modRateHint:'A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.',
+    modLine:'Modelação 3D — {n} modelo(s)',
+    modWork:'de trabalho de desenho',
     notaOn:'Mostrar a nota de validade no rodapé do orçamento',
     notaHint:'É a primeira linha do rodapé do orçamento. Desligada, o rodapé começa logo no prazo de produção. Sai sempre, tenhas ou não a tua empresa ligada.',
     licSub:'Licença de utilização · versão <span id="lic_v"></span>',
@@ -2459,6 +2578,23 @@ const I18N={
     taxIncluded:'{name} {rate}% included',
     taxFree:'{name} 0% / exempt',
     taxNetRevenue:'Revenue before tax',
+    taxAdded:'{name} {rate}% added',
+    taxMode:'How it enters the price',
+    taxModeIncl:'Included in the total — carved out of your price',
+    taxModeAdd:'Added to the total — goes on top, the client pays it',
+    taxModeHint:'<b>Included</b>: the total is what the client pays and the tax comes out of it — it lands before your profit. <b>Added</b>: the total is your clean price and the tax goes on top — your profit is the same and the client pays the tax.',
+    modTitle:'3D modelling — pre-processing',
+    modName:'Model',
+    modNamePh:'e.g. Sensor bracket',
+    modHours:'Time',
+    modAdd:'+ Add model',
+    modDelTitle:'Remove model',
+    modShow:'List the models on the client quote',
+    modHint:'Design time before printing — CAD, mesh repair, support prep. With no models, none of this shows on the quote. Time accepts <b>2h30</b>, <b>2:30</b> or minutes (<b>150</b>), and is charged at the <b>3D modelling</b> rate in Settings. Being one-off work, it stays out of the quantity discount.',
+    modRate:'3D modelling',
+    modRateHint:'<b>3D modelling</b> is the design work before printing — CAD, mesh repair, support prep. It is charged by the hour, separately from printing, and carries the same labour margin.',
+    modLine:'3D modelling — {n} model(s)',
+    modWork:'of design work',
     notaOn:'Show the validity note in the quote footer',
     notaHint:'It is the first line of the quote footer. Switched off, the footer starts at the production lead time. It prints whether or not your company block is on.',
     licSub:'Usage licence · version <span id="lic_v"></span>',
@@ -2542,7 +2678,7 @@ function estado(){
   o.preset=el('p_sel').value;
   ['j_cliente','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
    'r_g','r_t','r_e'].forEach(i=>o[i]=el(i).value);
-  ['j_ajusta','j_round','r_usar','j_mostrar_maq'].forEach(i=>o[i]=el(i).checked);
+  ['j_ajusta','j_round','r_usar','j_mostrar_maq','j_mostrar_mod'].forEach(i=>o[i]=el(i).checked);
   return o;
 }
 function repor(o){
@@ -2553,7 +2689,7 @@ function repor(o){
   drawPrinters(); if(o.printer!==undefined) el('s_printer').value=o.printer;
   ['j_cliente','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
    'r_g','r_t','r_e'].forEach(i=>{ if(o[i]!==undefined) el(i).value=o[i]; });
-  ['j_ajusta','j_round','r_usar','j_mostrar_maq'].forEach(i=>{ if(o[i]!==undefined) el(i).checked=o[i]; });
+  ['j_ajusta','j_round','r_usar','j_mostrar_maq','j_mostrar_mod'].forEach(i=>{ if(o[i]!==undefined) el(i).checked=o[i]; });
   if(o.fechados){ FECHADOS=new Set(o.fechados); aplicaFechados(); }
   if(o.simples!==undefined){ SIMPLES=o.simples; aplicaSimples(); }
   calc();
@@ -2786,7 +2922,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 }
 
 /* ============ arranque ============ */
-drawFils(false);
+drawFils(false); drawModelos();
 S_NUM.forEach(k=>el('s_'+k).value=DEF[k]);
 el('s_auto_kwh').checked=DEF.auto_kwh;
 drawTaxPresets();
@@ -2807,6 +2943,8 @@ el('s_fil_nome').addEventListener('change',aplicaFilamento);
 ['s_fil_kg','s_fil_portes'].forEach(i=>el(i).addEventListener('input',marcaFilamento));
 el('s_tax_preset').addEventListener('change',aplicarTaxPreset);
 el('s_tax_on').addEventListener('change',calc);
+el('s_tax_modo').addEventListener('change',()=>{ calc(); guardaEstado(); });
+el('j_mostrar_mod').addEventListener('change',calc);
 ['s_tax_nome','s_tax_rate'].forEach(i=>el(i).addEventListener('input',marcarTaxCustom));
 document.querySelectorAll('input,select').forEach(i=>i.addEventListener('input',calc));
 el('s_auto_kwh').addEventListener('change',toggleAuto);

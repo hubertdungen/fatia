@@ -37,6 +37,10 @@ O Fatia calcula as duas coisas em paralelo: **o que te custa** e **o que cobras*
 
 **Várias impressoras no mesmo trabalho.** Cada mesa escolhe a sua máquina. O custo horário é o dessa máquina e o total sai da média ponderada pelo tempo de cada mesa. Se retificares o tempo real, todas as mesas escalam na mesma proporção — regra de três simples. O painel mostra o €/h de cada máquina e a média resultante.
 
+**Modelação 3D, antes de imprimir.** O desenho é trabalho e paga-se. Acrescentas os modelos que fizeste — nome e tempo cada um, com **+** e **−** — e o Fatia cobra-os à tarifa horária de modelação, à parte da impressão e com a margem de mão de obra. Fica de fora do desconto por quantidade de propósito: desenha-se uma vez, imprimam-se 1 ou 100. Sem modelos, nada disto aparece no orçamento; com modelos, o cliente vê a linha e, se quiseres, os nomes e as horas de cada um.
+
+**Imposto: incluído ou acrescentado.** Duas maneiras de o imposto entrar no preço. **Incluído** — o total é o que o cliente paga e o imposto sai de lá de dentro, ou seja vem antes do teu lucro. **Acrescentado** — o total é o teu preço limpo, o imposto vai por cima e quem o paga é o cliente, sem te tocar na margem. O orçamento mostra sempre o subtotal e o imposto em separado.
+
 **As peças contam-se por mesa.** Cada mesa diz quantas peças saem dela e o campo lá em cima mostra o total somado — 2 peças em 2 mesas são 2 peças, não 4. O escalão de desconto por quantidade segue esse total.
 
 **Gestor de filamentos.** Cada filamento é um nome e os seus preços — preço/kg e portes do fornecedor. Acrescentas e removes os teus, e ficam guardados nos presets e dentro do ficheiro do Exportar. Cada mesa escolhe que filamentos usou, e pode levar mais do que um.
@@ -48,7 +52,7 @@ O Fatia calcula as duas coisas em paralelo: **o que te custa** e **o que cobras*
 - **as impressoras usadas** — interruptor geral, e um visto por mesa para escolher quais aparecem;
 - **a nota de rodapé** — "Valores em euros. Orçamento válido por 30 dias." é texto teu, editável e desligável;
 - **a tua marca** — logótipo, nome de quem fatura, NIF, contactos, morada, slogan em itálico e uma mensagem destacada ao cliente;
-- **imposto de faturação** — presets para Portugal IVA 23%, 13% e 6%, Espanha IVA 21%, França TVA 20%, Alemanha MwSt. 19%, Itália IVA 22%, Países Baixos btw 21%, Reino Unido VAT 20%, ou uma taxa personalizada/geral. O total do cliente mantém-se igual e o orçamento separa subtotal antes de imposto e imposto incluído;
+- **imposto de faturação** — presets para Portugal IVA 23%, 13% e 6%, Espanha IVA 21%, França TVA 20%, Alemanha MwSt. 19%, Itália IVA 22%, Países Baixos btw 21%, Reino Unido VAT 20%, ou uma taxa personalizada/geral, incluído no total ou acrescentado por cima. O orçamento separa sempre subtotal e imposto;
 - **QR codes** — desligados por omissão. O QR é gerado do endereço que escreveres, sem rede nem serviços externos, e qualquer um pode ser substituído por uma imagem tua (PNG/JPEG).
 
 **Presets e memória.** Guarda configurações com nome, exporta e importa em JSON. Tudo entra no template: impressoras por mesa, logótipo, textos e QR codes. Ele lembra-se de onde ficaste.
