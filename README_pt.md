@@ -59,6 +59,14 @@ Duas coisas só funcionam quando a página é servida por `http(s)` — a atuali
 python3 -m http.server 8000     # depois abre http://localhost:8000
 ```
 
+Para uso permanente com memória partilhada, corre antes o servidor incluído:
+
+```bash
+python3 server.py --host 0.0.0.0 --port 8098
+```
+
+Continua a servir a mesma PWA, mas acrescenta `/api/*` para login e memória por utilizador em SQLite. Por defeito, o primeiro utilizador só pode ser criado pela LAN/Meshnet; usa `FATIA_ALLOW_SIGNUP=1` apenas se quiseres permitir auto-registo.
+
 ## Fontes dos dados de referência
 
 | O quê | Fonte | Data |

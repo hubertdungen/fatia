@@ -31,6 +31,8 @@ h1{font-size:27px;margin:0;letter-spacing:-.8px;font-weight:800}
 .sub{color:var(--dim);font-size:12.5px;margin-top:1px}
 header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
 .hbtns{display:flex;gap:8px;flex-wrap:wrap}
+.memuser{color:var(--good);border-color:rgba(62,207,142,.45)}
+.memstatus{font-size:12px;color:var(--dim);line-height:1.45;margin-top:10px;min-height:18px}
 
 button{
   background:var(--panel2); color:var(--txt); border:1px solid var(--line);
@@ -149,6 +151,15 @@ body.simples .hint{display:none}
 .lictxt p{margin:0 0 10px} .lictxt b{color:var(--txt)}
 .lictxt ul{margin:6px 0 10px;padding-left:20px} .lictxt li{margin-bottom:4px}
 
+/* ---- memória remota ---- */
+#mem{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:210;
+  align-items:center;justify-content:center;padding:20px;overflow:auto}
+.membox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:22px;max-width:460px;width:100%}
+.membox .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.membox .actions button{flex:1;min-width:120px}
+.membox .split{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+
 /* ---- posicionamento de mercado ---- */
 #mkt{margin-top:16px}
 .gauges{display:grid;grid-template-columns:1fr 1fr;gap:22px}
@@ -230,6 +241,8 @@ footer a{color:var(--blue);text-decoration:none}
     -webkit-print-color-adjust:exact;print-color-adjust:exact}
   .pq .hd{display:flex;justify-content:space-between;align-items:flex-end;
     border-bottom:3px solid #ff9f2e;padding-bottom:12px;margin-bottom:22px}
+  .pq .ttl{display:flex;align-items:center;gap:10px}
+  .pq .fmini{width:32px;height:32px;object-fit:contain;flex:none}
   .pq h1{font-size:30px;margin:0;letter-spacing:-.8px;font-weight:800}
   .pq .s{font-size:12px;color:#777 !important;letter-spacing:.3px;margin-top:2px}
   .pq .dt{font-size:12px;color:#777 !important}
@@ -244,6 +257,8 @@ footer a{color:var(--blue);text-decoration:none}
   .pq td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
   .pq td .d{font-size:11.5px;color:#8a8a8a !important;font-weight:400;margin-top:3px}
   .pq tr.disc td{color:#1a7f4f !important}
+  .pq tr.subtot td{border-top:1.5px solid #d9d9d9;color:#666 !important;font-size:12.5px;padding-top:12px}
+  .pq tr.tax td{color:#666 !important;font-size:12.5px;padding-top:9px;padding-bottom:9px}
   .pq tr.tot td{border-top:2.5px solid #111;border-bottom:none;font-size:22px;font-weight:800;padding-top:14px}
   .pq .pu{text-align:right;font-size:11.5px;color:#888 !important;margin-top:5px}
   .pq .foot{margin-top:34px;padding-top:12px;border-top:1px solid #eee;
@@ -306,20 +321,23 @@ footer a{color:var(--blue);text-decoration:none}
     </svg>
     <div>
       <h1>Fatia</h1>
-      <div class="sub">Preços de impressão 3D — a partir do teu slicer</div>
+      <div class="sub" data-i18n="tagline">Preços de impressão 3D — a partir do teu slicer</div>
     </div>
   </div>
   <div class="hbtns">
+    <select id="lang_sel" onchange="mudarIdioma(this.value)" style="width:auto;font-size:13px"
+      title="Idioma / Language"><option value="pt">PT</option><option value="en">EN</option></select>
     <select id="p_sel" onchange="carregarPreset()" style="width:auto;min-width:150px;font-size:13px"></select>
-    <button class="ghost" onclick="guardarPreset()" title="Guardar o estado atual como preset">💾</button>
-    <button class="ghost" onclick="apagarPreset()" title="Apagar o preset selecionado">🗑</button>
-    <button class="ghost" onclick="exportSettings()">↓ Exportar</button>
-    <button class="ghost" onclick="document.getElementById('imp').click()">↑ Importar</button>
+    <button class="ghost" onclick="guardarPreset()" data-i18n-title="tGuardarPreset" title="Guardar o estado atual como preset">💾</button>
+    <button class="ghost" onclick="apagarPreset()" data-i18n-title="tApagarPreset" title="Apagar o preset selecionado">🗑</button>
+    <button class="ghost" onclick="exportSettings()" data-i18n="bExportar">↓ Exportar</button>
+    <button class="ghost" onclick="document.getElementById('imp').click()" data-i18n="bImportar">↑ Importar</button>
     <input type="file" id="imp" accept=".json" style="display:none" onchange="importSettings(event)">
-    <button class="ghost" id="b_instalar" style="display:none" onclick="instalarApp()">⤓ Instalar app</button>
+    <button class="ghost" id="b_memoria" onclick="mostrarMemoria()" data-i18n="bMemoria">Memória</button>
+    <button class="ghost" id="b_instalar" style="display:none" onclick="instalarApp()" data-i18n="bInstalar">⤓ Instalar app</button>
     <button class="ghost" id="b_simples" onclick="toggleSimples()">Modo simples</button>
-    <button class="ghost" onclick="resetJob()">Novo orçamento</button>
-    <button class="primary" onclick="preview()">👁 Orçamento do cliente</button>
+    <button class="ghost" onclick="resetJob()" data-i18n="bNovo">Novo orçamento</button>
+    <button class="primary" onclick="preview()" data-i18n="bOrcamento">👁 Orçamento do cliente</button>
   </div>
 </header>
 
@@ -327,9 +345,9 @@ footer a{color:var(--blue);text-decoration:none}
   <div class="licbox">
     <div class="lichd">
       <svg class="mark" viewBox="0 0 64 64" style="width:34px;height:34px"><use href="#fmark"/></svg>
-      <div><b>Fatia</b><div class="s">Licença de utilização · versão <span id="lic_v"></span></div></div>
+      <div><b>Fatia</b><div class="s" data-i18n-html="licSub">Licença de utilização · versão <span id="lic_v"></span></div></div>
     </div>
-    <div class="lictxt">
+    <div class="lictxt" data-i18n-html="licText">
       <p><b>Uso pessoal — livre e gratuito.</b> Podes usar, copiar e modificar o Fatia à vontade para
       projetos pessoais, aprendizagem e trabalhos sem fins comerciais.</p>
       <p><b>Uso comercial — sob consulta prévia.</b> Se usares o Fatia para orçamentar trabalho que vendes,
@@ -343,17 +361,47 @@ footer a{color:var(--blue);text-decoration:none}
       num orçamento real. O autor não se responsabiliza por decisões comerciais tomadas com base neles.</p>
     </div>
     <div class="row" style="margin:14px 0 10px">
-      <label>Como vais usar o Fatia?</label>
+      <label data-i18n="licUse">Como vais usar o Fatia?</label>
       <select id="lic_uso">
-        <option value="pessoal">Uso pessoal / não comercial — gratuito</option>
-        <option value="com_peq">Uso comercial — até 10 000 €/mês (10 €/mês)</option>
-        <option value="com_gra">Uso comercial — acima de 10 000 €/mês (100 €/mês)</option>
+        <option value="pessoal" data-i18n="licOptPersonal">Uso pessoal / não comercial — gratuito</option>
+        <option value="com_peq" data-i18n="licOptSmall">Uso comercial — até 10 000 €/mês (10 €/mês)</option>
+        <option value="com_gra" data-i18n="licOptLarge">Uso comercial — acima de 10 000 €/mês (100 €/mês)</option>
       </select>
     </div>
-    <label class="toggle"><input type="checkbox" id="lic_ok"> Li e aceito os termos da licença</label>
+    <label class="toggle"><input type="checkbox" id="lic_ok"> <span data-i18n="licAccept">Li e aceito os termos da licença</span></label>
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-      <button class="primary" onclick="aceitarLicenca()" style="flex:1">Continuar</button>
-      <button class="ghost" onclick="window.open('https://github.com/hubertdungen/fatia#licen%C3%A7a','_blank')">Ler a licença completa ↗</button>
+      <button class="primary" onclick="aceitarLicenca()" style="flex:1" data-i18n="licContinue">Continuar</button>
+      <button class="ghost" onclick="window.open('https://github.com/hubertdungen/fatia#licen%C3%A7a','_blank')" data-i18n="licRead">Ler a licença completa ↗</button>
+    </div>
+  </div>
+</div>
+
+<div id="mem">
+  <div class="membox">
+    <div class="lichd">
+      <svg class="mark" viewBox="0 0 64 64" style="width:34px;height:34px"><use href="#fmark"/></svg>
+      <div><b data-i18n="memTitle">Memória Fatia</b><div class="s" id="mem_user_label">Memória local no browser</div></div>
+    </div>
+    <div class="row">
+      <label data-i18n="memUser">Utilizador</label>
+      <input id="mem_user" autocomplete="username" placeholder="hubert">
+    </div>
+    <div class="row">
+      <label data-i18n="memPass">Password</label>
+      <input id="mem_pass" type="password" autocomplete="current-password">
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="entrarMemoria()" data-i18n="memLogin">Entrar</button>
+      <button class="ghost" onclick="criarMemoria()" data-i18n="memCreate">Criar utilizador</button>
+      <button class="ghost" onclick="sairMemoria()" data-i18n="memLogout">Sair</button>
+    </div>
+    <div class="split">
+      <div class="actions">
+        <button class="ghost" onclick="guardarMemoriaRemota(true)" data-i18n="memSaveNow">Guardar agora</button>
+        <button class="ghost" onclick="carregarMemoriaRemota(false)" data-i18n="memLoad">Carregar</button>
+        <button class="ghost" onclick="mostrarMemoria(0)" data-i18n="memClose">Fechar</button>
+      </div>
+      <div class="memstatus" id="mem_status" data-i18n="memChecking">A verificar servidor de memória…</div>
     </div>
   </div>
 </div>
@@ -475,7 +523,7 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="row r3 avancado">
       <div><label>€/kWh em uso</label><div class="suffix"><input type="number" id="s_kwh" step="0.0001"><i>€</i></div></div>
       <div><label>Taxas + redes</label><div class="suffix"><input type="number" id="s_kwh_add" step="0.001" disabled><i>€</i></div></div>
-      <div><label>IVA</label><div class="suffix"><input type="number" id="s_iva" step="1" disabled><i>%</i></div></div>
+      <div><label data-i18n="energyVat">IVA energia</label><div class="suffix"><input type="number" id="s_iva" step="1" disabled><i>%</i></div></div>
     </div>
     <div class="livebox avancado" id="live">
       <span class="st">Modo manual — liga o automático se tiveres tarifa indexada.</span>
@@ -526,6 +574,16 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
     <div class="hint" style="margin-top:-4px"><b>Preparação por mesa</b> é o trabalho fixo de cada impressão — fatiar, preparar e limpar a base, arrancar as peças. Não depende de quantas peças cabem lá dentro, e é por isso que encher a mesa compensa. Cobrada à tua tarifa de mão de obra.</div>
     <div class="hint" style="margin-top:-4px">A <b>0 €/h</b> só repassas o custo de eletricidade e amortização — é o que a folha original fazia. Qualquer valor acima disso passa a cobrar o tempo da impressora, que é onde os trabalhos longos ganham ou perdem dinheiro.</div>
+
+    <h3 data-i18n="taxTitle">Imposto no orçamento</h3>
+    <label class="toggle"><input type="checkbox" id="s_tax_on" checked> <span data-i18n="taxOn">Mostrar imposto no orçamento do cliente</span></label>
+    <div class="row r3">
+      <div><label data-i18n="taxPreset">País / regra</label><select id="s_tax_preset"></select></div>
+      <div><label data-i18n="taxDocName">Nome no documento</label><input id="s_tax_nome" placeholder="IVA, VAT, TVA"></div>
+      <div><label data-i18n="taxRate">Taxa</label><div class="suffix"><input type="number" id="s_tax_rate" min="0" max="100" step="0.1"><i>%</i></div></div>
+    </div>
+    <div class="hint" data-i18n="taxHint">O total final mantém-se igual: o orçamento separa subtotal antes de imposto e imposto incluído. Usa “Personalizado” para outros países ou regimes.</div>
+
     <div class="row r3" style="margin-top:10px">
       <div><label>Mão de obra</label><div class="suffix"><input type="number" id="s_mao" step="1"><i>€/h</i></div></div>
       <div><label>Polimento</label><div class="suffix"><input type="number" id="s_polh" step="1"><i>€/h</i></div></div>
@@ -758,6 +816,7 @@ function preview(on=true){
 const DEF = {
   data:'2026-08-11', fil_nome:'PLA+ Reprap',
   kwh:0.2377, kwh_add:0.078, iva:23, auto_kwh:false,
+  tax_rate:23, tax_on:true, tax_nome:'IVA', tax_preset:'PT_23',
   fil_kg:17.56, fil_portes:3.50, desp:1.25, mmat:3.50,
   imp_preco:250, imp_vida:5000, imp_kw:0.12, pc_kw:0.08, pc_kw2:0.15,
   fer_preco:200, fer_vida:7500, fer_kw:0.10, tinta_l:30, tinta_ml:1,
@@ -767,7 +826,7 @@ const DEF = {
   dev_mat:0, dev_t:0,
   portes:[[250,0],[500,0],[1000,0],[2000,0],[5000,0]]
 };
-const S_NUM = ['data','fil_nome','kwh','kwh_add','iva','fil_kg','fil_portes','desp','mmat',
+const S_NUM = ['data','fil_nome','kwh','kwh_add','iva','tax_rate','fil_kg','fil_portes','desp','mmat',
   'imp_preco','imp_vida','imp_kw','pc_kw','pc_kw2','fer_preco','fer_vida','fer_kw',
   'tinta_l','tinta_ml','emb_peso','emb_custo','prep_min','base','base_mesa','taxa_maq','mao','polh','pinth','tiers',
   'mimp','mmao','margem','mmin','dev_mat','dev_t'];
@@ -775,6 +834,64 @@ const S_NUM = ['data','fil_nome','kwh','kwh_add','iva','fil_kg','fil_portes','de
 const eur = n => (isFinite(n)?n:0).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 const num = id => parseFloat(document.getElementById(id).value)||0;
 const el  = id => document.getElementById(id);
+const pct = n => (isFinite(n)?n:0).toLocaleString('pt-PT',{maximumFractionDigits:2});
+const htmlEsc = s => String(s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+const TAX_PRESETS=[
+  {id:'PT_23', label:{pt:'Portugal — IVA 23%', en:'Portugal — VAT 23%'}, nome:'IVA', rate:23},
+  {id:'PT_13', label:{pt:'Portugal — IVA reduzido 13%', en:'Portugal — reduced VAT 13%'}, nome:'IVA', rate:13},
+  {id:'PT_6',  label:{pt:'Portugal — IVA reduzido 6%', en:'Portugal — reduced VAT 6%'}, nome:'IVA', rate:6},
+  {id:'ES_21', label:{pt:'Espanha — IVA 21%', en:'Spain — VAT 21%'}, nome:'IVA', rate:21},
+  {id:'FR_20', label:{pt:'França — TVA 20%', en:'France — TVA 20%'}, nome:'TVA', rate:20},
+  {id:'DE_19', label:{pt:'Alemanha — MwSt. 19%', en:'Germany — MwSt. 19%'}, nome:'MwSt.', rate:19},
+  {id:'IT_22', label:{pt:'Itália — IVA 22%', en:'Italy — VAT 22%'}, nome:'IVA', rate:22},
+  {id:'NL_21', label:{pt:'Países Baixos — btw 21%', en:'Netherlands — btw 21%'}, nome:'btw', rate:21},
+  {id:'UK_20', label:{pt:'Reino Unido — VAT 20%', en:'United Kingdom — VAT 20%'}, nome:'VAT', rate:20},
+  {id:'CUSTOM', label:{pt:'Personalizado / geral', en:'Custom / general'}, nome:'IVA', rate:23, custom:true}
+];
+function taxPreset(id){ return TAX_PRESETS.find(p=>p.id===id)||TAX_PRESETS[0]; }
+function taxPresetLabel(p){
+  const l=p.label;
+  return typeof l==='object' ? (l[IDIOMA]||l.pt) : l;
+}
+function drawTaxPresets(){
+  const sel=el('s_tax_preset'); if(!sel) return;
+  const current=sel.value||DEF.tax_preset;
+  sel.innerHTML=TAX_PRESETS.map(p=>`<option value="${p.id}">${taxPresetLabel(p)}</option>`).join('');
+  sel.value=TAX_PRESETS.some(p=>p.id===current)?current:'CUSTOM';
+  updateTaxFieldState();
+}
+function updateTaxFieldState(){
+  const sel=el('s_tax_preset'); if(!sel) return;
+  const custom=sel.value==='CUSTOM';
+  el('s_tax_nome').disabled=!custom;
+  el('s_tax_rate').disabled=!custom;
+}
+function aplicarTaxPreset(){
+  const p=taxPreset(el('s_tax_preset').value);
+  if(!p.custom){
+    el('s_tax_nome').value=p.nome;
+    el('s_tax_rate').value=p.rate;
+  }
+  updateTaxFieldState();
+  calc(); guardaEstado();
+}
+function marcarTaxCustom(){
+  const sel=el('s_tax_preset');
+  if(sel && sel.value!=='CUSTOM') sel.value='CUSTOM';
+  updateTaxFieldState();
+}
+function impostoFaturacao(total){
+  const on=el('s_tax_on') ? el('s_tax_on').checked : false;
+  const rate=Math.max(0,num('s_tax_rate'));
+  const nome=((el('s_tax_nome')&&el('s_tax_nome').value)||tr('taxGeneric')).trim()||tr('taxGeneric');
+  const active=on&&rate>0;
+  const base=active ? total/(1+rate/100) : total;
+  const valor=active ? total-base : 0;
+  return {on,active,nome,rate,base,valor,total};
+}
+function semImposto(v,tax){
+  return tax&&tax.active ? v/(1+tax.rate/100) : v;
+}
 
 /* ============ QR codes ============
    Codificador próprio — modo byte, correção M, versões 1 a 10 (até 213 bytes).
@@ -1391,17 +1508,21 @@ function calc(){
   const bruto=pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg-desc-promo+pPortes;
   const total=el('j_round').checked?Math.floor(bruto*2)/2:bruto;
   const arred=total-bruto;
+  const tax=impostoFaturacao(total);
+  const taxNome=htmlEsc(tax.nome);
+  const taxRate=pct(tax.rate);
 
   /* custo real */
   const cPrep=nMesas*prepMin/60*hManualReal;
   const cImp=cImpBase, cMan=minM/60*hManualReal, cPol=minP/60*hManualReal, cPin=minT/60*hPinturaReal;
   const custo=cMat+cImp+cPrep+cMan+cPol+cPin+pPortes;
-  const lucro=total-custo, marg=total?lucro/total*100:0;
+  const receita=tax.base;
+  const lucro=receita-custo, marg=receita?lucro/receita*100:0;
 
   /* leitura das margens parciais */
   el('m_res').innerHTML=
     `Material <b>+${eur(pMat-cMat)}</b> · Impressão <b>+${eur(pImp-cImp)}</b> · Acabamento <b>+${eur(pAcab-cPrep-cMan-cPol-cPin)}</b><br>
-     Margem final <b>+${eur(pMarg)}</b> → lucro total <b>${eur(lucro)}</b> (<b>${marg.toFixed(1)} %</b>)`;
+     Margem final <b>+${eur(pMarg)}</b>${tax.active?' · '+taxNome+' <b>'+eur(tax.valor)+'</b>':''} → lucro total <b>${eur(lucro)}</b> (<b>${marg.toFixed(1)} %</b>)`;
 
   /* render */
   const L=[
@@ -1419,6 +1540,14 @@ function calc(){
   if(desc>0)  html+=`<div class="li neg"><span>Desconto ${num('j_desc')}%</span><b>−${eur(desc)}</b></div>`;
   if(promo>0) html+=`<div class="li neg"><span>Promoção ${num('j_promo')}%</span><b>−${eur(promo)}</b></div>`;
   if(Math.abs(arred)>.004) html+=`<div class="li neg"><span>Arredondamento</span><b>${eur(arred)}</b></div>`;
+  if(tax.on){
+    if(tax.active){
+      html+=`<div class="li muted"><span>${tr('taxSubtotal',{name:taxNome})}</span><b>${eur(tax.base)}</b></div>`;
+      html+=`<div class="li muted"><span>${tr('taxIncluded',{name:taxNome,rate:taxRate})}</span><b>${eur(tax.valor)}</b></div>`;
+    } else {
+      html+=`<div class="li muted"><span>${tr('taxFree',{name:taxNome})}</span><b>${eur(0)}</b></div>`;
+    }
+  }
   html+=`<div class="li strong"><span>Total</span><b>${eur(total)}</b></div>`;
   el('o_linhas').innerHTML=html;
   el('o_total').textContent=eur(total);
@@ -1433,7 +1562,8 @@ function calc(){
   el('k_margem').className='v '+(marg>=mMin?'good':marg>=mMin*0.6?'blue':'bad');
 
   const segs=[['Material',cMat,'#5aa9ff'],['Energia + máquina',cImp,'#8b6bff'],
-              ['Outros custos',cPrep+cMan+cPol+cPin+pPortes,'#ff6b6b'],['Lucro',Math.max(lucro,0),'#3ecf8e']];
+              ['Outros custos',cPrep+cMan+cPol+cPin+pPortes,'#ff6b6b'],
+              [taxNome,tax.valor,'#ffbd55'],['Lucro',Math.max(lucro,0),'#3ecf8e']];
   const tt=segs.reduce((s,x)=>s+x[1],0)||1;
   el('bar').innerHTML=segs.map(s=>`<i style="width:${s[1]/tt*100}%;background:${s[2]}"></i>`).join('');
   el('leg').innerHTML=segs.map(s=>`<span><s style="background:${s[2]}"></s>${s[0]} ${(s[1]/tt*100).toFixed(0)}%</span>`).join('');
@@ -1443,7 +1573,9 @@ function calc(){
      <div><span>Eletricidade + amortização</span><b>${eur(cImp)}</b></div>
      <div><span>Preparação + pós-processamento</span><b>${eur(cPrep+cMan+cPol+cPin)}</b></div>
      <div><span>Portes</span><b>${eur(pPortes)}</b></div>
+     ${tax.active?`<div><span>${tr('taxIncluded',{name:taxNome,rate:taxRate})}</span><b>${eur(tax.valor)}</b></div>`:''}
      <div class="sep"><span>Custo total</span><b>${eur(custo)}</b></div>
+     ${tax.active?`<div><span>${tr('taxNetRevenue')}</span><b>${eur(receita)}</b></div>`:''}
      <div><span>Ponto de equilíbrio</span><b>${eur(custo/pecas)}/peça</b></div>`;
 
   const d=el('s_data').value, dias=d?Math.floor((Date.now()-new Date(d))/864e5):999;
@@ -1453,7 +1585,7 @@ function calc(){
     ? `<div class="warn">⚠️ Margem de ${marg.toFixed(1)}% — abaixo do teu mínimo de ${mMin}%. Sobe a margem final ou reduz o desconto.</div>`
     : (dias>90 ? `<div class="warn">⚠️ Definições sem revisão há <b>${dias} dias</b>. Confirma o preço do filamento antes de enviar.</div>` : '');
 
-  LAST={pMat,pImp,pBase,pAcab,pMarg,desc,promo,pPortes,total,hTot,pecas,
+  LAST={pMat,pImp,pBase,pAcab,pMarg,desc,promo,pPortes,total,tax,hTot,pecas,
         taxa: hTot>0?(total-pMat-pAcab-pPortes)/hTot:0};
   marketPanel({total,pMat,pAcab,pPortes,pBase,desc,hTot,pecas,det,nMesas,
     pPrepMesa:nMesas?pPrep/nMesas:0, taxaCobrada: taxaMaq>0?taxaMaq:hImpMedia});
@@ -1462,7 +1594,7 @@ function calc(){
   buildPrint({
     impressao: pMat+pImp+pBase+pMarg,
     acabamento: pAcab,
-    portes:pPortes, desc, promo, arred, total, pecas, gTot, mTot, nMesas,
+    portes:pPortes, desc, promo, arred, total, tax, pecas, gTot, mTot, nMesas,
     temAcab: pAcab>0,
     /* só as mesas com o visto entram — uma máquina que também fez mesas escondidas
        não pode levar o tempo dessas para o orçamento */
@@ -1838,6 +1970,8 @@ function aplicaMarca(){
 /* ============ orçamento do cliente — limpo, sem margens à vista ============ */
 function buildPrint(x){
   const desconto=x.desc+x.promo-Math.min(x.arred,0)*0; /* arredondamento entra em separado */
+  const esc=htmlEsc;
+  const tax=x.tax||{on:false,active:false,nome:tr('taxGeneric'),rate:0,base:x.total,valor:0,total:x.total};
   const rows=[];
   rows.push([`Impressão 3D — ${x.pecas} peça(s)`,
              `${x.material} · ${Math.round(x.gTot)} g de material · ${hm(x.mTot)} de impressão`
@@ -1850,11 +1984,17 @@ function buildPrint(x){
              x.acabamento]);
   if(x.portes>0) rows.push(['Portes de envio', x.transp, x.portes]);
   const descTot=x.desc+x.promo+(x.arred<0?-x.arred:0);
-  const html=rows.map(r=>`<tr><td><b>${r[0]}</b>${r[1]?`<div class="d">${r[1]}</div>`:''}</td><td>${eur(r[2])}</td></tr>`).join('')
-    +(descTot>0.004?`<tr class="disc"><td><b>Desconto</b></td><td>−${eur(descTot)}</td></tr>`:'')
-    +(x.arred>0.004?`<tr><td><b>Ajuste</b></td><td>${eur(x.arred)}</td></tr>`:'');
+  const html=rows.map(r=>`<tr><td><b>${r[0]}</b>${r[1]?`<div class="d">${r[1]}</div>`:''}</td><td>${eur(semImposto(r[2],tax))}</td></tr>`).join('')
+    +(descTot>0.004?`<tr class="disc"><td><b>Desconto</b></td><td>−${eur(semImposto(descTot,tax))}</td></tr>`:'')
+    +(x.arred>0.004?`<tr><td><b>Ajuste</b></td><td>${eur(semImposto(x.arred,tax))}</td></tr>`:'');
+  const taxName=esc(tax.nome), taxRate=pct(tax.rate);
+  const taxHtml=tax.on
+    ? (tax.active
+      ? `<tr class="subtot"><td><b>${tr('taxSubtotal',{name:taxName})}</b></td><td>${eur(tax.base)}</td></tr>
+         <tr class="tax"><td><b>${tr('taxIncluded',{name:taxName,rate:taxRate})}</b></td><td>${eur(tax.valor)}</td></tr>`
+      : `<tr class="tax"><td><b>${tr('taxFree',{name:taxName})}</b></td><td>${eur(0)}</td></tr>`)
+    : '';
 
-  const esc=s=>String(s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
   const v=k=>el('b_'+k).value.trim();
 
   /* ---- cabeçalho da empresa (opcional) ---- */
@@ -1897,7 +2037,7 @@ function buildPrint(x){
   el('printable').innerHTML=`<div class="pq">
     ${empresa}
     <div class="hd">
-      <div><h1>Orçamento</h1><div class="s">Impressão 3D · fabrico por encomenda</div></div>
+      <div class="ttl"><img class="fmini" src="fatia-logo.svg" alt="Fatia"><div><h1>Orçamento</h1><div class="s">Impressão 3D · fabrico por encomenda</div></div></div>
       <div class="dt">${new Date().toLocaleDateString('pt-PT',{day:'2-digit',month:'long',year:'numeric'})}</div>
     </div>
     <div class="cli">Para: <b>${esc(el('j_cliente').value)||'—'}</b></div>
@@ -1907,7 +2047,7 @@ function buildPrint(x){
       <div><span>Peso total</span><b>${Math.round(x.gTot)} g</b></div>
       <div><span>Tempo de impressão</span><b>${hm(x.mTot)}</b></div>
     </div>
-    <table>${html}<tr class="tot"><td>Total</td><td>${eur(x.total)}</td></tr></table>
+    <table>${html}${taxHtml}<tr class="tot"><td>Total</td><td>${eur(x.total)}</td></tr></table>
     ${x.pecas>1?`<div class="pu">${eur(x.total/x.pecas)} por peça</div>`:''}
     ${maq}
     ${msg}
@@ -1927,7 +2067,8 @@ function buildPrint(x){
 
 /* ============ guardar / carregar ============ */
 function collect(){
-  const o={portes,mesas,hist,banda:bandaEscolhida,printer:el('s_printer').value,auto_kwh:el('s_auto_kwh').checked};
+  const o={portes,mesas,hist,banda:bandaEscolhida,printer:el('s_printer').value,auto_kwh:el('s_auto_kwh').checked,
+           tax_on:el('s_tax_on').checked,tax_preset:el('s_tax_preset').value,tax_nome:el('s_tax_nome').value};
   S_NUM.forEach(k=>o[k]=el('s_'+k).value);
   o.marca={on:el('b_on').checked, qr:el('q_on').checked, logo:LOGO, qrs:QRS.map(q=>({...q}))};
   B_TXT.forEach(k=>o.marca[k]=el('b_'+k).value);
@@ -1936,6 +2077,10 @@ function collect(){
 function apply(o){
   S_NUM.forEach(k=>{ if(o[k]!==undefined) el('s_'+k).value=o[k]; });
   if(o.auto_kwh!==undefined){ el('s_auto_kwh').checked=!!o.auto_kwh; toggleAuto(); }
+  if(o.tax_on!==undefined) el('s_tax_on').checked=!!o.tax_on;
+  if(o.tax_preset!==undefined) el('s_tax_preset').value=o.tax_preset;
+  if(o.tax_nome!==undefined) el('s_tax_nome').value=o.tax_nome;
+  updateTaxFieldState();
   if(o.portes){ portes=o.portes; drawPortes(); drawPortesSel(); }
   if(o.mesas){ mesas=o.mesas.map(normMesa); drawMesas(); }
   if(o.hist) hist=o.hist;
@@ -1958,7 +2103,7 @@ function exportSettings(){
 function importSettings(e){
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader();
-  r.onload=()=>{ try{ apply(JSON.parse(r.result)); calc(); }catch(_){ alert('Ficheiro inválido'); } };
+  r.onload=()=>{ try{ apply(JSON.parse(r.result)); calc(); guardaEstado(); }catch(_){ alert(tr('invalidFile')); } };
   r.readAsText(f); e.target.value='';
 }
 function resetJob(){
@@ -1966,25 +2111,198 @@ function resetJob(){
   mesas=[[0,'','',el('s_printer').value||'',true]]; drawMesas();
   ['j_manual','j_pol','j_pint','j_desc','j_promo'].forEach(i=>el(i).value=0);
   ['r_g','r_t','r_e'].forEach(i=>el(i).value=''); el('r_usar').checked=true;
-  el('j_portes').value='0'; calc();
+  el('j_portes').value='0'; calc(); guardaEstado();
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.1.0';
+const VERSAO='1.1.3';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
   del(k){ try{ localStorage.removeItem('fatia:'+k); }catch(_){} }
 };
+const I18N={
+  pt:{
+    tagline:'Preços de impressão 3D — a partir do teu slicer',
+    tGuardarPreset:'Guardar o estado atual como preset',
+    tApagarPreset:'Apagar o preset selecionado',
+    bExportar:'↓ Exportar',
+    bImportar:'↑ Importar',
+    bMemoria:'Memória',
+    bMemoriaUser:'Memória: {user}',
+    bInstalar:'⤓ Instalar app',
+    bSimples:'Modo simples',
+    bCompleto:'Modo completo',
+    bNovo:'Novo orçamento',
+    bOrcamento:'👁 Orçamento do cliente',
+    energyVat:'IVA energia',
+    taxTitle:'Imposto no orçamento',
+    taxOn:'Mostrar imposto no orçamento do cliente',
+    taxPreset:'País / regra',
+    taxDocName:'Nome no documento',
+    taxRate:'Taxa',
+    taxHint:'O total final mantém-se igual: o orçamento separa subtotal antes de imposto e imposto incluído. Usa “Personalizado” para outros países ou regimes.',
+    taxGeneric:'Imposto',
+    taxSubtotal:'Subtotal antes de {name}',
+    taxIncluded:'{name} {rate}% incluído',
+    taxFree:'{name} 0% / isento',
+    taxNetRevenue:'Receita antes de imposto',
+    licSub:'Licença de utilização · versão <span id="lic_v"></span>',
+    licText:'<p><b>Uso pessoal — livre e gratuito.</b> Podes usar, copiar e modificar o Fatia à vontade para projetos pessoais, aprendizagem e trabalhos sem fins comerciais.</p><p><b>Uso comercial — sob consulta prévia.</b> Se usares o Fatia para orçamentar trabalho que vendes, é necessária uma licença comercial:</p><ul><li><b>10 €/mês</b> — empresas ou profissionais com faturação até 10 000 €/mês</li><li><b>100 €/mês</b> — acima desse valor</li></ul><p>Os preços de mercado, tarifas de transporte e valores de impressoras aqui incluídos são <b>referências informativas</b> recolhidas em fontes públicas. Confirma-os antes de os usar num orçamento real. O autor não se responsabiliza por decisões comerciais tomadas com base neles.</p>',
+    licUse:'Como vais usar o Fatia?',
+    licOptPersonal:'Uso pessoal / não comercial — gratuito',
+    licOptSmall:'Uso comercial — até 10 000 €/mês (10 €/mês)',
+    licOptLarge:'Uso comercial — acima de 10 000 €/mês (100 €/mês)',
+    licAccept:'Li e aceito os termos da licença',
+    licContinue:'Continuar',
+    licRead:'Ler a licença completa ↗',
+    memTitle:'Memória Fatia',
+    memLocal:'Memória local no browser',
+    memSession:'Sessão: {user}',
+    memUser:'Utilizador',
+    memPass:'Password',
+    memLogin:'Entrar',
+    memCreate:'Criar utilizador',
+    memLogout:'Sair',
+    memSaveNow:'Guardar agora',
+    memLoad:'Carregar',
+    memClose:'Fechar',
+    memChecking:'A verificar servidor de memória…',
+    memRemoteOn:'Memória remota ligada.',
+    memServerAvailable:'Servidor de memória disponível.',
+    memLocalOnly:'Memória local ativa. O servidor remoto não está disponível nesta origem.',
+    memFill:'Preenche utilizador e password.',
+    memSessionStarted:'Sessão iniciada para {user}.',
+    memUserCreated:'Utilizador criado e memória guardada para {user}.',
+    memSessionEnded:'Sessão terminada. A memória local continua neste browser.',
+    memLoginLoad:'Entra primeiro para carregar memória remota.',
+    memLoaded:'Memória carregada de {user}.',
+    memEmpty:'Ainda não há memória remota para {user}.',
+    memLoginSave:'Entra primeiro para guardar memória remota.',
+    memSavedNow:'Memória guardada agora.',
+    memSavedAuto:'Memória remota atualizada.',
+    presetsEmpty:'— presets guardados —',
+    presetPrompt:'Nome do preset (ex.: "PLA Ender", "Resina cliente X"):',
+    presetNoSave:'O browser não deixou guardar. Usa Exportar.',
+    presetDelete:'Apagar o preset "{name}"?',
+    invalidFile:'Ficheiro inválido',
+    foldTitle:'Clica para esconder ou mostrar',
+    updateFileMode:'A verificação automática precisa que a página seja servida por http(s). Aberta do disco, o browser bloqueia. Usa <b>Importar</b> com um ficheiro de dados.',
+    updateChecking:'A verificar…',
+    updateDone:'Dados atualizados para a versão de <b>{date}</b>.',
+    updateNone:'Sem atualizações disponíveis neste momento.',
+    acceptLicence:'Tens de assinalar que leste e aceitas os termos.',
+    installUnavailable:'O teu browser não oferece instalação nesta página. No Chrome ou Edge: menu ⋮ → "Instalar Fatia". No telemóvel: partilhar → "Adicionar ao ecrã principal".'
+  },
+  en:{
+    tagline:'3D printing prices — from your slicer',
+    tGuardarPreset:'Save the current state as a preset',
+    tApagarPreset:'Delete the selected preset',
+    bExportar:'↓ Export',
+    bImportar:'↑ Import',
+    bMemoria:'Memory',
+    bMemoriaUser:'Memory: {user}',
+    bInstalar:'⤓ Install app',
+    bSimples:'Simple mode',
+    bCompleto:'Full mode',
+    bNovo:'New quote',
+    bOrcamento:'👁 Customer quote',
+    energyVat:'Energy VAT',
+    taxTitle:'Invoice tax',
+    taxOn:'Show tax on the customer quote',
+    taxPreset:'Country / rule',
+    taxDocName:'Document name',
+    taxRate:'Rate',
+    taxHint:'The final total stays the same: the quote splits the pre-tax subtotal and included tax. Use “Custom” for other countries or regimes.',
+    taxGeneric:'Tax',
+    taxSubtotal:'Subtotal before {name}',
+    taxIncluded:'{name} {rate}% included',
+    taxFree:'{name} 0% / exempt',
+    taxNetRevenue:'Revenue before tax',
+    licSub:'Usage licence · version <span id="lic_v"></span>',
+    licText:'<p><b>Personal use — free.</b> You may use, copy and modify Fatia freely for personal projects, learning and non-commercial work.</p><p><b>Commercial use — by prior arrangement.</b> If you use Fatia to price work you sell, a commercial licence is required:</p><ul><li><b>€10/month</b> — companies or professionals with monthly revenue up to €10,000</li><li><b>€100/month</b> — above that amount</li></ul><p>The market prices, shipping tariffs and printer values included here are <b>informational references</b> gathered from public sources. Check them before using them in a real quote. The author is not responsible for commercial decisions made from them.</p>',
+    licUse:'How will you use Fatia?',
+    licOptPersonal:'Personal / non-commercial use — free',
+    licOptSmall:'Commercial use — up to €10,000/month (€10/month)',
+    licOptLarge:'Commercial use — above €10,000/month (€100/month)',
+    licAccept:'I have read and accept the licence terms',
+    licContinue:'Continue',
+    licRead:'Read the full licence ↗',
+    memTitle:'Fatia Memory',
+    memLocal:'Local browser memory',
+    memSession:'Session: {user}',
+    memUser:'User',
+    memPass:'Password',
+    memLogin:'Log in',
+    memCreate:'Create user',
+    memLogout:'Log out',
+    memSaveNow:'Save now',
+    memLoad:'Load',
+    memClose:'Close',
+    memChecking:'Checking memory server…',
+    memRemoteOn:'Remote memory connected.',
+    memServerAvailable:'Memory server available.',
+    memLocalOnly:'Local memory active. The remote server is not available from this origin.',
+    memFill:'Fill in user and password.',
+    memSessionStarted:'Session started for {user}.',
+    memUserCreated:'User created and memory saved for {user}.',
+    memSessionEnded:'Session ended. Local memory remains in this browser.',
+    memLoginLoad:'Log in first to load remote memory.',
+    memLoaded:'Memory loaded from {user}.',
+    memEmpty:'There is no remote memory for {user} yet.',
+    memLoginSave:'Log in first to save remote memory.',
+    memSavedNow:'Memory saved now.',
+    memSavedAuto:'Remote memory updated.',
+    presetsEmpty:'— saved presets —',
+    presetPrompt:'Preset name (e.g. "PLA Ender", "Resin client X"):',
+    presetNoSave:'The browser did not allow saving. Use Export.',
+    presetDelete:'Delete preset "{name}"?',
+    invalidFile:'Invalid file',
+    foldTitle:'Click to hide or show',
+    updateFileMode:'Automatic checks need the page to be served over http(s). Opened from disk, the browser blocks them. Use <b>Import</b> with a data file.',
+    updateChecking:'Checking…',
+    updateDone:'Data updated to version <b>{date}</b>.',
+    updateNone:'No updates available right now.',
+    acceptLicence:'You need to tick that you have read and accept the terms.',
+    installUnavailable:'Your browser does not offer installation on this page. In Chrome or Edge: menu ⋮ → "Install Fatia". On mobile: share → "Add to home screen".'
+  }
+};
+let IDIOMA=I18N[store.get('idioma','pt')]?store.get('idioma','pt'):'pt';
+function tr(k,v={}){
+  let s=(I18N[IDIOMA]&&I18N[IDIOMA][k])||I18N.pt[k]||k;
+  Object.keys(v).forEach(key=>{ s=s.replaceAll('{'+key+'}', v[key]); });
+  return s;
+}
+function aplicarIdioma(){
+  document.documentElement.lang=IDIOMA==='en'?'en':'pt-PT';
+  const sel=el('lang_sel'); if(sel) sel.value=IDIOMA;
+  document.querySelectorAll('[data-i18n]').forEach(n=>{ n.textContent=tr(n.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(n=>{ n.innerHTML=tr(n.dataset.i18nHtml); });
+  document.querySelectorAll('[data-i18n-title]').forEach(n=>{ n.title=tr(n.dataset.i18nTitle); });
+  if(el('lic_v')) el('lic_v').textContent=LICENCA_V;
+  if(typeof aplicaSimples==='function') aplicaSimples();
+  if(typeof estadoMemoria==='function') estadoMemoria();
+  if(typeof drawPresets==='function') drawPresets();
+  if(typeof drawTaxPresets==='function') drawTaxPresets();
+  document.querySelectorAll('.card h2').forEach(h=>{ h.title=tr('foldTitle'); });
+}
+function mudarIdioma(lang){
+  IDIOMA=I18N[lang]?lang:'pt';
+  store.set('idioma',IDIOMA);
+  aplicarIdioma();
+  calc();
+  guardaEstado();
+}
 function estado(){
   const o=collect();
-  o.favs=favs; o.custom=custom; o.simples=SIMPLES; o.fechados=[...FECHADOS];
+  o.favs=favs; o.custom=custom; o.simples=SIMPLES; o.fechados=[...FECHADOS]; o.idioma=IDIOMA;
   ['j_cliente','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
    'r_g','r_t','r_e'].forEach(i=>o[i]=el(i).value);
   ['j_ajusta','j_round','r_usar','j_mostrar_maq'].forEach(i=>o[i]=el(i).checked);
   return o;
 }
 function repor(o){
+  if(o.idioma && I18N[o.idioma]) IDIOMA=o.idioma;
   apply(o);
   if(o.favs) favs=o.favs;
   if(o.custom) custom=o.custom;
@@ -1995,22 +2313,137 @@ function repor(o){
   if(o.fechados){ FECHADOS=new Set(o.fechados); aplicaFechados(); }
   if(o.simples!==undefined){ SIMPLES=o.simples; aplicaSimples(); }
   calc();
+  aplicarIdioma();
 }
 let guardaT;
-function guardaEstado(){ clearTimeout(guardaT); guardaT=setTimeout(()=>store.set('ultimo',estado()),400); }
+function guardaEstado(){
+  clearTimeout(guardaT);
+  guardaT=setTimeout(()=>{
+    store.set('ultimo',estado());
+    agendarMemoriaRemota();
+  },400);
+}
+
+/* ---- memória remota por utilizador ---- */
+const MEM={user:null,updated_at:null,online:false};
+let memT;
+function pacoteMemoria(){
+  return {
+    versao:VERSAO,
+    idioma:IDIOMA,
+    ultimo:estado(),
+    presets:presets(),
+    licenca:store.get('licenca',0),
+    lic_uso:store.get('lic_uso','')
+  };
+}
+function estadoMemoria(msg){
+  const b=el('b_memoria'), label=el('mem_user_label'), st=el('mem_status');
+  if(b){
+    b.textContent=MEM.user?tr('bMemoriaUser',{user:MEM.user}):tr('bMemoria');
+    b.classList.toggle('memuser',!!MEM.user);
+  }
+  if(label) label.textContent=MEM.user?tr('memSession',{user:MEM.user}):tr('memLocal');
+  if(st && msg) st.textContent=msg;
+}
+function mostrarMemoria(on=1){
+  el('mem').style.display=on?'flex':'none';
+  estadoMemoria();
+}
+async function apiMemoria(path,opt={}){
+  const headers=Object.assign({'Content-Type':'application/json'},opt.headers||{});
+  const r=await fetch('/api/'+path,Object.assign({credentials:'same-origin',headers},opt));
+  const data=await r.json().catch(()=>({ok:false,error:'Resposta inválida'}));
+  if(!r.ok || data.ok===false) throw new Error(data.error||('Erro '+r.status));
+  return data;
+}
+function aplicarMemoriaRemota(payload){
+  if(!payload) return false;
+  if(payload.presets) store.set('presets',payload.presets);
+  if(payload.licenca!==undefined) store.set('licenca',payload.licenca);
+  if(payload.lic_uso!==undefined) store.set('lic_uso',payload.lic_uso);
+  if(payload.idioma && I18N[payload.idioma]){ IDIOMA=payload.idioma; store.set('idioma',IDIOMA); }
+  drawPresets();
+  if(payload.ultimo) repor(payload.ultimo);
+  return true;
+}
+async function iniciarMemoriaRemota(){
+  try{
+    const data=await apiMemoria('auth/me',{method:'GET'});
+    MEM.online=true;
+    MEM.user=data.user?data.user.username:null;
+    estadoMemoria(MEM.user?tr('memRemoteOn'):tr('memServerAvailable'));
+    if(MEM.user) await carregarMemoriaRemota(true);
+  }catch(_){
+    MEM.online=false;
+    estadoMemoria(tr('memLocalOnly'));
+  }
+}
+async function entrarMemoria(){
+  const username=el('mem_user').value.trim(), password=el('mem_pass').value;
+  if(!username||!password) return estadoMemoria(tr('memFill'));
+  try{
+    const data=await apiMemoria('auth/login',{method:'POST',body:JSON.stringify({username,password})});
+    MEM.user=data.user.username; el('mem_pass').value='';
+    const carregou=await carregarMemoriaRemota(true);
+    if(!carregou) await guardarMemoriaRemota(false);
+    estadoMemoria(tr('memSessionStarted',{user:MEM.user}));
+  }catch(e){ estadoMemoria(e.message); }
+}
+async function criarMemoria(){
+  const username=el('mem_user').value.trim(), password=el('mem_pass').value;
+  if(!username||!password) return estadoMemoria(tr('memFill'));
+  try{
+    const data=await apiMemoria('auth/register',{method:'POST',body:JSON.stringify({username,password})});
+    MEM.user=data.user.username; el('mem_pass').value='';
+    await guardarMemoriaRemota(false);
+    estadoMemoria(tr('memUserCreated',{user:MEM.user}));
+  }catch(e){ estadoMemoria(e.message); }
+}
+async function sairMemoria(){
+  try{ await apiMemoria('auth/logout',{method:'POST',body:'{}'}); }catch(_){}
+  MEM.user=null; MEM.updated_at=null; estadoMemoria(tr('memSessionEnded'));
+}
+async function carregarMemoriaRemota(silencioso){
+  if(!MEM.user){ if(!silencioso) estadoMemoria(tr('memLoginLoad')); return false; }
+  try{
+    const data=await apiMemoria('state',{method:'GET'});
+    MEM.updated_at=data.updated_at||null;
+    const ok=aplicarMemoriaRemota(data.state);
+    estadoMemoria(ok?tr('memLoaded',{user:MEM.user}):tr('memEmpty',{user:MEM.user}));
+    return ok;
+  }catch(e){ if(!silencioso) estadoMemoria(e.message); return false; }
+}
+function agendarMemoriaRemota(){
+  if(!MEM.user) return;
+  clearTimeout(memT);
+  memT=setTimeout(()=>guardarMemoriaRemota(false),1600);
+}
+async function guardarMemoriaRemota(manual){
+  if(!MEM.user){
+    if(manual) estadoMemoria(tr('memLoginSave'));
+    return false;
+  }
+  try{
+    const data=await apiMemoria('state',{method:'PUT',body:JSON.stringify({state:pacoteMemoria()})});
+    MEM.updated_at=data.updated_at;
+    estadoMemoria(manual?tr('memSavedNow'):tr('memSavedAuto'));
+    return true;
+  }catch(e){ if(manual) estadoMemoria(e.message); return false; }
+}
 
 /* ---- presets ---- */
 function presets(){ return store.get('presets',{}); }
 function drawPresets(){
   const s=el('p_sel'), ks=Object.keys(presets()).sort();
-  s.innerHTML='<option value="">— presets guardados —</option>'+ks.map(k=>`<option>${k}</option>`).join('');
+  s.innerHTML='<option value="">'+tr('presetsEmpty')+'</option>'+ks.map(k=>`<option>${k}</option>`).join('');
 }
 function guardarPreset(){
-  const n=(prompt('Nome do preset (ex.: "PLA Ender", "Resina cliente X"):')||'').trim();
+  const n=(prompt(tr('presetPrompt'))||'').trim();
   if(!n) return;
   const p=presets(); p[n]=estado();
-  if(!store.set('presets',p)) return alert('O browser não deixou guardar. Usa Exportar.');
-  drawPresets(); el('p_sel').value=n;
+  if(!store.set('presets',p)) return alert(tr('presetNoSave'));
+  drawPresets(); el('p_sel').value=n; agendarMemoriaRemota();
 }
 function carregarPreset(){
   const n=el('p_sel').value; if(!n) return;
@@ -2018,15 +2451,15 @@ function carregarPreset(){
 }
 function apagarPreset(){
   const n=el('p_sel').value; if(!n) return;
-  if(!confirm(`Apagar o preset "${n}"?`)) return;
-  const p=presets(); delete p[n]; store.set('presets',p); drawPresets();
+  if(!confirm(tr('presetDelete',{name:n}))) return;
+  const p=presets(); delete p[n]; store.set('presets',p); drawPresets(); agendarMemoriaRemota();
 }
 
 /* ---- modo simples e painéis dobráveis ---- */
 let SIMPLES=false, FECHADOS=new Set();
 function aplicaSimples(){
   document.body.classList.toggle('simples',SIMPLES);
-  el('b_simples').textContent=SIMPLES?'Modo completo':'Modo simples';
+  el('b_simples').textContent=SIMPLES?tr('bCompleto'):tr('bSimples');
   el('b_simples').classList.toggle('primary',SIMPLES);
 }
 function toggleSimples(){ SIMPLES=!SIMPLES; aplicaSimples(); guardaEstado(); }
@@ -2037,7 +2470,7 @@ function ligaDobras(){
   document.querySelectorAll('.card').forEach((c,i)=>{
     if(!c.id) c.id='card'+i;
     const h=c.querySelector('h2'); if(!h) return;
-    h.style.cursor='pointer'; h.title='Clica para esconder ou mostrar';
+    h.style.cursor='pointer'; h.title=tr('foldTitle');
     h.insertAdjacentHTML('beforeend','<span class="chev">▾</span>');
     h.addEventListener('click',()=>{
       FECHADOS.has(c.id)?FECHADOS.delete(c.id):FECHADOS.add(c.id);
@@ -2051,11 +2484,10 @@ let DADOS_URL='https://hubertdungen.github.io/fatia/dados.json';
 async function procurarAtualizacoes(silencioso){
   const box=el('upd');
   if(location.protocol==='file:'){
-    if(!silencioso) box.innerHTML='<span class="st">A verificação automática precisa que a página seja servida por http(s). '
-      +'Aberta do disco, o browser bloqueia. Usa <b>Importar</b> com um ficheiro de dados.</span>';
+    if(!silencioso) box.innerHTML='<span class="st">'+tr('updateFileMode')+'</span>';
     return;
   }
-  if(!silencioso) box.innerHTML='<span class="st">A verificar…</span>';
+  if(!silencioso) box.innerHTML='<span class="st">'+tr('updateChecking')+'</span>';
   try{
     const r=await fetch(DADOS_URL+'?t='+Date.now(),{cache:'no-store'});
     if(!r.ok) throw new Error(r.status);
@@ -2064,9 +2496,9 @@ async function procurarAtualizacoes(silencioso){
     if(d.transp) Object.assign(TRANSP,d.transp);
     if(d.printers){ PRINTERS.length=0; PRINTERS.push(...d.printers); drawPrinters(); }
     drawPortesSel(); calc();
-    box.innerHTML=`<span class="st">Dados atualizados para a versão de <b>${d.data||'?'}</b>.</span>`;
+    box.innerHTML='<span class="st">'+tr('updateDone',{date:d.data||'?'})+'</span>';
   }catch(e){
-    if(!silencioso) box.innerHTML='<span class="st">Sem atualizações disponíveis neste momento.</span>';
+    if(!silencioso) box.innerHTML='<span class="st">'+tr('updateNone')+'</span>';
   }
 }
 
@@ -2077,10 +2509,11 @@ function mostrarLicenca(forcar){
   el('lic').style.display='flex';
 }
 function aceitarLicenca(){
-  if(!el('lic_ok').checked) return alert('Tens de assinalar que leste e aceitas os termos.');
+  if(!el('lic_ok').checked) return alert(tr('acceptLicence'));
   store.set('licenca',LICENCA_V);
   store.set('lic_uso',el('lic_uso').value);
   el('lic').style.display='none';
+  agendarMemoriaRemota();
 }
 
 /* ---- instalação como aplicação (PWA) ---- */
@@ -2090,8 +2523,7 @@ window.addEventListener('beforeinstallprompt',e=>{
 });
 window.addEventListener('appinstalled',()=>{ promptInstalar=null; el('b_instalar').style.display='none'; });
 async function instalarApp(){
-  if(!promptInstalar) return alert('O teu browser não oferece instalação nesta página. '
-    +'No Chrome ou Edge: menu ⋮ → "Instalar Fatia". No telemóvel: partilhar → "Adicionar ao ecrã principal".');
+  if(!promptInstalar) return alert(tr('installUnavailable'));
   promptInstalar.prompt(); await promptInstalar.userChoice;
   promptInstalar=null; el('b_instalar').style.display='none';
 }
@@ -2102,6 +2534,11 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 /* ============ arranque ============ */
 S_NUM.forEach(k=>el('s_'+k).value=DEF[k]);
 el('s_auto_kwh').checked=DEF.auto_kwh;
+drawTaxPresets();
+el('s_tax_preset').value=DEF.tax_preset;
+el('s_tax_nome').value=DEF.tax_nome;
+el('s_tax_on').checked=DEF.tax_on;
+updateTaxFieldState();
 el('srch').innerHTML=BENCH.pesquisas.map(([n,u])=>
   `<button onclick="window.open('${u}','_blank')">${n} ↗</button>`).join('');
 drawPrinters(); drawMesas(); drawPortes(); drawPortesSel(); toggleAuto();
@@ -2111,6 +2548,9 @@ ligaDobras(); drawPresets();
 el('ver').textContent='v'+VERSAO;
 el('lic_v').textContent=LICENCA_V;
 el('s_printer').addEventListener('change',aplicaImpressora);
+el('s_tax_preset').addEventListener('change',aplicarTaxPreset);
+el('s_tax_on').addEventListener('change',calc);
+['s_tax_nome','s_tax_rate'].forEach(i=>el(i).addEventListener('input',marcarTaxCustom));
 document.querySelectorAll('input,select').forEach(i=>i.addEventListener('input',calc));
 el('s_auto_kwh').addEventListener('change',toggleAuto);
 ['s_iva','s_kwh_add'].forEach(i=>el(i).addEventListener('input',applySpot));
@@ -2120,8 +2560,10 @@ document.querySelectorAll('input,select').forEach(i=>{
 });
 const ultimo=store.get('ultimo',null);
 if(ultimo){ try{ repor(ultimo); }catch(_){ calc(); } } else calc();
+aplicarIdioma();
 mostrarLicenca();
 procurarAtualizacoes(true);
+iniciarMemoriaRemota();
 </script>
 </body>
 </html>

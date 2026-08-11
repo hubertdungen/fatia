@@ -61,6 +61,14 @@ Two features need the page served over `http(s)`: live electricity spot pricing 
 python3 -m http.server 8000     # then open http://localhost:8000
 ```
 
+For always-on use with shared memory, run the bundled server instead:
+
+```bash
+python3 server.py --host 0.0.0.0 --port 8098
+```
+
+It still serves the same PWA, but also adds `/api/*` endpoints for login and per-user memory stored in SQLite. The first user must be created from LAN/Meshnet by default; set `FATIA_ALLOW_SIGNUP=1` only if you deliberately want open self-registration.
+
 ## Reference data sources
 
 | What | Source | Date |

@@ -1,7 +1,7 @@
 /* Fatia — service worker.
    A app tem de abrir sem rede: o essencial fica em cache.
    A página em si vai primeiro à rede, para que uma versão nova apareça sem truques. */
-const CACHE = 'fatia-1.1.0';
+const CACHE = 'fatia-1.1.3';
 const SHELL = ['./', './index.html', './manifest.webmanifest',
                './icon-192.png', './icon-512.png', './fatia-logo.svg'];
 
@@ -32,6 +32,10 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;   /* preço da eletricidade vai sempre à rede */
+  if (url.pathname.startsWith('/api/')) {
+    e.respondWith(fetch(req));
+    return;
+  }
 
   /* página e dados de mercado: rede primeiro, cache como rede de segurança */
   if (req.mode === 'navigate' || url.pathname.endsWith('.json') || url.pathname.endsWith('.webmanifest')) {
