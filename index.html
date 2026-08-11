@@ -396,7 +396,7 @@ footer a{color:var(--blue);text-decoration:none}
     <label class="toggle"><input type="checkbox" id="lic_ok"> <span data-i18n="licAccept">Li e aceito os termos da licença</span></label>
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
       <button class="primary" onclick="aceitarLicenca()" style="flex:1" data-i18n="licContinue">Continuar</button>
-      <button class="ghost" onclick="window.open('LICENCA.md','_blank')" data-i18n="licRead">Ler a licença completa ↗</button>
+      <button class="ghost" onclick="window.open('https://github.com/hubertdungen/fatia#licen%C3%A7a','_blank')" data-i18n="licRead">Ler a licença completa ↗</button>
     </div>
   </div>
 </div>
@@ -643,6 +643,14 @@ footer a{color:var(--blue);text-decoration:none}
         <option value="incluido" data-i18n="taxModeIncl">Incluído no total — sai de dentro do teu preço</option>
         <option value="acrescentado" data-i18n="taxModeAdd">Acrescentado ao total — vai por cima, paga-o o cliente</option>
       </select></div></div>
+    <div class="row" id="rowTaxArred" style="margin-top:6px;display:none"><div>
+      <label data-i18n="taxRound">O arredondamento aos 0,50 € incide em</label>
+      <select id="s_tax_arred">
+        <option value="preco" data-i18n="taxRoundNet">O teu preço, antes do imposto</option>
+        <option value="total" data-i18n="taxRoundGross">O total que o cliente paga</option>
+      </select>
+      <div class="hint" data-i18n="taxRoundHint">Só faz diferença com o arredondamento ligado no painel 1. Com o imposto incluído a pergunta não se põe — o preço e o total são o mesmo número.</div>
+    </div></div>
     <div class="hint" data-i18n-html="taxModeHint"><b>Incluído</b>: o total é o que o cliente paga e o imposto sai de lá de dentro — vem antes do teu lucro.
       <b>Acrescentado</b>: o total é o teu preço limpo e o imposto vai por cima — o teu lucro é o mesmo e o cliente é que paga o imposto.</div>
     <div class="hint" data-i18n="taxHint">O total final mantém-se igual: o orçamento separa subtotal antes de imposto e imposto incluído. Usa “Personalizado” para outros países ou regimes.</div>
@@ -938,6 +946,10 @@ function updateTaxFieldState(){
   const custom=sel.value==='CUSTOM';
   el('s_tax_nome').disabled=!custom;
   el('s_tax_rate').disabled=!custom;
+  /* escolher onde cai o arredondamento só faz sentido com o imposto por cima:
+     no modo incluído o teu preço e o total do cliente são o mesmo número */
+  const linha=el('rowTaxArred');
+  if(linha) linha.style.display = el('s_tax_modo').value==='acrescentado' ? '' : 'none';
 }
 function aplicarTaxPreset(){
   const p=taxPreset(el('s_tax_preset').value);
@@ -1785,7 +1797,14 @@ function calc(){
             todos.slice(0,3).map(s=>`${s.n} ${eur(s.p)}`).join(' · ')}</span></div>`:'');
 
   const bruto=pMod+pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg-desc-promo+pPortes;
-  const total=el('j_round').checked?Math.floor(bruto*2)/2:bruto;
+  let total=el('j_round').checked?Math.floor(bruto*2)/2:bruto;
+  /* com o imposto por cima há dois números para arredondar: o teu preço ou o que o
+     cliente paga. Arredondar o segundo obriga a recuar o primeiro pela taxa. */
+  if(el('j_round').checked && el('s_tax_modo').value==='acrescentado'
+     && el('s_tax_arred').value==='total'){
+    const t=impostoFaturacao(bruto);
+    if(t.active) total=Math.floor(bruto*(1+t.rate/100)*2)/2/(1+t.rate/100);
+  }
   const arred=total-bruto;
   const tax=impostoFaturacao(total);
   const totalCliente=tax.total;      /* com imposto acrescentado, é mais alto do que o total calculado */
@@ -1875,7 +1894,7 @@ function calc(){
     : (dias>90 ? `<div class="warn">⚠️ Definições sem revisão há <b>${dias} dias</b>. Confirma o preço do filamento antes de enviar.</div>` : ''));
 
   /* a régua horária é do tempo de máquina: modelação e acabamento saem de fora */
-  LAST={pMat,pImp,pBase,pAcab,pMod,pMarg,desc,promo,pPortes,total,tax,hTot,pecas,
+  LAST={pMat,pImp,pBase,pAcab,pMod,pMarg,desc,promo,arred,pPortes,total,tax,hTot,pecas,
         taxa: hTot>0?(total-pMat-pAcab-pMod-pPortes)/hTot:0};
   marketPanel({total,pMat,pAcab,pMod,pPortes,pBase,desc,hTot,pecas,det,nMesas,
     pPrepMesa:nMesas?pPrep/nMesas:0, taxaCobrada: taxaMaq>0?taxaMaq:hImpMedia});
@@ -2189,7 +2208,8 @@ function aprenderDesvio(){
 /* ============ marca da empresa + QR codes ============ */
 const B_TXT=['nome','slogan','nif','contacto','morada','site','msg','nota'];
 let LOGO='';                                  /* dataURI do logótipo, já reduzido */
-let QRS=[];
+let QRS=[{t:'DL X', u:'https://dlx.dungenlabs.com', img:''},
+         {t:'DungenLabs', u:'https://dungenlabs.com', img:''}];
 
 /* reduz a imagem antes de a guardar — um dataURI grande enche o localStorage e mata os presets */
 function reduzImagem(file,maxLado,cb){
@@ -2407,7 +2427,7 @@ function buildPrint(x){
 function collect(){
   const o={portes,mesas,hist,banda:bandaEscolhida,printer:el('s_printer').value,auto_kwh:el('s_auto_kwh').checked,
            tax_on:el('s_tax_on').checked,tax_preset:el('s_tax_preset').value,tax_nome:el('s_tax_nome').value,
-           tax_modo:el('s_tax_modo').value};
+           tax_modo:el('s_tax_modo').value,tax_arred:el('s_tax_arred').value};
   S_NUM.forEach(k=>o[k]=el('s_'+k).value);
   o.fils=FILS.map(f=>({...f}));
   o.modelos=MODELOS.map(m=>({...m}));
@@ -2429,6 +2449,7 @@ function apply(o){
   if(o.tax_on!==undefined) el('s_tax_on').checked=!!o.tax_on;
   if(o.tax_preset!==undefined) el('s_tax_preset').value=o.tax_preset;
   if(o.tax_modo!==undefined) el('s_tax_modo').value=o.tax_modo;
+  if(o.tax_arred!==undefined) el('s_tax_arred').value=o.tax_arred;
   if(Array.isArray(o.modelos)){ MODELOS=o.modelos.map(normModelo); drawModelos(); }
   if(o.tax_nome!==undefined) el('s_tax_nome').value=o.tax_nome;
   updateTaxFieldState();
@@ -2468,7 +2489,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.6.0';
+const VERSAO='1.7.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -2506,6 +2527,10 @@ const I18N={
     taxMode:'Como entra no preço',
     taxModeIncl:'Incluído no total — sai de dentro do teu preço',
     taxModeAdd:'Acrescentado ao total — vai por cima, paga-o o cliente',
+    taxRound:'O arredondamento aos 0,50 € incide em',
+    taxRoundNet:'O teu preço, antes do imposto',
+    taxRoundGross:'O total que o cliente paga',
+    taxRoundHint:'Só faz diferença com o arredondamento ligado no painel 1. Com o imposto incluído a pergunta não se põe — o preço e o total são o mesmo número.',
     taxModeHint:'<b>Incluído</b>: o total é o que o cliente paga e o imposto sai de lá de dentro — vem antes do teu lucro. <b>Acrescentado</b>: o total é o teu preço limpo e o imposto vai por cima — o teu lucro é o mesmo e o cliente é que paga o imposto.',
     modTitle:'Modelação 3D — pré-processamento',
     modName:'Modelo',
@@ -2600,6 +2625,10 @@ const I18N={
     taxMode:'How it enters the price',
     taxModeIncl:'Included in the total — carved out of your price',
     taxModeAdd:'Added to the total — goes on top, the client pays it',
+    taxRound:'Round to the nearest 0.50 on',
+    taxRoundNet:'Your price, before tax',
+    taxRoundGross:'The total the client pays',
+    taxRoundHint:'Only matters with rounding switched on in panel 1. With tax included the question does not arise — your price and the total are the same number.',
     taxModeHint:'<b>Included</b>: the total is what the client pays and the tax comes out of it — it lands before your profit. <b>Added</b>: the total is your clean price and the tax goes on top — your profit is the same and the client pays the tax.',
     modTitle:'3D modelling — pre-processing',
     modName:'Model',
@@ -2934,7 +2963,7 @@ function ligaDobras(){
 }
 
 /* ---- atualização dos dados de mercado ---- */
-let DADOS_URL='dados.json';
+let DADOS_URL='https://hubertdungen.github.io/fatia/dados.json';
 async function procurarAtualizacoes(silencioso){
   const box=el('upd');
   if(location.protocol==='file:'){
@@ -3007,7 +3036,8 @@ el('s_fil_nome').addEventListener('change',aplicaFilamento);
 ['s_fil_kg','s_fil_portes'].forEach(i=>el(i).addEventListener('input',marcaFilamento));
 el('s_tax_preset').addEventListener('change',aplicarTaxPreset);
 el('s_tax_on').addEventListener('change',calc);
-el('s_tax_modo').addEventListener('change',()=>{ calc(); guardaEstado(); });
+el('s_tax_modo').addEventListener('change',()=>{ updateTaxFieldState(); calc(); guardaEstado(); });
+el('s_tax_arred').addEventListener('change',()=>{ calc(); guardaEstado(); });
 el('j_mostrar_mod').addEventListener('change',calc);
 ['s_tax_nome','s_tax_rate'].forEach(i=>el(i).addEventListener('input',marcarTaxCustom));
 document.querySelectorAll('input,select').forEach(i=>i.addEventListener('input',calc));

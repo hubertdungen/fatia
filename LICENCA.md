@@ -1,6 +1,6 @@
 # Licença Fatia 1.0
 
-Copyright (c) 2026 Fatia contributors. Todos os direitos reservados.
+Copyright (c) 2026 Hubert Dungen. Todos os direitos reservados.
 
 Esta é uma licença de código disponível, não é uma licença de código aberto.
 **O uso pessoal é gratuito. O uso comercial exige licença paga, acordada previamente com o autor.**
@@ -69,4 +69,4 @@ Esta licença rege-se pela lei portuguesa.
 
 ## 10. Contacto
 
-Licenciamento comercial e outras questões: contacta o responsável do projeto.
+Licenciamento comercial e outras questões: **hubertkenobi@gmail.com**

@@ -13,7 +13,7 @@
 
 Metes o que o slicer te dá — gramas, tempo, custo — e o Fatia devolve o preço, o lucro real e um orçamento pronto a enviar ao cliente. Como app local é um único ficheiro HTML, sem servidor e sem conta — e instalável como aplicação com um clique. Para uso permanente, o servidor Python incluído acrescenta login e memória partilhada por utilizador.
 
-Abre o `index.html` localmente, ou publica o repositório em qualquer alojamento estático.
+**[▶ Abrir o Fatia](https://hubertdungen.github.io/fatia/)**
 
 ## Porquê
 
@@ -106,10 +106,15 @@ Estes valores são **estimativas informativas**, não cotações. Confirma-os an
 | Até 10 000 € | 10 €/mês |
 | Acima de 10 000 € | 100 €/mês |
 
-Contacta o responsável do projeto antes de começares. Termos completos em [`LICENCA.md`](LICENCA.md) (PT) e [`LICENSE`](LICENSE) (EN, versão que prevalece).
+Contacta **hubertkenobi@gmail.com** antes de começares. Termos completos em [`LICENCA.md`](LICENCA.md) (PT) e [`LICENSE`](LICENSE) (EN, versão que prevalece).
 
 ---
 
 <p align="center">
-  <i>Fatia — calculadora de orçamentos para impressão 3D</i>
+  <i>Fatia — powered by <b>DL X</b></i><br>
+  <sub><i>DL X é a divisão de investigação e produto da <b>DungenLabs</b>, laboratório de engenharia em Lisboa —
+  a metade do laboratório que constrói para si própria: protótipos experimentais, produtos próprios
+  fabricados em casa (extrusão FDM, filamento reforçado com fibra e fundição em resina), parcerias e
+  tecnologia à procura de uso.</i></sub><br>
+  <sub><a href="https://dlx.dungenlabs.com">dlx.dungenlabs.com</a> · <a href="https://dungenlabs.com">dungenlabs.com</a></sub>
 </p>
