@@ -601,7 +601,7 @@ footer a{color:var(--blue);text-decoration:none}
       <div><label>PC</label><div class="suffix"><input type="number" id="s_pc_kw" step="0.01"><i>kW</i></div></div>
     </div>
 
-    <h3 class="avancado">Ferramentas e tintas · por hora de pós-processamento</h3>
+    <h3 class="avancado fechada">Ferramentas e tintas · por hora de pós-processamento</h3>
     <div class="row r4 avancado">
       <div><label>Ferramentas</label><div class="suffix"><input type="number" id="s_fer_preco" step="1"><i>€</i></div></div>
       <div><label>Vida útil</label><div class="suffix"><input type="number" id="s_fer_vida" step="100"><i>h</i></div></div>
@@ -671,7 +671,7 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="hint">Abaixo disto recebes aviso.</div></div>
     </div>
 
-    <h3 class="avancado">Embalagem</h3>
+    <h3 class="avancado fechada">Embalagem</h3>
     <div class="row r2 avancado">
       <div><label>Peso da embalagem</label><div class="suffix"><input type="number" id="s_emb_peso" step="10" min="0"><i>g</i></div>
         <div class="hint">Caixa, plástico-bolha, etiqueta. Soma-se ao peso das peças para o escalão dos portes.</div></div>
@@ -2463,7 +2463,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.5.0';
+const VERSAO='1.5.1';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -2874,6 +2874,9 @@ function ligaSubdobras(){
     c.querySelectorAll(':scope > h3').forEach((h,i)=>{
       const id=c.id+'/'+i;
       h.dataset.sub=id;
+      /* class="fechada" no HTML = nasce dobrada. Só conta em instalação nova:
+         quem já usou a app traz o seu FECHADOS e o repor() substitui este por inteiro. */
+      if(h.classList.contains('fechada')) FECHADOS.add(id);
       const corpo=document.createElement('div');
       corpo.className='subsec'+(h.classList.contains('avancado')?' avancado':'');
       let n=h.nextElementSibling;
@@ -2887,6 +2890,7 @@ function ligaSubdobras(){
       });
     });
   });
+  aplicaFechados();
 }
 function aplicaFechados(){
   document.querySelectorAll('.card').forEach(c=>c.classList.toggle('fechado',FECHADOS.has(c.id)));
