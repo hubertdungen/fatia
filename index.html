@@ -2352,7 +2352,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.3.0';
+const VERSAO='1.3.1';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -2424,6 +2424,7 @@ const I18N={
     presetPrompt:'Nome do preset (ex.: "PLA Ender", "Resina cliente X"):',
     presetNoSave:'O browser não deixou guardar. Usa Exportar.',
     presetDelete:'Apagar o preset "{name}"?',
+    presetPickFirst:'Escolhe primeiro um preset na lista.',
     invalidFile:'Ficheiro inválido',
     foldTitle:'Clica para esconder ou mostrar',
     updateFileMode:'A verificação automática precisa que a página seja servida por http(s). Aberta do disco, o browser bloqueia. Usa <b>Importar</b> com um ficheiro de dados.',
@@ -2498,6 +2499,7 @@ const I18N={
     presetPrompt:'Preset name (e.g. "PLA Ender", "Resin client X"):',
     presetNoSave:'The browser did not allow saving. Use Export.',
     presetDelete:'Delete preset "{name}"?',
+    presetPickFirst:'Pick a preset from the list first.',
     invalidFile:'Invalid file',
     foldTitle:'Click to hide or show',
     updateFileMode:'Automatic checks need the page to be served over http(s). Opened from disk, the browser blocks them. Use <b>Import</b> with a data file.',
@@ -2537,6 +2539,7 @@ function mudarIdioma(lang){
 function estado(){
   const o=collect();
   o.favs=favs; o.custom=custom; o.simples=SIMPLES; o.fechados=[...FECHADOS]; o.idioma=IDIOMA;
+  o.preset=el('p_sel').value;
   ['j_cliente','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
    'r_g','r_t','r_e'].forEach(i=>o[i]=el(i).value);
   ['j_ajusta','j_round','r_usar','j_mostrar_maq'].forEach(i=>o[i]=el(i).checked);
@@ -2555,6 +2558,8 @@ function repor(o){
   if(o.simples!==undefined){ SIMPLES=o.simples; aplicaSimples(); }
   calc();
   aplicarIdioma();
+  /* depois do aplicarIdioma, que redesenha a lista de presets */
+  if(o.preset && presets()[o.preset]) el('p_sel').value=o.preset;
 }
 let guardaT;
 function guardaEstado(){
@@ -2675,25 +2680,33 @@ async function guardarMemoriaRemota(manual){
 
 /* ---- presets ---- */
 function presets(){ return store.get('presets',{}); }
+/* redesenhar a lista não pode perder a escolha: isto corre também ao mudar de idioma
+   e no fim de cada repor(), e sem o keep o preset carregado desaparecia do dropdown
+   — o que deixava o 🗑 sem nada para apagar */
 function drawPresets(){
-  const s=el('p_sel'), ks=Object.keys(presets()).sort();
-  s.innerHTML='<option value="">'+tr('presetsEmpty')+'</option>'+ks.map(k=>`<option>${k}</option>`).join('');
+  const s=el('p_sel'), keep=s.value, ks=Object.keys(presets()).sort();
+  s.innerHTML='<option value="">'+tr('presetsEmpty')+'</option>'
+    +ks.map(k=>`<option>${htmlEsc(k)}</option>`).join('');
+  s.value=ks.includes(keep)?keep:'';
 }
 function guardarPreset(){
   const n=(prompt(tr('presetPrompt'))||'').trim();
   if(!n) return;
-  const p=presets(); p[n]=estado();
+  const p=presets(); p[n]=estado(); p[n].preset=n;
   if(!store.set('presets',p)) return alert(tr('presetNoSave'));
   drawPresets(); el('p_sel').value=n; agendarMemoriaRemota();
 }
 function carregarPreset(){
   const n=el('p_sel').value; if(!n) return;
   const p=presets()[n]; if(p) repor(p);
+  el('p_sel').value=n;                     /* o preset carregado é o que fica à vista */
 }
 function apagarPreset(){
-  const n=el('p_sel').value; if(!n) return;
+  const n=el('p_sel').value;
+  if(!n) return alert(tr('presetPickFirst'));
   if(!confirm(tr('presetDelete',{name:n}))) return;
-  const p=presets(); delete p[n]; store.set('presets',p); drawPresets(); agendarMemoriaRemota();
+  const p=presets(); delete p[n]; store.set('presets',p);
+  el('p_sel').value=''; drawPresets(); agendarMemoriaRemota();
 }
 
 /* ---- modo simples e painéis dobráveis ---- */
