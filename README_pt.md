@@ -57,7 +57,7 @@ O Fatia calcula as duas coisas em paralelo: **o que te custa** e **o que cobras*
 
 **Presets e memória.** Guarda configurações com nome, exporta e importa em JSON. Tudo entra no template: impressoras por mesa, logótipo, textos e QR codes. Ele lembra-se de onde ficaste.
 
-**Modo simples.** Esconde tudo o que não estás a usar. Clica nos títulos dos painéis para os dobrar.
+**Modo simples.** Esconde tudo o que não estás a usar. Clica nos títulos dos painéis para os dobrar — e nos subtítulos, para dobrar só aquela secção. O que deixares fechado fica fechado da próxima vez.
 
 ## Como usar
 
