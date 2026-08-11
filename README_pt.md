@@ -37,6 +37,8 @@ O Fatia calcula as duas coisas em paralelo: **o que te custa** e **o que cobras*
 
 **Várias impressoras no mesmo trabalho.** Cada mesa escolhe a sua máquina. O custo horário é o dessa máquina e o total sai da média ponderada pelo tempo de cada mesa. Se retificares o tempo real, todas as mesas escalam na mesma proporção — regra de três simples. O painel mostra o €/h de cada máquina e a média resultante.
 
+**As peças contam-se por mesa.** Cada mesa diz quantas peças saem dela e o campo lá em cima mostra o total somado — 2 peças em 2 mesas são 2 peças, não 4. O escalão de desconto por quantidade segue esse total.
+
 **Gestor de filamentos.** Cada filamento é um nome e os seus preços — preço/kg e portes do fornecedor. Acrescentas e removes os teus, e ficam guardados nos presets e dentro do ficheiro do Exportar. Cada mesa escolhe que filamentos usou, e pode levar mais do que um.
 
 **Vários filamentos na mesma mesa.** Quando uma mesa leva mais do que um filamento e não tem o custo do slicer, não há como saber quantos gramas são de cada: o Fatia estima pela média dos preços dessa mesa — e avisa-te, porque basta meteres o custo do slicer nessa mesa para o valor ficar exato. O orçamento do cliente mostra os filamentos usados, e discrimina-os por mesa quando há mais do que um.
@@ -60,6 +62,8 @@ Abre o `index.html` no browser. É tudo.
 **Instalar como aplicação.** Servido por `http(s)` — no GitHub Pages ou num servidor local — o Fatia é uma PWA: aparece um botão **⤓ Instalar app**, ou usas o menu do browser (Chrome/Edge: ⋮ → *Instalar Fatia*; telemóvel: partilhar → *Adicionar ao ecrã principal*). Passa a abrir em janela própria, com ícone, e funciona sem rede.
 
 Duas coisas só funcionam quando a página é servida por `http(s)` — a atualização automática do preço de mercado da eletricidade e a verificação de atualizações dos dados. Aberto do disco com `file://`, o browser bloqueia qualquer pedido para fora, e não há volta a dar. Usa o GitHub Pages, ou um servidor local:
+
+O **preço de mercado da eletricidade** precisa mesmo do servidor incluído (`server.py`): a API do mercado só autoriza pedidos vindos do domínio dela, por isso um pedido feito pelo browser é sempre bloqueado por CORS. O servidor pede por ti em `/api/spot`, com uns minutos de cache. Sem ele, a app fica em modo manual de eletricidade — tudo o resto funciona na mesma.
 
 ```bash
 python3 -m http.server 8000     # depois abre http://localhost:8000

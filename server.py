@@ -15,6 +15,7 @@ import secrets
 import sqlite3
 import time
 import urllib.parse
+import urllib.request
 from http import cookies
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -35,9 +36,48 @@ ALLOW_PUBLIC_BOOTSTRAP = os.environ.get("FATIA_ALLOW_PUBLIC_BOOTSTRAP", "").lowe
 }
 COOKIE_SECURE = os.environ.get("FATIA_COOKIE_SECURE", "").lower() in {"1", "true", "yes", "on"}
 
+SPOT_URL = "https://api.energy-charts.info/price?bzn={zone}"
+SPOT_TTL = int(os.environ.get("FATIA_SPOT_TTL", "900"))
+_spot_cache: dict[str, tuple[float, dict[str, Any]]] = {}
+
 
 def now() -> int:
     return int(time.time())
+
+
+def spot_price(zone: str = "PT") -> tuple[int, dict[str, Any]]:
+    """Preço de mercado da eletricidade, pedido daqui em vez do browser.
+
+    A energy-charts responde com Access-Control-Allow-Origin fixo no domínio dela,
+    por isso um fetch feito pela página leva sempre com CORS, esteja a ligação boa
+    ou não. Do lado do servidor não há CORS. A resposta fica em cache uns minutos
+    para não bater na API a cada arranque da app.
+    """
+    zone = re.sub(r"[^A-Za-z0-9-]", "", zone)[:8].upper() or "PT"
+    cached = _spot_cache.get(zone)
+    if cached and time.time() - cached[0] < SPOT_TTL:
+        return 200, cached[1]
+    try:
+        req = urllib.request.Request(
+            SPOT_URL.format(zone=zone), headers={"User-Agent": "Fatia/1.x (+servidor local)"}
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except Exception as exc:  # rede, timeout, JSON partido — o cliente só precisa de saber que falhou
+        return 502, {"ok": False, "error": f"sem resposta do mercado ({exc.__class__.__name__})"}
+    precos = [p for p in (data.get("price") or []) if isinstance(p, (int, float))]
+    if not precos:
+        return 502, {"ok": False, "error": "o mercado não devolveu preços"}
+    payload = {
+        "ok": True,
+        "zone": zone,
+        "unit": data.get("unit", "EUR/MWh"),
+        "media_mwh": sum(precos) / len(precos),
+        "n": len(precos),
+        "obtido_em": now(),
+    }
+    _spot_cache[zone] = (time.time(), payload)
+    return 200, payload
 
 
 def init_db(db_path: Path) -> None:
@@ -235,6 +275,11 @@ class FatiaHandler(SimpleHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
         if path == "/api/health":
             self.write_json(200, {"ok": True, "name": "Fatia", "memory": True})
+            return
+        if path == "/api/spot":
+            zona = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("bzn", ["PT"])[0]
+            status, payload = spot_price(zona)
+            self.write_json(status, payload)
             return
         if path == "/api/auth/me":
             user = self.current_user()

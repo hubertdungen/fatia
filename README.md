@@ -39,6 +39,8 @@ Fatia computes both sides in parallel: **what it costs you** and **what you char
 
 **Several printers in one job.** Each plate picks its own machine. The hourly cost is that machine's, and the total is the time-weighted average across plates. Reconcile the real print time and every plate scales by the same ratio — plain rule of three. The panel shows each machine's €/h and the resulting average.
 
+**Parts are counted per plate.** Each plate states how many parts come off it and the field up top shows the running total — 2 parts across 2 plates is 2 parts, not 4. The quantity discount tier follows that total.
+
 **Filament manager.** A filament is a name and its prices — price/kg and the supplier's shipping. Add your own, remove them, and they travel with your presets and inside the Export file. Each plate picks which filaments it used, and can use more than one.
 
 **Several filaments on one plate.** When a plate carries more than one filament and has no slicer cost, there is no way to know how many grams are of each: Fatia estimates from the average of that plate's prices — and warns you, because entering the slicer cost for that plate is all it takes to make the figure exact. The client quote lists the filaments used, and breaks them down per plate when there is more than one.
@@ -62,6 +64,8 @@ Open `index.html` in a browser. That's it.
 **Install it as an app.** Served over `http(s)` — GitHub Pages or a local server — Fatia is a PWA: an **⤓ Install app** button appears, or use the browser menu (Chrome/Edge: ⋮ → *Install Fatia*; mobile: share → *Add to Home Screen*). It then opens in its own window, with an icon, and works offline.
 
 Two features need the page served over `http(s)`: live electricity spot pricing and the data update check. Opened from disk as `file://`, browsers block all outbound requests and there is no way around it. Use GitHub Pages, or a local server:
+
+**Live electricity pricing needs the bundled server** (`server.py`): the market API only allows requests from its own domain, so a request made by the browser is always blocked by CORS. The server fetches it for you at `/api/spot`, cached for a few minutes. Without it the app stays on manual electricity — everything else works the same.
 
 ```bash
 python3 -m http.server 8000     # then open http://localhost:8000
