@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256" role="img" aria-label="Fatia">
+  <title>Fatia</title>
+  <defs>
+    <clipPath id="fBody"><path d="M32 33 L48.97 16.03 A24 24 0 1 1 25.79 9.82 Z"/></clipPath>
+    <clipPath id="fWedge"><path d="M32.67 30.49 L26.46 7.31 A24 24 0 0 1 49.64 13.52 Z"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#fBody)">
+    <path d="M32 33 L48.97 16.03 A24 24 0 1 1 25.79 9.82 Z" fill="currentColor" opacity=".10"/>
+    <g stroke="currentColor" stroke-width="1.7" opacity=".42">
+      <path d="M0 13h64M0 19h64M0 25h64M0 31h64M0 37h64M0 43h64M0 49h64M0 55h64"/>
+    </g>
+  </g>
+  <path d="M32 33 L48.97 16.03 A24 24 0 1 1 25.79 9.82 Z"
+        fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+
+  <g clip-path="url(#fWedge)">
+    <path d="M32.67 30.49 L26.46 7.31 A24 24 0 0 1 49.64 13.52 Z" fill="#ff9f2e"/>
+    <g stroke="#a34f00" stroke-width="1.5" opacity=".3">
+      <path d="M0 11h64M0 17h64M0 23h64M0 29h64"/>
+    </g>
+  </g>
+  <path d="M32.67 30.49 L26.46 7.31 A24 24 0 0 1 49.64 13.52 Z"
+        fill="none" stroke="#ff8a1f" stroke-width="2.6" stroke-linejoin="round"/>
+
+  <circle cx="32" cy="33" r="2.9" fill="currentColor"/>
+</svg>
