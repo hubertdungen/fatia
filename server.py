@@ -45,6 +45,33 @@ def now() -> int:
     return int(time.time())
 
 
+# ------------------------------------------------------------------ Bobina --
+# O inventário de filamento vive no Bobina (porta 8100). O pedido é feito daqui,
+# do lado do servidor, e não pelo browser: entre portas diferentes o browser
+# batia em CORS e o cookie de sessão não passava. As duas apps correm na mesma
+# máquina e com o mesmo utilizador, por isso o segredo é lido do ficheiro que o
+# Bobina escreve -- não há nada para o Hubert configurar.
+BOBINA_URL = os.environ.get("FATIA_BOBINA_URL", "http://127.0.0.1:8100")
+BOBINA_TOKEN_FILE = Path(
+    os.environ.get("FATIA_BOBINA_TOKEN",
+                   str(Path.home() / ".local/share/bobina/bridge.token")))
+
+
+def bobina_filaments() -> tuple[int, dict[str, Any]]:
+    if not BOBINA_TOKEN_FILE.exists():
+        return 503, {"ok": False, "error": "O Bobina ainda não arrancou nesta máquina."}
+    token = BOBINA_TOKEN_FILE.read_text().strip()
+    if not token:
+        return 503, {"ok": False, "error": "O Bobina ainda não gerou o segredo da ligação."}
+    url = f"{BOBINA_URL}/api/fatia/filamentos?token={urllib.parse.quote(token)}"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as r:
+            data = json.loads(r.read().decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        return 502, {"ok": False, "error": f"Sem resposta do Bobina: {exc}"}
+    return 200, {"ok": True, "filamentos": data.get("filamentos", [])}
+
+
 def spot_price(zone: str = "PT") -> tuple[int, dict[str, Any]]:
     """Preço de mercado da eletricidade, pedido daqui em vez do browser.
 
@@ -273,6 +300,10 @@ class FatiaHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         path = urllib.parse.urlparse(self.path).path
+        if path == "/api/bobina/filamentos":
+            status, payload = bobina_filaments()
+            self.write_json(status, payload)
+            return
         if path == "/api/health":
             self.write_json(200, {"ok": True, "name": "Fatia", "memory": True})
             return

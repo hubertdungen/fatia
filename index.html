@@ -578,7 +578,8 @@ footer a{color:var(--blue);text-decoration:none}
         <div style="display:flex;gap:6px"><select id="s_fil_nome" style="flex:1"></select>
           <button title="Guardar os preços atuais como filamento novo" onclick="addFil()" style="padding:8px 11px">+</button>
           <button title="Mudar o nome e os preços deste filamento" onclick="editFil()" style="padding:8px 11px">✎</button>
-          <button title="Remover este filamento" onclick="delFil()" style="padding:8px 11px">×</button></div>
+          <button title="Remover este filamento" onclick="delFil()" style="padding:8px 11px">×</button>
+          <button title="Importar os filamentos que tens no Bobina, com o custo real por quilo" onclick="importaBobina()" style="padding:8px 11px">⬇</button></div>
         <div class="hint">O filamento escolhido aqui é o que vale para as mesas onde não escolheres nenhum.
           Os preços dele são os de baixo — ou usa o <b>✎</b>.</div></div>
     </div>
@@ -1257,6 +1258,31 @@ function addFil(){
   else FILS.push(f);
   drawFils(); el('s_fil_nome').value=n; aplicaFilamento();
 }
+/* ---- ligação ao Bobina ----
+   O inventário de filamento vive no Bobina (:8100). Aqui só se puxa o que ele
+   sabe: nome e custo REAL por quilo, calculado pelo que foi mesmo pago pelas
+   bobines que estão em casa. O pedido passa pelo server.py do Fatia porque
+   entre portas o browser batia em CORS. */
+async function importaBobina(){
+  try{
+    const r=await fetch('/api/bobina/filamentos',{credentials:'same-origin'});
+    const d=await r.json();
+    if(!d.ok) return alert(d.error||'Não consegui falar com o Bobina.');
+    const lista=(d.filamentos||[]).filter(f=>f.n);
+    if(!lista.length) return alert('O Bobina ainda não tem filamentos no inventário.');
+    let novos=0, actualizados=0, semPreco=0;
+    lista.forEach(b=>{
+      const kg=+b.kg||0;
+      const i=FILS.findIndex(x=>x.n===b.n);
+      if(i>=0){ if(kg>0 && FILS[i].kg!==kg){ FILS[i].kg=kg; actualizados++; } }
+      else { FILS.push({n:b.n, kg, portes:+b.portes||0}); novos++; if(!kg) semPreco++; }
+    });
+    drawFils(); aplicaFilamento(); guardaEstado(); calc();
+    alert(`Do Bobina: ${novos} filamento(s) novo(s), ${actualizados} preço(s) atualizado(s).`
+      + (semPreco?`\n${semPreco} sem custo — no Bobina ainda não têm compra registada.`:''));
+  }catch(e){ alert('Não consegui falar com o Bobina: '+e.message); }
+}
+
 /* mudar nome e preços sem depender dos campos avançados — em Modo simples estão escondidos */
 function editFil(){
   const f=filInfo(el('s_fil_nome').value);
