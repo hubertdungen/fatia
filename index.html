@@ -66,6 +66,16 @@ button.ghost.primary:hover{background:var(--accent2);color:#1a1206}
 .card h3.dobrado{color:var(--dim);border-left-color:var(--line)}
 .card h3.dobrado .chev{transform:rotate(-90deg)}
 .card h3.dobrado + .subsec{display:none}
+/* blocos de trabalho: cada um entra ou sai do orçamento por si */
+.card h3 .blocobts{margin-left:auto;display:flex;gap:6px;align-items:center}
+.card h3 .blocobts + .chev{margin-left:8px}
+.card h3 .blocobts button{font:inherit;font-size:10px;font-weight:700;letter-spacing:.2px;
+  padding:3px 7px;border-radius:6px;background:var(--panel);border:1px solid var(--line);
+  color:var(--dim);cursor:pointer;line-height:1.5}
+.card h3 .blocobts button:hover{border-color:var(--accent2);color:var(--accent2)}
+.card h3 .blocobts .bl-t{font-size:12px;padding:1px 6px}
+.card h3.bloco-off{opacity:.5;border-left-color:var(--line)}
+.card h3.bloco-off + .subsec{display:none}
 
 label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px}
 input,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
@@ -460,7 +470,7 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
     <div class="derived" id="d_trabalho"></div>
 
-    <h3 style="margin-top:14px" data-i18n="modTitle">🧊 Modelação 3D — pré-processamento</h3>
+    <h3 style="margin-top:14px" data-bloco="mod"><span data-i18n="modTitle">🧊 Modelação 3D — pré-processamento</span></h3>
     <table id="tbl_mod"><thead><tr>
       <th style="width:56%" data-i18n="modName">Modelo</th>
       <th style="width:30%" data-i18n="modHours">Tempo</th>
@@ -480,7 +490,7 @@ footer a{color:var(--blue);text-decoration:none}
       e é cobrado à tarifa de <b>Modelação 3D</b> das Definições. Como é trabalho de uma vez, não entra no desconto por quantidade.</div>
     <div class="derived" id="d_mod"></div>
 
-    <h3 style="margin-top:14px">🔪 Mesas (dados do slicer)</h3>
+    <h3 style="margin-top:14px" data-bloco="imp"><span>🔪 Mesas (dados do slicer)</span></h3>
     <table id="tbl_mesas"><thead><tr>
       <th style="width:22%">Peso (g)</th>
       <th style="width:24%">Tempo</th>
@@ -529,7 +539,7 @@ footer a{color:var(--blue);text-decoration:none}
         onclick="aprenderDesvio()">Aplicar este desvio a futuras estimativas</button>
     </details>
 
-    <h3>🎨 Pós-processamento</h3>
+    <h3 data-bloco="pos"><span>🎨 Pós-processamento</span></h3>
     <div class="row r3">
       <div><label>Trab. manual</label><div class="suffix"><input type="number" id="j_manual" value="2" min="0" step="1"><i>min</i></div></div>
       <div><label>Polimento</label><div class="suffix"><input type="number" id="j_pol" value="0" min="0" step="1"><i>min</i></div></div>
@@ -1641,8 +1651,14 @@ function toggleAuto(){
 }
 
 /* ============ CÁLCULO ============ */
+/* blocos de trabalho — dá para orçamentar só modelação, só impressão ou só acabamento */
+let BLOCOS={mod:true, imp:true, pos:true};
+
 function calc(){
   const kwh=num('s_kwh');
+  /* blocos desligados não entram no cálculo nem no orçamento do cliente */
+  const bMod=BLOCOS.mod, bImp=BLOCOS.imp, bPos=BLOCOS.pos;
+  const mesasAtivas = bImp ? mesas : [];
 
   /* custos unitários derivados */
   const fDesp        = 1+num('s_desp')/100;
@@ -1664,7 +1680,7 @@ function calc(){
   let gEst=0,mEst=0,cEst=0,nSlic=0;
   const det=[];   /* detalhe por mesa, para o rateio e o painel de posicionamento */
   const mistura=[];  /* mesas com vários filamentos e sem custo do slicer: preço médio */
-  mesas.forEach((m,i)=>{
+  mesasAtivas.forEach((m,i)=>{
     const g=parseFloat(m[0])||0, t=parseT(m[1]), s=parseFloat(m[2]);
     const fs=filsDaMesa(m);
     /* com vários filamentos na mesma mesa não há como saber quantos gramas são de cada:
@@ -1721,14 +1737,15 @@ function calc(){
   renderRetif({gEst,mEst,cEst,rG,rT,rE});
 
   /* as peças são de cada mesa; o campo lá em cima é só o total somado */
-  const pecasTot=totalPecas();
+  const pecasTot = bImp ? totalPecas() : 0;
   el('j_pecas').value=pecasTot;
-  const hTot=mTot/60, pecas=Math.max(pecasTot,1);
+  /* pecas é a contagem real — pode ser 0; pecasDiv só serve de divisor seguro */
+  const hTot=mTot/60, pecas=pecasTot, pecasDiv=Math.max(pecasTot,1);
   const pMat=cMat*(1+num('s_mmat')/100);
 
   const usou = usarReal&&((isFinite(rG)&&rG>0)||rT>0||(isFinite(rE)&&rE>0));
   el('d_mesas').innerHTML=
-    `<div><span>${pecasTot} peça(s) em ${mesas.length} mesa(s) · peso total</span><b>${Math.round(gTot).toLocaleString('pt-PT')} g</b></div>
+    `<div><span>${pecasTot} peça(s) em ${mesasAtivas.length} mesa(s) · peso total</span><b>${Math.round(gTot).toLocaleString('pt-PT')} g</b></div>
      <div><span>Tempo total de impressão</span><b>${hm(mTot)} · ${hTot.toFixed(1)} h</b></div>
      <div class="sep"><span>Base de material${usou?' — retificada':(nSlic?' — '+nSlic+' pelo slicer':' — por peso')}</span><b>${eur(cMat)}</b></div>`
     + (maquinas.length>1
@@ -1738,7 +1755,7 @@ function calc(){
         ? `<div><span>${filsEmUso.length} filamentos neste trabalho</span><b>${filsEmUso.map(htmlEsc).join(' · ')}</b></div>`
         : '');
 
-  const minM=num('j_manual'), minP=num('j_pol'), minT=num('j_pint');
+  const minM=bPos?num('j_manual'):0, minP=bPos?num('j_pol'):0, minT=bPos?num('j_pint'):0;
 
   /* preço ao cliente — cada rubrica com a sua margem parcial */
   /* Regra de três: se o tempo final (desvio típico ou retificação) difere da soma das mesas,
@@ -1750,16 +1767,16 @@ function calc(){
   const taxaMaq=num('s_taxa_maq');
   det.forEach(m=>m.rate = taxaMaq>0?taxaMaq:m.hImp);
   const pImp= taxaMaq>0 ? hTot*taxaMaq : cImpBase*(1+num('s_mimp')/100);
-  const pBase=num('s_base')*pecas + num('s_base_mesa')*Math.max(mesas.length,1);
+  const pBase=num('s_base')*pecasTot + num('s_base_mesa')*mesasAtivas.length;
   const fMao=1+num('s_mmao')/100;
-  const nMesas=Math.max(mesas.length,1);
+  const nMesas=mesasAtivas.length;
   const prepMin=num('s_prep_min');
   const pPrep=nMesas*prepMin/60*num('s_mao')*fMao;     /* preparação: fixa por mesa */
   const pMan=minM/60*num('s_mao')*fMao, pPol=minP/60*num('s_polh')*fMao, pPin=minT/60*num('s_pinth')*fMao;
   const pAcab=pPrep+pMan+pPol+pPin;
   /* modelação 3D: trabalho de uma vez, à tarifa própria e com a margem de mão de obra.
      Fora do desconto por quantidade de propósito — desenha-se uma vez, imprimam-se 1 ou 100. */
-  const minMod=minutosModelacao(), hMod=minMod/60;
+  const minMod=bMod?minutosModelacao():0, hMod=minMod/60;
   const pMod=hMod*num('s_modh')*fMao;
   const cMod=hMod*num('s_pc_kw2')*kwh;                 /* o custo real é o PC ligado */
   const pMarg=(pMat+pImp+pBase)*num('s_margem')/100;
@@ -1768,14 +1785,18 @@ function calc(){
 
   /* ---- portes ---- */
   const sel=el('j_portes').value;
-  const gEnvio=gTot+num('s_emb_peso');           // peças + embalagem
-  const custoEmb=num('s_emb_custo');
+  /* só se expede o que se imprimiu: sem mesas não há peso nem embalagem para cobrar.
+     O valor manual continua disponível, para quem devolve peças de um trabalho de acabamento. */
+  const temFisico = nMesas>0 || sel==='man';
+  const gEnvio=gTot+(temFisico?num('s_emb_peso'):0);   // peças + embalagem
+  const custoEmb=temFisico?num('s_emb_custo'):0;
   el('j_portes_man').disabled = sel!=='man';
   let pPortes=0, notaPortes='';
 
   const todos=TRANSP.grupos.flatMap(g=>g.s.map(s=>({...s, grupo:g.g, p:precoServico(s,gEnvio)})))
                            .filter(s=>s.p!==null).sort((a,b)=>a.p-b.p);
-  if(sel==='0'){ notaPortes='Entrega em mão — sem custo de transporte.'; }
+  if(!temFisico){ notaPortes='Sem peças impressas — nada a expedir. Escolhe <b>Valor manual</b> se mesmo assim houver envio.'; }
+  else if(sel==='0'){ notaPortes='Entrega em mão — sem custo de transporte.'; }
   else if(sel==='man'){ pPortes=num('j_portes_man')+custoEmb; notaPortes='Valor introduzido à mão.'; }
   else if(sel==='custom'){
     const t=portes.filter(p=>gEnvio<=p[0]).sort((a,b)=>a[0]-b[0])[0];
@@ -1831,19 +1852,22 @@ function calc(){
      Margem final <b>+${eur(pMarg)}</b>${tax.active?' · '+taxNome+' <b>'+eur(tax.valor)+'</b>':''} → lucro total <b>${eur(lucro)}</b> (<b>${marg.toFixed(1)} %</b>)`;
 
   /* render */
+  /* 4.º campo: esconder de vez — a rubrica não pertence a este orçamento */
+  const semImp = nMesas===0;
   const L=[
-    [tr('modLine',{n:MODELOS.length})+' — '+hm(minMod), pMod, minMod===0],
-    ['Material — '+gTot+' g'+(nSlic?'<span class="tag">SLICER</span>':''), pMat, false],
-    ['Impressão — '+hm(mTot)+(taxaMaq>0?' @ '+taxaMaq.toFixed(2).replace('.',',')+' €/h':''), pImp, false],
-    ['Base — '+pecas+' peça(s)'+(num('s_base_mesa')>0?' + '+nMesas+' mesa(s)':''), pBase, false],
-    ['Preparação — '+nMesas+' mesa(s) × '+prepMin+' min', pPrep, prepMin===0],
-    ['Trabalho manual — '+minM+' min', pMan, minM===0],
-    ['Polimento — '+minP+' min', pPol, minP===0],
-    ['Pintura — '+minT+' min', pPin, minT===0],
-    ['Margem de lucro '+num('s_margem')+'%', pMarg, false],
-    ['Portes de envio', pPortes, pPortes===0],
+    [tr('modLine',{n:MODELOS.length})+' — '+hm(minMod), pMod, minMod===0, !bMod],
+    ['Material — '+gTot+' g'+(nSlic?'<span class="tag">SLICER</span>':''), pMat, false, semImp],
+    ['Impressão — '+hm(mTot)+(taxaMaq>0?' @ '+taxaMaq.toFixed(2).replace('.',',')+' €/h':''), pImp, false, semImp],
+    ['Base — '+pecas+' peça(s)'+(num('s_base_mesa')>0?' + '+nMesas+' mesa(s)':''), pBase, false, semImp],
+    ['Preparação — '+nMesas+' mesa(s) × '+prepMin+' min', pPrep, prepMin===0, semImp],
+    ['Trabalho manual — '+minM+' min', pMan, minM===0, !bPos],
+    ['Polimento — '+minP+' min', pPol, minP===0, !bPos],
+    ['Pintura — '+minT+' min', pPin, minT===0, !bPos],
+    ['Margem de lucro '+num('s_margem')+'%', pMarg, false, semImp],
+    ['Portes de envio', pPortes, pPortes===0, !temFisico],
   ];
-  let html=L.map(([t,v,mu])=>`<div class="li${mu?' muted':''}"><span>${t}</span><b>${eur(v)}</b></div>`).join('');
+  let html=L.filter(r=>!r[3])
+            .map(([t,v,mu])=>`<div class="li${mu?' muted':''}"><span>${t}</span><b>${eur(v)}</b></div>`).join('');
   if(desc>0)  html+=`<div class="li neg"><span>Desconto ${num('j_desc')}%</span><b>−${eur(desc)}</b></div>`;
   if(promo>0) html+=`<div class="li neg"><span>Promoção ${num('j_promo')}%</span><b>−${eur(promo)}</b></div>`;
   if(Math.abs(arred)>.004) html+=`<div class="li neg"><span>Arredondamento</span><b>${eur(arred)}</b></div>`;
@@ -1884,7 +1908,7 @@ function calc(){
      ${tax.active?`<div><span>${tr('taxIncluded',{name:taxNome,rate:taxRate})}</span><b>${eur(tax.valor)}</b></div>`:''}
      <div class="sep"><span>Custo total</span><b>${eur(custo)}</b></div>
      ${tax.active?`<div><span>${tr('taxNetRevenue')}</span><b>${eur(receita)}</b></div>`:''}
-     <div><span>Ponto de equilíbrio</span><b>${eur(custo/pecas)}/peça</b></div>`;
+     ${pecas>0?`<div><span>Ponto de equilíbrio</span><b>${eur(custo/pecasDiv)}/peça</b></div>`:''}`;
 
   const d=el('s_data').value, dias=d?Math.floor((Date.now()-new Date(d))/864e5):999;
   /* média de preços: só avisa quando ela chega mesmo a pesar no custo */
@@ -1893,7 +1917,10 @@ function calc(){
        e sem custo do slicer — o material foi estimado pela <b>média dos preços</b> dos filamentos dessa mesa,
        não pelos gramas de cada um. Mete o custo do slicer nessa(s) mesa(s) para o valor ficar exato.</div>`
     : '';
-  el('stale').innerHTML = avisoMix + (lucro<0
+  const avisoBlocos = (!bMod&&!bImp&&!bPos)
+    ? `<div class="warn">⚠️ Estão desligados todos os blocos de trabalho — não há nada para orçamentar.</div>`
+    : '';
+  el('stale').innerHTML = avisoBlocos + avisoMix + (lucro<0
     ? `<div class="warn">⚠️ Este orçamento dá prejuízo de ${eur(-lucro)}.</div>`
     : marg<mMin
     ? `<div class="warn">⚠️ Margem de ${marg.toFixed(1)}% — abaixo do teu mínimo de ${mMin}%. Sobe a margem final ou reduz o desconto.</div>`
@@ -1920,7 +1947,7 @@ function calc(){
       : [],
     acabamento: pAcab,
     portes:pPortes, desc, promo, arred, total:totalCliente, tax, pecas, gTot, mTot, nMesas,
-    temAcab: pAcab>0,
+    temImp: nMesas>0, temAcab: pAcab>0,
     /* só as mesas com o visto entram — uma máquina que também fez mesas escondidas
        não pode levar o tempo dessas para o orçamento */
     maquinas: el('j_mostrar_maq').checked ? agrupaMaquinas(det.filter(m=>m.mostrar)) : [],
@@ -1998,10 +2025,10 @@ function marketPanel(x){
 
   /* taxa horária de máquina: o que sobra depois de material, acabamento, modelação e portes */
   const taxa = horas>0 ? (x.total - x.pMat - x.pAcab - (x.pMod||0) - x.pPortes)/horas : 0;
-  const porPeca = (x.total-(x.pMod||0))/pecas;   /* a modelação é do trabalho, não de cada peça */
+  const porPeca = pecas>0 ? (x.total-(x.pMod||0))/pecas : 0;   /* a modelação é do trabalho, não de cada peça */
 
   el('g1v').textContent = horas>0 ? taxa.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €/h' : '—';
-  el('g2v').textContent = eur(porPeca);
+  el('g2v').textContent = pecas>0 ? eur(porPeca) : '—';
 
   const topo=B.bandas[2].hi*1.25;
   gauge('g1', taxa, [
@@ -2314,15 +2341,19 @@ function buildPrint(x){
                  ? x.modDet.map(m=>`${esc(m.n||tr('modNamePh'))}${m.t>0?` · ${hm(m.t)}`:''}`).join(' · ')
                  : `${hm(x.modMin)} ${tr('modWork')}`,
                x.modelacao]);
-  rows.push([`Impressão 3D — ${x.pecas} peça(s)`,
-             `${x.material} · ${Math.round(x.gTot)} g de material · ${hm(x.mTot)} de impressão`
-             + (x.nMesas>1?` · ${x.nMesas} ciclos de máquina`:''),
-             x.impressao]);
-  if(x.temAcab) rows.push(['Acabamento e montagem',
-             (x.detAcab?x.detAcab.charAt(0).toUpperCase()+x.detAcab.slice(1)+' · ':'')
-             + `preparação e verificação de ${x.nMesas} impressão(ões)`
-             + (x.minutosAcab>0?` · ${x.minutosAcab} min de trabalho manual`:''),
-             x.acabamento]);
+  /* sem mesas não há impressão nenhuma para faturar — nem linha, nem ficha técnica */
+  if(x.temImp)
+    rows.push([`Impressão 3D — ${x.pecas} peça(s)`,
+               `${x.material} · ${Math.round(x.gTot)} g de material · ${hm(x.mTot)} de impressão`
+               + (x.nMesas>1?` · ${x.nMesas} ciclos de máquina`:''),
+               x.impressao]);
+  if(x.temAcab)
+    rows.push(['Acabamento e montagem',
+               [x.detAcab?x.detAcab.charAt(0).toUpperCase()+x.detAcab.slice(1):'',
+                x.temImp?`preparação e verificação de ${x.nMesas} impressão(ões)`:'',
+                x.minutosAcab>0?`${x.minutosAcab} min de trabalho manual`:''
+               ].filter(Boolean).join(' · '),
+               x.acabamento]);
   if(x.portes>0) rows.push(['Portes de envio', x.transp, x.portes]);
   const descTot=x.desc+x.promo+(x.arred<0?-x.arred:0);
   const html=rows.map(r=>`<tr><td><b>${r[0]}</b>${r[1]?`<div class="d">${r[1]}</div>`:''}</td><td>${eur(semImposto(r[2],tax))}</td></tr>`).join('')
@@ -2406,6 +2437,18 @@ function buildPrint(x){
     </svg>`;
 
   const projeto=(el('j_projeto').value||'').trim();
+  const spec = x.temImp
+    ? `<div class="spec">
+      <div><span>Material</span><b>${esc(x.material)}</b></div>
+      <div><span>Quantidade</span><b>${x.pecas} peça(s)</b></div>
+      <div><span>Peso total</span><b>${Math.round(x.gTot)} g</b></div>
+      <div><span>Tempo de impressão</span><b>${hm(x.mTot)}</b></div>
+    </div>` : '';
+  /* o prazo sai do tempo de máquina: sem impressão não há prazo de produção a citar */
+  const prazo = x.temImp
+    ? `Prazo de produção estimado: ${Math.max(1,Math.ceil(x.mTot/60/8))} dia(s) útil(eis) de impressão${x.portes>0?', mais o tempo de transporte':''}.<br>
+    Peso e tempo indicados são estimativas do fatiamento e podem variar ligeiramente na produção.`
+    : (x.portes>0?'Prazo de entrega conforme o serviço de transporte escolhido.':'');
   el('printable').innerHTML=`<div class="pq">
     ${empresa}
     <div class="hd">
@@ -2413,19 +2456,13 @@ function buildPrint(x){
       <div class="dt">${new Date().toLocaleDateString('pt-PT',{day:'2-digit',month:'long',year:'numeric'})}</div>
     </div>
     <div class="cli">Para: <b>${esc(el('j_cliente').value)||'—'}</b>${projeto?` · Projeto: <b>${esc(projeto)}</b>`:''}</div>
-    <div class="spec">
-      <div><span>Material</span><b>${esc(x.material)}</b></div>
-      <div><span>Quantidade</span><b>${x.pecas} peça(s)</b></div>
-      <div><span>Peso total</span><b>${Math.round(x.gTot)} g</b></div>
-      <div><span>Tempo de impressão</span><b>${hm(x.mTot)}</b></div>
-    </div>
+    ${spec}
     <table>${html}${taxHtml}<tr class="tot"><td>Total</td><td>${eur(x.total)}</td></tr></table>
     ${x.pecas>1?`<div class="pu">${eur(x.total/x.pecas)} por peça</div>`:''}
     ${maq}
     ${fil}
     ${msg}
-    <div class="foot">${nota}Prazo de produção estimado: ${Math.max(1,Math.ceil(x.mTot/60/8))} dia(s) útil(eis) de impressão${x.portes>0?', mais o tempo de transporte':''}.<br>
-    Peso e tempo indicados são estimativas do fatiamento e podem variar ligeiramente na produção.</div>
+    ${nota||prazo?`<div class="foot">${nota}${prazo}</div>`:''}
     <div class="sig">
       <div class="st">
         <div class="pw">Orçamento gerado com ${fmini} <b style="letter-spacing:0">Fatia</b> · powered by ${dlx}</div>
@@ -2495,6 +2532,7 @@ function importSettings(e){
 }
 function resetJob(){
   el('j_cliente').value=''; el('j_projeto').value=''; el('j_pecas').value=1;
+  BLOCOS={mod:true, imp:true, pos:true}; aplicaBlocos();
   mesas=[[0,'','',el('s_printer').value||'',true,[],1]]; drawMesas();
   MODELOS=[]; drawModelos();
   ['j_manual','j_pol','j_pint','j_desc','j_promo'].forEach(i=>el(i).value=0);
@@ -2503,7 +2541,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.8.0';
+const VERSAO='1.9.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -2526,6 +2564,10 @@ const I18N={
     bNovo:'Novo orçamento',
     bOrcamento:'👁 Orçamento do cliente',
     energyVat:'IVA energia',
+    blocoSolo:'só isto',
+    blocoSoloT:'Orçamentar só este bloco — desliga os outros. Carrega outra vez para voltar tudo.',
+    blocoOnT:'Este bloco entra no orçamento. Carrega para o deixar de fora.',
+    blocoOffT:'Este bloco está de fora. Carrega para o incluir.',
     taxTitle:'🏛️ Imposto no orçamento',
     taxOn:'Mostrar imposto no orçamento do cliente',
     taxPreset:'País / regra',
@@ -2624,6 +2666,10 @@ const I18N={
     bNovo:'New quote',
     bOrcamento:'👁 Customer quote',
     energyVat:'Energy VAT',
+    blocoSolo:'only this',
+    blocoSoloT:'Quote this block alone — switches the others off. Click again to bring them all back.',
+    blocoOnT:'This block is in the quote. Click to leave it out.',
+    blocoOffT:'This block is left out. Click to include it.',
     taxTitle:'🏛️ Invoice tax',
     taxOn:'Show tax on the customer quote',
     taxPreset:'Country / rule',
@@ -2724,6 +2770,7 @@ function aplicarIdioma(){
   if(typeof estadoMemoria==='function') estadoMemoria();
   if(typeof drawPresets==='function') drawPresets();
   if(typeof atualizaBotaoDobrar==='function') atualizaBotaoDobrar();
+  if(typeof aplicaBlocos==='function') aplicaBlocos();
   if(typeof drawTaxPresets==='function') drawTaxPresets();
   document.querySelectorAll('.card h2').forEach(h=>{ h.title=tr('foldTitle'); });
   /* traduzir um h3 reescreve-lhe o texto todo: o chevron tem de voltar */
@@ -2742,6 +2789,7 @@ function mudarIdioma(lang){
 function estado(){
   const o=collect();
   o.favs=favs; o.custom=custom; o.simples=SIMPLES; o.fechados=[...FECHADOS]; o.idioma=IDIOMA;
+  o.blocos={...BLOCOS};
   o.preset=el('p_sel').value;
   ['j_cliente','j_projeto','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
    'r_g','r_t','r_e'].forEach(i=>o[i]=el(i).value);
@@ -2764,6 +2812,8 @@ function repor(o){
   }
   if(o.fechados){ FECHADOS=new Set(o.fechados); aplicaFechados(); }
   if(o.simples!==undefined){ SIMPLES=o.simples; aplicaSimples(); }
+  if(o.blocos) BLOCOS={mod:true,imp:true,pos:true,...o.blocos};
+  aplicaBlocos();
   calc();
   aplicarIdioma();
   /* depois do aplicarIdioma, que redesenha a lista de presets */
@@ -2955,6 +3005,39 @@ function aplicaFechados(){
   document.querySelectorAll('.card h3[data-sub]').forEach(h=>h.classList.toggle('dobrado',FECHADOS.has(h.dataset.sub)));
   atualizaBotaoDobrar();
 }
+/* ---- blocos de trabalho ---- */
+function blocoH3s(){ return [...document.querySelectorAll('.card h3[data-bloco]')]; }
+function ligaBlocos(){
+  blocoH3s().forEach(h=>{
+    const k=h.dataset.bloco;
+    const bts=document.createElement('span'); bts.className='blocobts';
+    const t=document.createElement('button');  t.className='bl-t';
+    const so=document.createElement('button'); so.className='bl-s';
+    /* o h3 inteiro dobra ao clique: estes botões não podem deixar o clique subir */
+    t.addEventListener('click',e=>{ e.stopPropagation();
+      BLOCOS[k]=!BLOCOS[k]; aplicaBlocos(); calc(); guardaEstado(); });
+    so.addEventListener('click',e=>{ e.stopPropagation(); soBloco(k); });
+    bts.append(t,so);
+    h.insertBefore(bts, h.querySelector('.chev'));
+  });
+  aplicaBlocos();
+}
+/* "só isto": este fica ligado e os outros saem; carregar outra vez devolve tudo */
+function soBloco(k){
+  const ja = BLOCOS[k] && Object.keys(BLOCOS).every(o=>o===k||!BLOCOS[o]);
+  Object.keys(BLOCOS).forEach(o=>{ BLOCOS[o] = ja ? true : o===k; });
+  aplicaBlocos(); calc(); guardaEstado();
+}
+function aplicaBlocos(){
+  blocoH3s().forEach(h=>{
+    const on=BLOCOS[h.dataset.bloco]!==false;
+    h.classList.toggle('bloco-off',!on);
+    const t=h.querySelector('.bl-t'), so=h.querySelector('.bl-s');
+    if(t){ t.textContent=on?'☑':'☐'; t.title=tr(on?'blocoOnT':'blocoOffT'); t.setAttribute('aria-pressed',on); }
+    if(so){ so.textContent=tr('blocoSolo'); so.title=tr('blocoSoloT'); }
+  });
+}
+
 const subtitulos = () => [...document.querySelectorAll('.card h3[data-sub]')];
 /* um só botão: fecha tudo enquanto houver secções abertas, senão abre tudo */
 function dobrarTudo(){
@@ -3047,7 +3130,7 @@ el('srch').innerHTML=BENCH.pesquisas.map(([n,u])=>
 drawPrinters(); drawMesas(); drawPortes(); drawPortesSel(); toggleAuto();
 drawLogo(); drawQRs(); aplicaMarca();
 ['b_on','q_on','f_on'].forEach(i=>el(i).addEventListener('change',()=>{ aplicaMarca(); calc(); }));
-ligaDobras(); ligaSubdobras(); drawPresets();
+ligaDobras(); ligaSubdobras(); ligaBlocos(); drawPresets();
 el('ver').textContent='v'+VERSAO;
 el('lic_v').textContent=LICENCA_V;
 el('s_printer').addEventListener('change',aplicaImpressora);
