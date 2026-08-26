@@ -452,13 +452,15 @@ footer a{color:var(--blue);text-decoration:none}
   <div class="card" id="cardTrabalho">
     <h2><i class="n">1</i>O Trabalho</h2>
 
-    <div class="row r2">
-      <div><label>Cliente / Projeto</label><input id="j_cliente" placeholder="Ex.: Miniaturas — João"></div>
+    <div class="row r3">
+      <div><label>Cliente</label><input id="j_cliente" placeholder="Ex.: João Silva"></div>
+      <div><label>Projeto</label><input id="j_projeto" placeholder="Ex.: Miniaturas"></div>
       <div><label>N.º de peças — total</label><input type="number" id="j_pecas" value="2" min="0" step="1" readonly>
         <div class="hint">Somado das mesas. As peças contam-se uma vez: 2 peças em 2 mesas são 2 peças, não 4.</div></div>
     </div>
+    <div class="derived" id="d_trabalho"></div>
 
-    <h3 style="margin-top:14px" data-i18n="modTitle">Modelação 3D — pré-processamento</h3>
+    <h3 style="margin-top:14px" data-i18n="modTitle">🧊 Modelação 3D — pré-processamento</h3>
     <table id="tbl_mod"><thead><tr>
       <th style="width:56%" data-i18n="modName">Modelo</th>
       <th style="width:30%" data-i18n="modHours">Tempo</th>
@@ -478,7 +480,7 @@ footer a{color:var(--blue);text-decoration:none}
       e é cobrado à tarifa de <b>Modelação 3D</b> das Definições. Como é trabalho de uma vez, não entra no desconto por quantidade.</div>
     <div class="derived" id="d_mod"></div>
 
-    <h3 style="margin-top:14px">Mesas (dados do slicer)</h3>
+    <h3 style="margin-top:14px">🔪 Mesas (dados do slicer)</h3>
     <table id="tbl_mesas"><thead><tr>
       <th style="width:22%">Peso (g)</th>
       <th style="width:24%">Tempo</th>
@@ -527,14 +529,14 @@ footer a{color:var(--blue);text-decoration:none}
         onclick="aprenderDesvio()">Aplicar este desvio a futuras estimativas</button>
     </details>
 
-    <h3>Pós-processamento</h3>
+    <h3>🎨 Pós-processamento</h3>
     <div class="row r3">
       <div><label>Trab. manual</label><div class="suffix"><input type="number" id="j_manual" value="2" min="0" step="1"><i>min</i></div></div>
       <div><label>Polimento</label><div class="suffix"><input type="number" id="j_pol" value="0" min="0" step="1"><i>min</i></div></div>
       <div><label>Pintura</label><div class="suffix"><input type="number" id="j_pint" value="0" min="0" step="1"><i>min</i></div></div>
     </div>
 
-    <h3>Descontos e envio</h3>
+    <h3>🚚 Descontos e envio</h3>
     <div class="row r2">
       <div>
         <label>Desconto por quantidade</label>
@@ -582,7 +584,7 @@ footer a{color:var(--blue);text-decoration:none}
       <span class="st">Modo manual — liga o automático se tiveres tarifa indexada.</span>
     </div>
 
-    <h3 class="fechada">Filamento</h3>
+    <h3 class="fechada">🧵 Filamento</h3>
     <div class="row r3 avancado">
       <div><label>Preço/kg</label><div class="suffix"><input type="number" id="s_fil_kg" step="0.01"><i>€</i></div></div>
       <div><label>Portes forn.</label><div class="suffix"><input type="number" id="s_fil_portes" step="0.01"><i>€</i></div></div>
@@ -592,7 +594,7 @@ footer a{color:var(--blue);text-decoration:none}
       mexer neles atualiza-o. O <b>+</b> guarda os valores atuais como filamento novo. O desperdício é da casa, não da bobine,
       por isso aplica-se a todos.</div>
 
-    <h3 class="fechada">Impressora + PC · por hora de impressão</h3>
+    <h3 class="fechada">🖨️ Impressora + PC · por hora de impressão</h3>
     <div class="row"><div><label>Modelo</label>
       <div style="display:flex;gap:6px"><select id="s_printer" style="flex:1"></select>
         <button id="b_fav" title="Marcar como favorita" onclick="toggleFav()" style="padding:8px 11px">★</button>
@@ -606,7 +608,7 @@ footer a{color:var(--blue);text-decoration:none}
       <div><label>PC</label><div class="suffix"><input type="number" id="s_pc_kw" step="0.01"><i>kW</i></div></div>
     </div>
 
-    <h3 class="avancado fechada">Ferramentas e tintas · por hora de pós-processamento</h3>
+    <h3 class="avancado fechada">🛠️ Ferramentas e tintas · por hora de pós-processamento</h3>
     <div class="row r4 avancado">
       <div><label>Ferramentas</label><div class="suffix"><input type="number" id="s_fer_preco" step="1"><i>€</i></div></div>
       <div><label>Vida útil</label><div class="suffix"><input type="number" id="s_fer_vida" step="100"><i>h</i></div></div>
@@ -618,7 +620,7 @@ footer a{color:var(--blue);text-decoration:none}
       <div><label>Consumo de tinta</label><div class="suffix"><input type="number" id="s_tinta_ml" step="0.5"><i>ml/h</i></div></div>
     </div>
 
-    <h3 class="fechada">O que cobras</h3>
+    <h3 class="fechada">🧾 O que cobras</h3>
     <div class="row r4">
       <div><label>Base/peça</label><div class="suffix"><input type="number" id="s_base" step="0.5"><i>€</i></div></div>
       <div><label style="color:var(--accent2)">Base por mesa</label>
@@ -631,7 +633,7 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="hint" style="margin-top:-4px"><b>Preparação por mesa</b> é o trabalho fixo de cada impressão — fatiar, preparar e limpar a base, arrancar as peças. Não depende de quantas peças cabem lá dentro, e é por isso que encher a mesa compensa. Cobrada à tua tarifa de mão de obra.</div>
     <div class="hint" style="margin-top:-4px">A <b>0 €/h</b> só repassa o custo de eletricidade e amortização. Qualquer valor acima disso passa a cobrar o tempo da impressora, que é onde os trabalhos longos ganham ou perdem dinheiro.</div>
 
-    <h3 class="fechada" data-i18n="taxTitle">Imposto no orçamento</h3>
+    <h3 class="fechada" data-i18n="taxTitle">🏛️ Imposto no orçamento</h3>
     <label class="toggle"><input type="checkbox" id="s_tax_on" checked> <span data-i18n="taxOn">Mostrar imposto no orçamento do cliente</span></label>
     <div class="row r3">
       <div><label data-i18n="taxPreset">País / regra</label><select id="s_tax_preset"></select></div>
@@ -684,7 +686,7 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="hint">Abaixo disto recebes aviso.</div></div>
     </div>
 
-    <h3 class="avancado fechada">Embalagem</h3>
+    <h3 class="avancado fechada">📦 Embalagem</h3>
     <div class="row r2 avancado">
       <div><label>Peso da embalagem</label><div class="suffix"><input type="number" id="s_emb_peso" step="10" min="0"><i>g</i></div>
         <div class="hint">Caixa, plástico-bolha, etiqueta. Soma-se ao peso das peças para o escalão dos portes.</div></div>
@@ -719,7 +721,7 @@ footer a{color:var(--blue);text-decoration:none}
     </div>
 
     <div class="card">
-      <h2>Para onde vai o preço</h2>
+      <h2>📊 Para onde vai o preço</h2>
       <div class="bar" id="bar"></div>
       <div class="legend" id="leg"></div>
       <div class="derived" id="d_custo" style="margin-top:14px"></div>
@@ -762,7 +764,7 @@ footer a{color:var(--blue);text-decoration:none}
     <th>Mesa</th><th>Impressora</th><th>Peso</th><th>Tempo</th><th>Material</th><th>Preço</th><th>€/h efetivo</th>
   </tr></thead><tbody id="rateio"></tbody></table>
 
-  <h3 style="margin-top:18px">Em que patamar te queres posicionar?</h3>
+  <h3 style="margin-top:18px">🎯 Em que patamar te queres posicionar?</h3>
   <div class="bandsel" id="bands"></div>
   <div class="target">
     <div class="tv" id="t_val">—</div>
@@ -1788,6 +1790,10 @@ function calc(){
     if(p===null){ notaPortes=`<b style="color:var(--bad)">${s?s.n:'Serviço'}</b> não aceita ${(gEnvio/1000).toFixed(2)} kg. Escolhe outro.`; }
     else { pPortes=p+custoEmb; notaPortes=s.d; }
   }
+  const nomeT=nomeTrabalho();
+  el('d_trabalho').innerHTML = nomeT
+    ? `<div><span>Etiqueta do trabalho</span><b>${htmlEsc(nomeT)}</b></div>`
+    : '';
   el('d_portes').innerHTML=
     `<div><span>Peso a expedir (peças + embalagem)</span><b>${Math.round(gEnvio).toLocaleString('pt-PT')} g</b></div>`
     + (custoEmb>0&&pPortes>0?`<div><span>Transporte + embalagem</span><b>${eur(pPortes-custoEmb)} + ${eur(custoEmb)}</b></div>`:'')
@@ -2134,10 +2140,17 @@ function aplicarAlvo(){
   calc();
 }
 
+/* cliente e projeto são campos separados; a etiqueta do trabalho é a junção
+   formatada — "Projeto — Cliente", ou só o que estiver preenchido */
+function nomeTrabalho(){
+  const c=(el('j_cliente').value||'').trim(), p=(el('j_projeto').value||'').trim();
+  return c&&p ? p+' — '+c : (c||p||'');
+}
+
 /* ============ histórico ============ */
 let hist=[];
 function registarHist(){
-  hist.unshift({d:new Date().toISOString().slice(0,10), c:el('j_cliente').value||'—',
+  hist.unshift({d:new Date().toISOString().slice(0,10), c:nomeTrabalho()||'—',
     t:LAST.total, h:LAST.taxa, e:parseInt(el('h_estado').value)});
   calc();
 }
@@ -2392,13 +2405,14 @@ function buildPrint(x){
       <polygon fill="#ec826c" points="521.28 788.93 521.28 596.66 426.43 489.55 426.43 788.93 426.43 883.78 521.28 883.78 699.36 883.78 699.36 788.93 521.28 788.93"/>
     </svg>`;
 
+  const projeto=(el('j_projeto').value||'').trim();
   el('printable').innerHTML=`<div class="pq">
     ${empresa}
     <div class="hd">
       <div class="ttl"><div><h1>Orçamento</h1><div class="s">Impressão 3D · fabrico por encomenda</div></div></div>
       <div class="dt">${new Date().toLocaleDateString('pt-PT',{day:'2-digit',month:'long',year:'numeric'})}</div>
     </div>
-    <div class="cli">Para: <b>${esc(el('j_cliente').value)||'—'}</b></div>
+    <div class="cli">Para: <b>${esc(el('j_cliente').value)||'—'}</b>${projeto?` · Projeto: <b>${esc(projeto)}</b>`:''}</div>
     <div class="spec">
       <div><span>Material</span><b>${esc(x.material)}</b></div>
       <div><span>Quantidade</span><b>${x.pecas} peça(s)</b></div>
@@ -2480,7 +2494,7 @@ function importSettings(e){
   r.readAsText(f); e.target.value='';
 }
 function resetJob(){
-  el('j_cliente').value=''; el('j_pecas').value=1;
+  el('j_cliente').value=''; el('j_projeto').value=''; el('j_pecas').value=1;
   mesas=[[0,'','',el('s_printer').value||'',true,[],1]]; drawMesas();
   MODELOS=[]; drawModelos();
   ['j_manual','j_pol','j_pint','j_desc','j_promo'].forEach(i=>el(i).value=0);
@@ -2489,7 +2503,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.7.0';
+const VERSAO='1.8.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -2512,7 +2526,7 @@ const I18N={
     bNovo:'Novo orçamento',
     bOrcamento:'👁 Orçamento do cliente',
     energyVat:'IVA energia',
-    taxTitle:'Imposto no orçamento',
+    taxTitle:'🏛️ Imposto no orçamento',
     taxOn:'Mostrar imposto no orçamento do cliente',
     taxPreset:'País / regra',
     taxDocName:'Nome no documento',
@@ -2532,7 +2546,7 @@ const I18N={
     taxRoundGross:'O total que o cliente paga',
     taxRoundHint:'Só faz diferença com o arredondamento ligado no painel 1. Com o imposto incluído a pergunta não se põe — o preço e o total são o mesmo número.',
     taxModeHint:'<b>Incluído</b>: o total é o que o cliente paga e o imposto sai de lá de dentro — vem antes do teu lucro. <b>Acrescentado</b>: o total é o teu preço limpo e o imposto vai por cima — o teu lucro é o mesmo e o cliente é que paga o imposto.',
-    modTitle:'Modelação 3D — pré-processamento',
+    modTitle:'🧊 Modelação 3D — pré-processamento',
     modName:'Modelo',
     modNamePh:'Ex.: Suporte do sensor',
     modHours:'Tempo',
@@ -2610,7 +2624,7 @@ const I18N={
     bNovo:'New quote',
     bOrcamento:'👁 Customer quote',
     energyVat:'Energy VAT',
-    taxTitle:'Invoice tax',
+    taxTitle:'🏛️ Invoice tax',
     taxOn:'Show tax on the customer quote',
     taxPreset:'Country / rule',
     taxDocName:'Document name',
@@ -2630,7 +2644,7 @@ const I18N={
     taxRoundGross:'The total the client pays',
     taxRoundHint:'Only matters with rounding switched on in panel 1. With tax included the question does not arise — your price and the total are the same number.',
     taxModeHint:'<b>Included</b>: the total is what the client pays and the tax comes out of it — it lands before your profit. <b>Added</b>: the total is your clean price and the tax goes on top — your profit is the same and the client pays the tax.',
-    modTitle:'3D modelling — pre-processing',
+    modTitle:'🧊 3D modelling — pre-processing',
     modName:'Model',
     modNamePh:'e.g. Sensor bracket',
     modHours:'Time',
@@ -2729,7 +2743,7 @@ function estado(){
   const o=collect();
   o.favs=favs; o.custom=custom; o.simples=SIMPLES; o.fechados=[...FECHADOS]; o.idioma=IDIOMA;
   o.preset=el('p_sel').value;
-  ['j_cliente','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
+  ['j_cliente','j_projeto','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
    'r_g','r_t','r_e'].forEach(i=>o[i]=el(i).value);
   ['j_ajusta','j_round','r_usar','j_mostrar_maq','j_mostrar_mod'].forEach(i=>o[i]=el(i).checked);
   return o;
@@ -2740,9 +2754,14 @@ function repor(o){
   if(o.favs) favs=o.favs;
   if(o.custom) custom=o.custom;
   drawPrinters(); if(o.printer!==undefined) el('s_printer').value=o.printer;
-  ['j_cliente','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
+  ['j_cliente','j_projeto','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
    'r_g','r_t','r_e'].forEach(i=>{ if(o[i]!==undefined) el(i).value=o[i]; });
   ['j_ajusta','j_round','r_usar','j_mostrar_maq','j_mostrar_mod'].forEach(i=>{ if(o[i]!==undefined) el(i).checked=o[i]; });
+  /* estados guardados antes da 1.8.0 traziam "Projeto — Cliente" num campo só */
+  if(o.j_projeto===undefined && (o.j_cliente||'').includes(' — ')){
+    const [proj,...resto]=o.j_cliente.split(' — ');
+    el('j_projeto').value=proj.trim(); el('j_cliente').value=resto.join(' — ').trim();
+  }
   if(o.fechados){ FECHADOS=new Set(o.fechados); aplicaFechados(); }
   if(o.simples!==undefined){ SIMPLES=o.simples; aplicaSimples(); }
   calc();
