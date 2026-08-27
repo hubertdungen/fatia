@@ -196,6 +196,13 @@ input.lido{opacity:.7;cursor:not-allowed}
 .fplive.velho{color:var(--accent2);border-color:rgba(255,196,107,.35)}
 .fplive.off{color:var(--bad);border-color:rgba(255,107,107,.35)}
 @keyframes fppulse{0%,100%{opacity:1}50%{opacity:.25}}
+/* os dois realces dos por abrir: é aparência, não filtro, por isso ficam ao pé
+   do estado da ligação e não na fila de chips */
+.fptitrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.frealce{font-size:11.5px;font-weight:600;color:var(--dim);background:var(--panel2);
+  border:1px solid var(--line);border-radius:20px;padding:4px 11px;cursor:pointer}
+.frealce:hover{border-color:var(--accent2);color:var(--accent2)}
+.frealce.on{color:var(--accent);border-color:rgba(255,159,46,.45)}
 
 .fpfiltros{padding:12px 18px;border-bottom:1px solid var(--line);display:flex;
   flex-direction:column;gap:9px}
@@ -222,6 +229,21 @@ input.lido{opacity:.7;cursor:not-allowed}
 .fcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .fcard.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .fcard.vazio{opacity:.55}
+/* Um filamento com TODAS as bobines por abrir marca-se de duas formas, ligadas
+   em separado: um véu da cor da casa, que se nota sempre, e um reflexo que o
+   atravessa devagar. Basta abrir uma bobine para deixar de estar marcado. */
+.fcard.porabrir{overflow:hidden}
+.fcard.veu:not(.sel):not(:hover){border-color:rgba(255,159,46,.34)}
+.fcard.veu::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(255,159,46,.12),rgba(255,159,46,.025) 62%)}
+.fcard.reflexo::after{content:"";position:absolute;top:-60%;bottom:-60%;width:34%;left:-55%;
+  pointer-events:none;transform:skewX(-18deg);
+  background:linear-gradient(90deg,transparent,rgba(255,196,107,.13),transparent);
+  animation:reflexoAbrir 9s ease-in-out infinite}
+/* 0 -> 30% é a passagem (2,7 s); o resto do ciclo fica parado fora do cartão,
+   senão uma grelha com meia dúzia de cartões marcados fica a piscar */
+@keyframes reflexoAbrir{0%{left:-55%}30%{left:135%}100%{left:135%}}
+@media (prefers-reduced-motion: reduce){ .fcard.reflexo::after{animation:none;left:135%} }
 .fcard .fbob{flex:none;margin-top:1px}
 .fcorpo{min-width:0;flex:1}
 .ftit{line-height:1.25;margin-bottom:5px}
@@ -508,7 +530,10 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="fphd">
       <div class="fptit">
         <b>🧵 <span data-i18n="fpTitulo">Filamentos</span></b>
-        <div id="bob_live" class="fplive"></div>
+        <div class="fptitrow">
+          <div id="bob_live" class="fplive"></div>
+          <div id="fp_realces" class="fptitrow"></div>
+        </div>
       </div>
       <button class="ghost fpx" onclick="fechaPicker()" title="Fechar">×</button>
     </div>
@@ -1643,7 +1668,7 @@ function nomesEmUso(){
 }
 
 /* ---- o seletor ---- */
-let FP={q:'',mat:'',stock:false};
+let FP={q:'',mat:'',stock:false,veu:false,reflexo:true};
 const pickerAberto = () => el('filpick') && el('filpick').style.display==='flex';
 function abrePicker(){
   const p=el('filpick'); if(!p) return;
@@ -1656,6 +1681,15 @@ function fechaPicker(){ const p=el('filpick'); if(p) p.style.display='none'; }
 function filtraPicker(){ FP.q=el('fp_q').value.trim().toLowerCase(); drawPicker(); }
 function chipPicker(m){ FP.mat=FP.mat===m?'':m; drawPicker(); }
 function togglaStock(){ FP.stock=!FP.stock; drawPicker(); }
+/* Realçar quem tem tudo por abrir é aparência: fica no browser, como o idioma,
+   e não no orçamento nem nos presets. */
+function toggleRealce(k){ FP[k]=!FP[k]; store.set('fp_'+k,FP[k]); desenhaRealces(); drawPicker(); }
+function desenhaRealces(){
+  const c=el('fp_realces'); if(!c) return;
+  c.innerHTML=[['veu','fpVeu','fpVeuT'],['reflexo','fpReflexo','fpReflexoT']].map(([k,t,tt])=>
+    `<button class="frealce${FP[k]?' on':''}" data-r="${k}" title="${htmlEsc(tr(tt))}">✦ ${htmlEsc(tr(t))}</button>`
+  ).join('');
+}
 
 const semAcentos = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 function casaFiltro(f){
@@ -1675,6 +1709,10 @@ function cartaoFil(f,i,escolhido){
     : f.origem_preco==='compras' ? tr('fpTagPago')
     : f.origem_preco==='lojas'   ? tr('fpTagLoja') : tr('fpTagSemPreco');
   const cheio = f.capacidade_g>0 ? Math.max(0,Math.min(1,f.restante_g/f.capacidade_g)) : 0;
+  /* basta uma bobine aberta para deixar de estar por abrir -- é isso que a
+     marca quer dizer, e não "tem algumas seladas" */
+  const porAbrir = f.bobina && f.bobines>0 && f.selados===f.bobines && (FP.veu||FP.reflexo);
+  const realce = porAbrir ? ' porabrir'+(FP.veu?' veu':'')+(FP.reflexo?' reflexo':'') : '';
   const stock = !f.bobina ? ''
     : f.bobines
       ? `<div class="fbar"><i style="width:${(cheio*100).toFixed(0)}%;${corBarra(cheio)}"></i></div>
@@ -1692,7 +1730,7 @@ function cartaoFil(f,i,escolhido){
     ? `<b>${htmlEsc([f.material,f.cor].filter(Boolean).join(' '))}</b>`
       + (f.marca?`<span class="fmarca">${htmlEsc(f.marca)}</span>`:'')
     : `<b>${htmlEsc(f.n)}</b>`;
-  return `<div class="fcard${escolhido?' sel':''}${f.bobina&&!f.bobines?' vazio':''}"
+  return `<div class="fcard${escolhido?' sel':''}${f.bobina&&!f.bobines?' vazio':''}${realce}"
       data-i="${i}" tabindex="0" role="button" title="${htmlEsc(f.n)}">
     <div class="fbob">${desenhaFil(f,42)}</div>
     <div class="fcorpo">
@@ -1730,6 +1768,11 @@ function drawPicker(){
 /* uma escuta só, montada no arranque */
 function ligaPicker(){
   const p=el('filpick'); if(!p) return;
+  FP.veu=store.get('fp_veu',false); FP.reflexo=store.get('fp_reflexo',true);
+  desenhaRealces();
+  el('fp_realces').addEventListener('click',e=>{
+    const b=e.target.closest('.frealce'); if(b) toggleRealce(b.dataset.r);
+  });
   p.addEventListener('click',e=>{ if(e.target===p) fechaPicker(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&pickerAberto()) fechaPicker(); });
   el('fp_chips').addEventListener('click',e=>{
@@ -3066,7 +3109,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.10.0';
+const VERSAO='1.11.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -3090,6 +3133,10 @@ const I18N={
     fpSemStock:'sem stock em casa',
     fpNaLoja:'{loja}: {preco}/kg',
     fpSoStock:'só com stock',
+    fpVeu:'véu',
+    fpVeuT:'Tingir os filamentos com todas as bobines por abrir',
+    fpReflexo:'reflexo',
+    fpReflexoT:'Passar um reflexo pelos filamentos com todas as bobines por abrir',
     fpTagMeu:'meu',
     fpTagPago:'pago',
     fpTagLoja:'loja',
@@ -3239,6 +3286,10 @@ const I18N={
     fpSemStock:'none in stock',
     fpNaLoja:'{loja}: {preco}/kg',
     fpSoStock:'in stock only',
+    fpVeu:'tint',
+    fpVeuT:'Tint filaments whose spools are all still sealed',
+    fpReflexo:'sheen',
+    fpReflexoT:'Sweep a sheen across filaments whose spools are all still sealed',
     fpTagMeu:'mine',
     fpTagPago:'paid',
     fpTagLoja:'shop',
@@ -3387,6 +3438,7 @@ function aplicarIdioma(){
   document.querySelectorAll('[data-i18n-placeholder]').forEach(n=>{ n.placeholder=tr(n.dataset.i18nPlaceholder); });
   if(typeof drawFils==='function') drawFils(false);
   if(typeof estadoBobina==='function') estadoBobina();
+  if(typeof desenhaRealces==='function') desenhaRealces();
   if(typeof pickerAberto==='function' && pickerAberto()) drawPicker();
   if(el('lic_v')) el('lic_v').textContent=LICENCA_V;
   if(typeof aplicaSimples==='function') aplicaSimples();
