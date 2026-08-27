@@ -156,6 +156,8 @@ td input.slic{border-color:rgba(62,207,142,.35)}
   background:#222a35;border-left:1px solid rgba(255,196,107,.32);border-top:1px solid rgba(255,196,107,.32);
   transform:rotate(45deg)}
 .hintpop:hover .tipbox,.hintpop:focus-within .tipbox{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.hintpop.pcima .tipbox{top:auto;bottom:calc(100% + 9px)}
+.hintpop.pcima .tipbox::before{top:auto;bottom:-6px}
 .hintpop .tipbox b{color:var(--accent2)}
 @media (prefers-reduced-motion: reduce){.hintpop .tipbox{transition:none}}
 @media(max-width:560px){.hintpop .tipbox{left:-6px;width:calc(100vw - 44px)}}
@@ -773,7 +775,7 @@ footer a{color:var(--blue);text-decoration:none}
          filamento nenhum, e um botão de baixa sem nada para dar baixa é ruído -->
     <div id="baixa_box" style="display:none">
       <button class="ghost" id="b_baixa" style="margin-top:6px;width:100%" onclick="abreBaixa()"></button>
-      <div class="hint" id="baixa_nota"></div>
+      <div class="hint viva" id="baixa_nota"></div>
     </div>
     <label class="toggle" style="margin-top:4px">
       <input type="checkbox" id="j_mostrar_maq">
@@ -1549,7 +1551,10 @@ function aplicaDataPrecos(guardar=true){
     b.title=tr(DATA_MANUAL?'dtVoltarT':'dtManualT');
   }
   const h=el('data_hint');
-  if(h) h.innerHTML=!tem?'':tr(DATA_MANUAL?'dtManual':'dtAuto',{d:BOB.precos_em});
+  if(h){
+    h.innerHTML=!tem?'':tr(DATA_MANUAL?'dtManual':'dtAuto',{d:BOB.precos_em});
+    ligaInfoPopups();
+  }
 }
 function destravaData(){ DATA_MANUAL=!DATA_MANUAL; aplicaDataPrecos(); guardaEstado(); }
 const BOB_INTERVALO=45000;
@@ -3160,6 +3165,9 @@ function calc(){
              .filter(Boolean).join(', '),
     transp: (()=>{ const s=servicoPorId(el('j_portes').value); return s?s.n+' · '+s.d:''; })()
   });
+  /* no FIM: o marketPanel acabou de reescrever o rodapé das fontes, e antes
+     disto ficava lá o texto cru até ao calc() seguinte */
+  ligaInfoPopups();
 }
 
 /* ============ BENCHMARK DE MERCADO ============
@@ -3305,9 +3313,12 @@ function marketPanel(x){
     `<div><span>${x.nMesas} mesa(s) · ${pecasPorMesa.toFixed(1)} peça(s) por mesa</span><b>${eur(porMesa)} por mesa</b></div>
      <div><span>Preço por mesa conta só impressão</span><b>sem modelação nem portes</b></div>
      <div><span>Preparação fixa diluída em cada peça</span><b>${eur(prepPorPeca)}</b></div>
-     ${x.pPrepMesa<=0?'<div class="sep"><span style="color:var(--accent2)">Não estás a cobrar preparação por mesa. Define os minutos em Definições → O que cobras: é o trabalho fixo de cada impressão, independente de quantas peças lá caibam.</span><b></b></div>':''}
+     ${x.pPrepMesa<=0?'<div class="sep"><span style="color:var(--accent2)">Não cobras preparação por mesa'
+        +'<span class="hint">Define os minutos em <b>Definições → O que cobras</b>: é o trabalho fixo de cada'
+        +' impressão, independente de quantas peças lá caibam.</span></span><b></b></div>':''}
      <div class="sep"><span>${pecasPorMesa<2
-        ? 'Mesas pouco cheias — a preparação fixa está a ser paga por poucas peças. Juntar encomendas na mesma mesa baixa o custo por peça sem baixar o teu ganho.'
+        ? 'Mesas pouco cheias<span class="hint">A preparação fixa está a ser paga por poucas peças.'
+          +' Juntar encomendas na mesma mesa baixa o custo por peça sem baixar o teu ganho.</span>'
         : `Se duplicasses as peças por mesa, a preparação por peça caía para ${eur(prepPorPeca/2)}.`}</span><b></b></div>`;
 
   /* escolha de patamar + alvo */
@@ -3779,7 +3790,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.15.0';
+const VERSAO='1.16.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -4241,9 +4252,23 @@ function aplicarIdioma(){
   });
 }
 let INFO_TIP_SEQ=0;
+/* As dicas longas passam a viver dentro de um "?": o texto continua todo lá,
+   com a formatação que tinha, mas deixa de encher o formulário.
+
+   Duas coisas que a primeira versão não fazia e davam textos à solta:
+
+   - **ter um `id` não é razão para ficar de fora.** Só ficam as dicas VIVAS --
+     as que dizem alguma coisa que tem de se ver sem procurar (o aviso do
+     filamento) ou que têm um botão lá dentro (a baixa dada, com o "anular").
+     Marcam-se com `.viva`, e não pelo id.
+   - **corre outra vez a cada desenho.** Há dicas escritas por JS -- o rodapé
+     das fontes, a data dos preços -- cujo conteúdo é reescrito por cima; aí o
+     popup desaparecia e ficava o texto cru. Por isso o teste é "já tem um
+     tipbox lá dentro?" e não "já passei por aqui?". */
 function ligaInfoPopups(){
-  document.querySelectorAll('.hint:not(.hintpop)').forEach(h=>{
-    if(h.id || h.classList.contains('filaviso')) return;
+  document.querySelectorAll('.hint,.src').forEach(h=>{
+    if(h.classList.contains('filaviso')||h.classList.contains('viva')) return;
+    if(h.querySelector('.tipbox')) return;
     const conteudo=h.innerHTML.trim();
     if(!conteudo) return;
     const id='tip_'+(++INFO_TIP_SEQ);
@@ -4252,6 +4277,15 @@ function ligaInfoPopups(){
       <span class="tipbox" id="${id}" role="tooltip">${conteudo}</span>`;
   });
 }
+/* Um "?" lá em baixo na página abria o balão para fora do ecrã. Mede-se ao
+   passar por cima -- é a única altura em que se sabe onde ele está. */
+function ladoDoPopup(e){
+  const p=e.target.closest&&e.target.closest('.hintpop');
+  if(!p) return;
+  p.classList.toggle('pcima', p.getBoundingClientRect().bottom>window.innerHeight-230);
+}
+document.addEventListener('mouseover',ladoDoPopup,{passive:true});
+document.addEventListener('focusin',ladoDoPopup,{passive:true});
 function mudarIdioma(lang){
   IDIOMA=I18N[lang]?lang:'pt';
   store.set('idioma',IDIOMA);
