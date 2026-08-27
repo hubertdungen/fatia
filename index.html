@@ -1864,10 +1864,14 @@ function cell(val,attrs,cls){
   Object.assign(inp,attrs); if(cls) inp.className=cls; inp.value=val;
   td.appendChild(inp); return [td,inp];
 }
+/* as linhas chamam-se `linha` e nunca `tr`: um `const tr` local tapa a função
+   tr() de tradução em todo o âmbito, e a chamada mais abaixo rebentava assim
+   que houvesse um filamento escrito à mão -- com o arranque a morrer aí, ficava
+   tudo o que vem depois por ligar, incluindo as escutas do seletor. */
 function drawMesas(){
   const tb=el('tbl_mesas').querySelector('tbody'); tb.innerHTML='';
   mesas.forEach((m,i)=>{
-    const tr=document.createElement('tr');
+    const linha=document.createElement('tr');
     const specs=[
       [m[0],{type:'number',min:'0',step:'1',placeholder:'0'},null,v=>mesas[i][0]=parseFloat(v)||0],
       [m[1],{type:'text',placeholder:'0h00'},null,v=>mesas[i][1]=v],
@@ -1878,12 +1882,12 @@ function drawMesas(){
       const [td,inp]=cell(v,a,c);
       /* mexer nas peças mexe no total, e o escalão de desconto segue-o como sempre seguiu */
       inp.addEventListener('input',()=>{ set(inp.value); col===3?mudaPecas():calc(); guardaEstado(); });
-      tr.appendChild(td);
+      linha.appendChild(td);
     });
     const td=document.createElement('td'), b=document.createElement('button');
     b.className='del'; b.textContent='×';
     b.addEventListener('click',()=>{ mesas.splice(i,1); drawMesas(); calc(); });
-    td.appendChild(b); tr.appendChild(td); tb.appendChild(tr);
+    td.appendChild(b); linha.appendChild(td); tb.appendChild(linha);
 
     /* segunda linha: que impressora fez esta mesa e se aparece no orçamento */
     const tr2=document.createElement('tr'); tr2.className='msub';
@@ -2107,16 +2111,16 @@ let portes = DEF.portes.map(p=>p.slice());
 function drawPortes(){
   const tb=el('tbl_portes').querySelector('tbody'); tb.innerHTML='';
   portes.forEach((p,i)=>{
-    const tr=document.createElement('tr');
+    const linha=document.createElement('tr');
     [[0,'50'],[1,'0.1']].forEach(([k,step])=>{
       const [td,inp]=cell(p[k],{type:'number',step});
       inp.addEventListener('input',()=>{ portes[i][k]=parseFloat(inp.value)||0; drawPortesSel(); calc(); guardaEstado(); });
-      tr.appendChild(td);
+      linha.appendChild(td);
     });
     const td=document.createElement('td'), b=document.createElement('button');
     b.className='del'; b.textContent='×';
     b.addEventListener('click',()=>{ portes.splice(i,1); drawPortes(); drawPortesSel(); calc(); });
-    td.appendChild(b); tr.appendChild(td); tb.appendChild(tr);
+    td.appendChild(b); linha.appendChild(td); tb.appendChild(linha);
   });
 }
 function addPorte(){ portes.push([0,0]); drawPortes(); drawPortesSel(); }
@@ -2746,14 +2750,14 @@ function limparHist(){ if(confirm('Apagar todo o histórico?')){ hist=[]; calc()
 function renderHist(taxaAtual){
   const tb=el('h_body'); tb.innerHTML='';
   hist.slice(0,12).forEach((r,i)=>{
-    const tr=document.createElement('tr');
+    const linha=document.createElement('tr');
     const lbl={1:['Aceite','ok'],0:['Recusado','no'],2:['Pendente','']}[r.e];
-    tr.innerHTML=`<td>${r.d}</td><td>${r.c}</td><td>${eur(r.t)}</td>
+    linha.innerHTML=`<td>${r.d}</td><td>${r.c}</td><td>${eur(r.t)}</td>
       <td>${(r.h||0).toFixed(2).replace('.',',')}</td><td class="${lbl[1]}">${lbl[0]}</td>`;
     const td=document.createElement('td'), b=document.createElement('button');
     b.className='del'; b.textContent='×';
     b.addEventListener('click',()=>{ hist.splice(i,1); calc(); });
-    td.appendChild(b); tr.appendChild(td); tb.appendChild(tr);
+    td.appendChild(b); linha.appendChild(td); tb.appendChild(linha);
   });
   const ok=hist.filter(r=>r.e===1).map(r=>r.h).filter(v=>isFinite(v)).sort((a,b)=>a-b);
   const no=hist.filter(r=>r.e===0).map(r=>r.h).filter(v=>isFinite(v)).sort((a,b)=>a-b);
@@ -3109,7 +3113,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.11.0';
+const VERSAO='1.11.1';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
