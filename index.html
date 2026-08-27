@@ -1491,6 +1491,19 @@ function bobineSVG(cor,tam,transp){
     <circle cx="24" cy="24" r="6" fill="none" stroke="${linha}" stroke-width="1.8"/>
   </svg>`;
 }
+/* A barra de stock muda de cor a partir dos 50%: âmbar em baixo, vermelho a
+   chegar ao fim. Acima de metade fica no laranja da casa -- duas cores só, que
+   uma barra aos arco-íris não diz nada a ninguém. O mesmo degrau existe no
+   Bobina (lá parte do roxo), para a mesma bobine ter a mesma cara nas duas. */
+const LIMIAR_BARRA=0.5;
+const misturaHex=(a,b,t)=>{ const A=hex2rgb(a),B=hex2rgb(b);
+  return rgb2hex(A.map((v,i)=>v+(B[i]-v)*t)); };
+function corBarra(fracao){
+  if(!(fracao<LIMIAR_BARRA)) return '';
+  const t=Math.max(0,Math.min(1,(LIMIAR_BARRA-fracao)/LIMIAR_BARRA));
+  return `background:linear-gradient(90deg,${misturaHex('#ff9f2e','#b91c1c',t)},`
+    +`${misturaHex('#ffc46b','#ef4444',t)})`;
+}
 const desenhaFil = (f,tam=34) => f&&f.bobina
   ? bobineSVG(f.cor_hex,tam,f.transparente)
   : bobineSVG(COR_NEUTRA,tam,false);
@@ -1664,7 +1677,7 @@ function cartaoFil(f,i,escolhido){
   const cheio = f.capacidade_g>0 ? Math.max(0,Math.min(1,f.restante_g/f.capacidade_g)) : 0;
   const stock = !f.bobina ? ''
     : f.bobines
-      ? `<div class="fbar"><i style="width:${(cheio*100).toFixed(0)}%"></i></div>
+      ? `<div class="fbar"><i style="width:${(cheio*100).toFixed(0)}%;${corBarra(cheio)}"></i></div>
          <div class="fmeta">${htmlEsc(kgTxt(f.restante_g))} · ${htmlEsc(tr('fpBobines',{n:f.bobines}))}`
         + (f.locais&&f.locais.length?`<em title="${htmlEsc(f.locais.join(' · '))}">${htmlEsc(f.locais[0])}</em>`:'')
         + `</div>`
