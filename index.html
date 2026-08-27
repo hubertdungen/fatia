@@ -287,6 +287,10 @@ input.lido{opacity:.7;cursor:not-allowed}
 .fcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .fcard.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .fcard.vazio{opacity:.55}
+.fcard.imprimindo{border-color:rgba(62,207,142,.55)}
+.fcard.imprimindo:hover{border-color:var(--good)}
+.fcard.imprimindo.sel{border-color:var(--good);
+  box-shadow:inset 0 0 0 1px var(--accent),0 0 0 1px rgba(62,207,142,.25)}
 /* Um filamento com TODAS as bobines por abrir marca-se de duas formas, ligadas
    em separado: um véu da cor da casa, que se nota sempre, e um reflexo que o
    atravessa devagar. Basta abrir uma bobine para deixar de estar marcado. */
@@ -326,6 +330,13 @@ input.lido{opacity:.7;cursor:not-allowed}
 .fbtn{padding:2px 7px;font-size:12px;line-height:1.5;border-radius:7px;background:var(--panel);
   border:1px solid var(--line);color:var(--dim);cursor:pointer;font-weight:600}
 .fbtn:hover{border-color:var(--accent2);color:var(--accent2)}
+.fnoz{line-height:0;padding:4px 6px;color:var(--dim)}
+.fnoz svg{vertical-align:-2px}
+.fnoz.on{color:var(--good);border-color:rgba(62,207,142,.42);background:rgba(62,207,142,.1)}
+.fnozmark{display:inline-flex;align-items:center;justify-content:center;flex:none;
+  color:var(--good);border:1px solid rgba(62,207,142,.42);background:rgba(62,207,142,.1);
+  border-radius:7px;padding:3px;line-height:0}
+.fnozmark svg{width:15px;height:15px}
 .fcard.fnovo{display:flex;align-items:center;justify-content:center;color:var(--dim);
   font-weight:600;font-size:12.5px;border-style:dashed;min-height:74px}
 .fcard.fnovo:hover{color:var(--accent2)}
@@ -409,6 +420,10 @@ tr.msub td{padding:0 3px 9px;border-bottom:1px solid var(--line)}
   font-size:12px;line-height:1;padding:0 2px;width:auto}
 .chipf button:hover{opacity:1;color:var(--bad)}
 .chipf .pt{width:8px;height:8px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+.chipf.imprimindo{border-color:rgba(62,207,142,.55);color:var(--good);
+  background:rgba(62,207,142,.11)}
+.chipf .nozmini{display:inline-flex;line-height:0;color:var(--good);font-style:normal}
+.chipf .nozmini svg{width:13px;height:13px;vertical-align:-2px}
 
 /* ---- marca / faturação ---- */
 #cardMarca{margin-top:16px}
@@ -1530,7 +1545,7 @@ function todosFils(){
   const guardados=BOB_SNAP.filter(b=>!meus.includes(b.n)&&!vivos.some(x=>x.n===b.n));
   return [...FILS, ...vivos.map(b=>bobFil(b.n)), ...guardados.map(b=>bobFil(b.n))];
 }
-const rotuloFil = f => `${f.n} — ${(+f.kg||0).toFixed(2)} €/kg`;
+const rotuloFil = f => `${rotuloEscolhaFil(f)} — ${(+f.kg||0).toFixed(2)} €/kg`;
 /* o filamento das Definições: o que vale para as mesas que não escolhem nenhum */
 const filDefault = () => filInfo(el('s_fil_nome').value)
   || {n:el('s_fil_nome').value||'Filamento', kg:num('s_fil_kg'), portes:num('s_fil_portes')};
@@ -1562,7 +1577,10 @@ async function puxaBobina(forcar=false){
   }
 }
 /* só o que mexe com o orçamento e com o que se vê nos cartões */
-const impressaoBob = () => JSON.stringify(BOB.fils.map(f=>[f.n,f.kg,f.restante_g,f.bobines,f.cor_hex]));
+const impressaoBob = () => JSON.stringify(BOB.fils.map(f=>[
+  f.n,f.kg,f.restante_g,f.bobines,f.cor_hex,f.na_impressora,
+  (f.lista_bobines||[]).map(b=>[b.id,b.restante_g,b.na_impressora])
+]));
 
 function ligaBobina(){
   const c=store.get('bobina',null);       /* a última leitura, para a app abrir já com dados */
@@ -1669,16 +1687,33 @@ function corBarra(fracao){
 const desenhaFil = (f,tam=34) => f&&f.bobina
   ? bobineSVG(f.cor_hex,tam,f.transparente)
   : bobineSVG(COR_NEUTRA,tam,false);
+/* O mesmo bico do Bobina: é o estado "esta bobine/filamento está montado na
+   impressora". O desenho usa currentColor; o verde vem das classes. */
+const NOZZLE = `<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"
+  style="vertical-align:-3px">
+  <path d="M12 2v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+  <rect x="6" y="5.5" width="12" height="6.5" rx="1.4" fill="currentColor"/>
+  <path d="M8.6 12h6.8l-2.2 5.2h-2.4z" fill="currentColor"/>
+  <circle cx="12" cy="20" r="1.5" fill="currentColor" opacity=".55"/></svg>`;
+const contaNaImpressora = f => f&&f.bobina
+  ? (+f.na_impressora||0) || (f.lista_bobines||[]).filter(b=>+b.na_impressora).length
+  : 0;
+const tituloNaImpressora = f => contaNaImpressora(f)>1
+  ? tr('fpImpTituloN',{n:contaNaImpressora(f)})
+  : tr('fpImpTitulo');
+const rotuloEscolhaFil = f => f.n + (contaNaImpressora(f) ? ' · '+tr('fpNaImpressora') : '');
 
 /* ---- o botão que abre o seletor ---- */
 function drawFilTrigger(){
   const b=el('fil_trigger'); if(!b) return;
   const n=el('s_fil_nome').value, f=filInfo(n);
   if(!f){ b.innerHTML=`<span class="ftxt"><b>${tr('fpNenhum')}</b></span><span class="fchev">▾</span>`; return; }
+  const imp=contaNaImpressora(f);
   const stock=f.bobina&&f.restante_g!==undefined
     ? `<span class="fst">${f.bobines?kgTxt(f.restante_g)+' · '+tr('fpBobines',{n:f.bobines}):tr('fpSemStock')}</span>`
     : '';
-  b.innerHTML=`${desenhaFil(f,32)}<span class="ftxt"><b>${htmlEsc(f.n)}</b>`
+  const noz=imp?`<span class="fnozmark" title="${htmlEsc(tituloNaImpressora(f))}">${NOZZLE}</span>`:'';
+  b.innerHTML=`${desenhaFil(f,32)}${noz}<span class="ftxt"><b>${htmlEsc(f.n)}</b>`
     +`<i>${eur(f.kg)}/kg${f.bobina?' · '+tr('fpDoBobina'):''}</i></span>${stock}<span class="fchev">▾</span>`;
 }
 
@@ -1798,6 +1833,25 @@ function delFil(nome){
   if(pickerAberto()) drawPicker();
 }
 
+async function alternaImpressoraFil(f){
+  if(!f||!f.bobina||!f.id) return;
+  try{
+    const r=await fetch('/api/bobina/impressora',{
+      method:'POST',
+      credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({filamento_id:f.id})
+    });
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok) throw new Error(d.error||d.erro||r.statusText||'erro');
+    await puxaBobina(true);
+    drawFils();
+    if(pickerAberto()) drawPicker();
+  }catch(e){
+    alert(tr('fpImpErro',{e:e.message||String(e)}));
+  }
+}
+
 /* os filamentos que este orcamento usa: o das Definicoes e os das mesas */
 function nomesEmUso(){
   const l=[el('s_fil_nome').value, ...mesas.flatMap(m=>m[5]||[])];
@@ -1842,6 +1896,7 @@ function casaFiltro(f){
    o cartão todo. FP.lista é a ordem que está no ecrã. */
 function cartaoFil(f,i,escolhido){
   const meu=!f.bobina;
+  const imp=contaNaImpressora(f);
   const tag = meu ? tr('fpTagMeu')
     : f.origem_preco==='compras' ? tr('fpTagPago')
     : f.origem_preco==='lojas'   ? tr('fpTagLoja') : tr('fpTagSemPreco');
@@ -1850,6 +1905,7 @@ function cartaoFil(f,i,escolhido){
      marca quer dizer, e não "tem algumas seladas" */
   const porAbrir = f.bobina && f.bobines>0 && f.selados===f.bobines && (FP.veu||FP.reflexo);
   const realce = porAbrir ? ' porabrir'+(FP.veu?' veu':'')+(FP.reflexo?' reflexo':'') : '';
+  const marcaImp = imp ? ' imprimindo' : '';
   const stock = !f.bobina ? ''
     : f.bobines
       ? `<div class="fbar"><i style="width:${(cheio*100).toFixed(0)}%;${corBarra(cheio)}"></i></div>
@@ -1862,12 +1918,13 @@ function cartaoFil(f,i,escolhido){
   const acoes = meu
     ? `<button class="fbtn" data-a="editar" title="${htmlEsc(tr('fpEditar'))}">✎</button>`
       + `<button class="fbtn" data-a="apagar" title="${htmlEsc(tr('fpApagarT'))}">×</button>`
-    : `<button class="fbtn" data-a="copiar" title="${htmlEsc(tr('fpCopiarT'))}">⧉</button>`;
+    : `<button class="fbtn fnoz${imp?' on':''}" data-a="impressora" title="${htmlEsc(imp?tr('fpImpDesativar'):tr('fpImpAtivar'))}">${NOZZLE}</button>`
+      + `<button class="fbtn" data-a="copiar" title="${htmlEsc(tr('fpCopiarT'))}">⧉</button>`;
   const titulo = f.bobina && (f.material||f.cor)
     ? `<b>${htmlEsc([f.material,f.cor].filter(Boolean).join(' '))}</b>`
       + (f.marca?`<span class="fmarca">${htmlEsc(f.marca)}</span>`:'')
     : `<b>${htmlEsc(f.n)}</b>`;
-  return `<div class="fcard${escolhido?' sel':''}${f.bobina&&!f.bobines?' vazio':''}${realce}"
+  return `<div class="fcard${escolhido?' sel':''}${f.bobina&&!f.bobines?' vazio':''}${realce}${marcaImp}"
       data-i="${i}" tabindex="0" role="button" title="${htmlEsc(f.n)}">
     <div class="fbob">${desenhaFil(f,42)}</div>
     <div class="fcorpo">
@@ -1926,6 +1983,7 @@ function ligaPicker(){
       if(b.dataset.a==='editar') editFil(f.n);
       else if(b.dataset.a==='apagar') delFil(f.n);
       else if(b.dataset.a==='copiar') copiaBob(f.n);
+      else if(b.dataset.a==='impressora') alternaImpressoraFil(f);
       return;
     }
     escolheFil(f.n); fechaPicker();
@@ -2015,6 +2073,7 @@ function gastoBobina(){
    qual é a bobine sem ir lá acima confirmar */
 function rotuloBobine(b){
   const p=[kgTxt(b.restante_g), estadoBob(b.estado)];
+  if(b.na_impressora) p.push(tr('bxMontada'));
   if(b.etiqueta) p.push(b.etiqueta);
   if(b.local) p.push(b.local);
   else if(b.caixa) p.push(tr('bxNaCaixa'));
@@ -2022,22 +2081,31 @@ function rotuloBobine(b){
   return p.join(' · ');
 }
 
-/* Qual bobine gastar, por omissão:
-   1) a que menos tem mas ainda chega, preferindo uma já ABERTA — acaba-se o que
-      está começado antes de estragar uma selada;
-   2) se nenhuma chega sozinha, começa na mais antiga e vai passando à seguinte,
-      que é como se gasta de facto quando uma acaba a meio da impressão. */
+/* Qual bobine gastar, por omissão, por esta ordem:
+   1) a que está montada na impressora — o Bobina manda isso desde a 1.13, e é a
+      melhor pista de qual imprimiu;
+   2) sem nenhuma montada, a que menos tem mas ainda chega, preferindo uma já
+      aberta — acaba-se o que está começado antes de estragar uma selada;
+   3) se nenhuma chega sozinha, gasta-se de várias: primeiro as montadas, depois
+      da mais antiga em diante. É só um palpite — o diálogo deixa trocar tudo. */
 function bobinesSugeridas(f,g){
   const bs=(f.lista_bobines||[]).filter(b=>(+b.restante_g||0)>0);
   if(!bs.length) return [];
-  const chegam=bs.filter(b=>b.restante_g+0.5>=g).sort((a,b)=>a.restante_g-b.restante_g);
-  const aberta=chegam.find(b=>b.estado==='aberto');
-  if(aberta) return [{id:aberta.id, g}];
-  if(chegam.length) return [{id:chegam[0].id, g}];
-  const velhas=[...bs].sort((a,b)=>
+  const porRestante=l=>[...l].sort((a,b)=>a.restante_g-b.restante_g);
+  const chega=l=>porRestante(l.filter(b=>b.restante_g+0.5>=g));
+  const montadas=bs.filter(b=>b.na_impressora);
+  const m=chega(montadas)[0];
+  if(m) return [{id:m.id, g}];
+  if(!montadas.length){
+    const chegam=chega(bs);
+    const aberta=chegam.find(b=>b.estado==='aberto');
+    if(aberta) return [{id:aberta.id, g}];
+    if(chegam.length) return [{id:chegam[0].id, g}];
+  }
+  const velhas=[...bs].filter(b=>!b.na_impressora).sort((a,b)=>
     String(a.comprado_em||'9999').localeCompare(String(b.comprado_em||'9999')) || a.id-b.id);
   const out=[]; let falta=g;
-  velhas.forEach(b=>{
+  [...porRestante(montadas), ...velhas].forEach(b=>{
     if(falta<=0.5) return;
     const q=Math.min(b.restante_g, falta);
     out.push({id:b.id, g:q}); falta-=q;
@@ -2334,12 +2402,17 @@ function drawMesas(){
     const nota=document.createElement('span');
     usados.forEach((n,k)=>{
       const f=filInfo(n);
-      const c=document.createElement('span'); c.className='chipf';
+      const imp=contaNaImpressora(f);
+      const c=document.createElement('span'); c.className='chipf'+(imp?' imprimindo':'');
       /* o ponto da cor é o do Bobina: numa mesa com três filamentos é o que
          permite ver qual é qual sem ler os nomes todos */
       if(f&&f.bobina){
         const p=document.createElement('i'); p.className='pt';
         p.style.background=corVisivel(f.cor_hex); c.appendChild(p);
+      }
+      if(imp){
+        const noz=document.createElement('i'); noz.className='nozmini';
+        noz.title=tituloNaImpressora(f); noz.innerHTML=NOZZLE; c.appendChild(noz);
       }
       c.appendChild(document.createTextNode(n));
       /* o campo dos gramas só aparece com dois materiais ou mais: com um só, os
@@ -2368,7 +2441,7 @@ function drawMesas(){
     });
     const add=document.createElement('select');
     const livres=todosFils().filter(f=>!usados.includes(f.n));
-    const grupo=l=>l.map(f=>`<option value="${htmlEsc(f.n)}">${htmlEsc(f.n)}</option>`).join('');
+    const grupo=l=>l.map(f=>`<option value="${htmlEsc(f.n)}">${htmlEsc(rotuloEscolhaFil(f))}</option>`).join('');
     const meusL=livres.filter(f=>!f.bobina), bobL=livres.filter(f=>f.bobina);
     add.title='Filamentos usados nesta mesa';
     add.innerHTML=`<option value="">${usados.length?'+ outro filamento':'↳ o filamento das Definições'}</option>`
@@ -3582,7 +3655,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.12.0';
+const VERSAO='1.13.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -3634,6 +3707,7 @@ const I18N={
     bxAberto:'aberta',
     bxVazio:'vazia',
     bxNaCaixa:'na caixa',
+    bxMontada:'na impressora',
     bxqTitulo:'Este trabalho já foi impresso?',
     bxqTxt:'Se já foi, dá-se baixa de {g} em {n} filamento(s) do Bobina. Se ainda não, o orçamento abre à mesma e o botão fica no cartão das mesas.',
     bxqSim:'Já foi — dar baixa',
@@ -3643,6 +3717,12 @@ const I18N={
     dtManualT:'Escrever a data à mão',
     dtVoltarT:'Voltar à data do Bobina',
     fpNaLoja:'{loja}: {preco}/kg',
+    fpNaImpressora:'na impressora',
+    fpImpTitulo:'na impressora',
+    fpImpTituloN:'{n} bobines na impressora',
+    fpImpAtivar:'Pôr na impressora — escolhe a bobine mais perto de acabar',
+    fpImpDesativar:'Tirar da impressora',
+    fpImpErro:'Não consegui mexer no Bobina: {e}',
     fpSoStock:'só com stock',
     fpVeu:'véu',
     fpVeuT:'Tingir os filamentos com todas as bobines por abrir',
@@ -3823,6 +3903,7 @@ const I18N={
     bxAberto:'open',
     bxVazio:'empty',
     bxNaCaixa:'boxed',
+    bxMontada:'on the printer',
     bxqTitulo:'Has this job been printed?',
     bxqTxt:'If it has, {g} across {n} Bobina filament(s) comes off the inventory. If not, the quote opens anyway and the button stays on the plates card.',
     bxqSim:'Yes — log usage',
@@ -3832,6 +3913,12 @@ const I18N={
     dtManualT:'Type the date by hand',
     dtVoltarT:'Back to the Bobina date',
     fpNaLoja:'{loja}: {preco}/kg',
+    fpNaImpressora:'on the printer',
+    fpImpTitulo:'on the printer',
+    fpImpTituloN:'{n} spools on the printer',
+    fpImpAtivar:'Put on the printer — picks the spool closest to empty',
+    fpImpDesativar:'Take off the printer',
+    fpImpErro:'Could not update Bobina: {e}',
     fpSoStock:'in stock only',
     fpVeu:'tint',
     fpVeuT:'Tint filaments whose spools are all still sealed',

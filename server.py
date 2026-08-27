@@ -466,13 +466,16 @@ class FatiaHandler(SimpleHTTPRequestHandler):
         # Não exige sessão -- a app inteira funciona sem conta, e a leitura do
         # inventário também não exige -- mas exige vir de casa: um pedido da
         # Internet não mexe nas bobines de ninguém.
-        if path in ("/api/bobina/gastar", "/api/bobina/gastar/anular"):
+        if path in ("/api/bobina/gastar", "/api/bobina/gastar/anular", "/api/bobina/impressora"):
             cliente = first_forwarded_for(self.headers, self.client_address[0])
             if not is_lan_or_mesh(cliente):
-                self.error_json(403, "As baixas no Bobina só se fazem da rede de casa")
+                self.error_json(403, "As escritas no Bobina só se fazem da rede de casa")
                 return
-            caminho = ("/api/fatia/gastar/anular" if path.endswith("/anular")
-                       else "/api/fatia/gastar")
+            if path == "/api/bobina/impressora":
+                caminho = "/api/fatia/impressora"
+            else:
+                caminho = ("/api/fatia/gastar/anular" if path.endswith("/anular")
+                           else "/api/fatia/gastar")
             status, payload = bobina_escreve(caminho, data if isinstance(data, dict) else {})
             self.write_json(status, payload)
             return
