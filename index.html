@@ -88,7 +88,10 @@ input[readonly]{opacity:.75;cursor:default;border-style:dashed}
 .row{display:grid;gap:10px;margin-bottom:10px}
 .row>*{min-width:0}   /* pela mesma razao: as celulas encolhem, o texto e que corta */
 .r2{grid-template-columns:1fr 1fr}
-.rdata{grid-template-columns:minmax(0,210px)}   /* a data não precisa da largura toda */
+.rdata{grid-template-columns:minmax(0,250px)}   /* a data não precisa da largura toda */
+.dtrow{display:flex;gap:6px}
+.dtrow input{flex:1;min-width:0}
+.dtrow button{flex:none;padding:8px 10px}
 .r3{grid-template-columns:1fr 1fr 1fr}
 .r4{grid-template-columns:1fr 1fr 1fr 1fr}
 .suffix{position:relative}
@@ -185,6 +188,53 @@ body.simples .hint{display:none}
 #fil_trigger .fchev{margin-left:6px;font-size:10px;opacity:.6}
 #fil_trigger .fst + .fchev{margin-left:0}
 .filaviso{color:var(--dim)}
+/* gramas de cada material dentro do chip do filamento */
+.mfil .chipf input.mg{width:52px;padding:1px 4px;font-size:11px;text-align:right;
+  border-radius:5px;margin-left:2px;background:var(--bg);border:1px solid var(--line);
+  appearance:textfield;-moz-appearance:textfield}
+.mfil .chipf input.mg::-webkit-outer-spin-button,
+.mfil .chipf input.mg::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.mfil .chipf i.mgu{font-style:normal;font-size:10px;opacity:.6;margin-left:1px}
+.mgnota{font-size:11px;color:var(--accent2);align-self:center}
+.mgnota:empty{display:none}
+
+/* ---- dar baixa no Bobina ---- */
+#baixa,#bxq{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:220;
+  align-items:center;justify-content:center;padding:20px;overflow:auto}
+.bxbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.fpsub{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:2px;max-width:46ch}
+.bxcorpo{padding:14px 18px;overflow:auto}
+.bxlin{border:1px solid var(--line);border-radius:12px;padding:10px 11px;margin-bottom:10px;
+  background:var(--panel2)}
+.bxhd{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.bxnome{display:flex;flex-direction:column;min-width:0;overflow:hidden;line-height:1.3}
+.bxnome b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bxnome i{font-style:normal;font-size:11px;color:var(--dim)}
+.bxtot{flex:none;margin-left:auto;font-weight:700;font-size:13.5px;
+  font-variant-numeric:tabular-nums}
+.bxal{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
+.bxal select{flex:1 1 200px;min-width:0}
+.bxal .bxg{flex:none;width:88px}
+.bxal .bxg input{text-align:right;padding-right:22px;appearance:textfield;
+  -moz-appearance:textfield}
+.bxal .bxg input::-webkit-outer-spin-button,
+.bxal .bxg input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.bxal .del{flex:none}
+.bxav{flex:1 1 100%;font-size:11px;color:var(--accent2)}
+.bxpe2{display:flex;align-items:center;gap:10px;margin-top:8px}
+.bxpe2 button{padding:4px 9px;font-size:11.5px}
+.bxdif{font-size:11.5px;color:var(--accent2)}
+.bxpe{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+.bxpe .primary{margin-left:auto}
+.bxerro{font-size:11.5px;color:var(--bad);flex:1}
+.bxfora{font-size:11.5px;color:var(--dim);margin-top:2px}
+.bxqbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:20px 22px;max-width:430px;width:100%}
+.bxqbox b{font-size:16px;display:block;margin-bottom:8px}
+.bxqtxt{font-size:12.5px;color:var(--dim);line-height:1.6}
+.bxqbt{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.bxqbt button{flex:1}
 input.lido{opacity:.7;cursor:not-allowed}
 
 #filpick{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:215;
@@ -554,6 +604,37 @@ footer a{color:var(--blue);text-decoration:none}
   </div>
 </div>
 
+<!-- ===== dar baixa no Bobina ===== -->
+<div id="baixa">
+  <div class="bxbox">
+    <div class="fphd">
+      <div class="fptit">
+        <b>📉 <span data-i18n="bxTitulo">Dar baixa no Bobina</span></b>
+        <div class="fpsub" data-i18n="bxSub">Sai do inventário o que este trabalho gastou, desperdício incluído. A bobine sugerida é a que faz sentido acabar primeiro — troca-a se foi outra.</div>
+      </div>
+      <button class="ghost fpx" onclick="fechaBaixa()" title="Fechar">×</button>
+    </div>
+    <div id="bx_corpo" class="bxcorpo"></div>
+    <div class="bxpe">
+      <div class="bxerro" id="bx_erro"></div>
+      <button class="ghost" onclick="fechaBaixa()" data-i18n="bxCancelar">Cancelar</button>
+      <button class="primary" id="bx_ok" onclick="confirmaBaixa()" data-i18n="bxDar">Dar baixa</button>
+    </div>
+  </div>
+</div>
+
+<!-- a pergunta que aparece ao abrir o orçamento do cliente -->
+<div id="bxq">
+  <div class="bxqbox">
+    <b data-i18n="bxqTitulo">Este trabalho já foi impresso?</b>
+    <div class="bxqtxt" id="bxq_txt"></div>
+    <div class="bxqbt">
+      <button class="primary" onclick="respondeBaixa(1)" data-i18n="bxqSim">Já foi — dar baixa</button>
+      <button class="ghost" onclick="respondeBaixa(0)" data-i18n="bxqNao">Ainda não</button>
+    </div>
+  </div>
+</div>
+
 <div id="mem">
   <div class="membox">
     <div class="lichd">
@@ -642,6 +723,12 @@ footer a{color:var(--blue);text-decoration:none}
       <th></th>
     </tr></thead><tbody></tbody></table>
     <button class="ghost" style="margin-top:6px;width:100%" onclick="addMesa()">+ Adicionar mesa</button>
+    <!-- só aparece havendo filamento do Bobina nas mesas: orçamentar não gasta
+         filamento nenhum, e um botão de baixa sem nada para dar baixa é ruído -->
+    <div id="baixa_box" style="display:none">
+      <button class="ghost" id="b_baixa" style="margin-top:6px;width:100%" onclick="abreBaixa()"></button>
+      <div class="hint" id="baixa_nota"></div>
+    </div>
     <label class="toggle" style="margin-top:4px">
       <input type="checkbox" id="j_mostrar_maq">
       Mostrar as impressoras usadas no orçamento do cliente
@@ -716,7 +803,10 @@ footer a{color:var(--blue);text-decoration:none}
     <h2><i class="n">2</i>Definições de custo</h2>
 
     <div class="row rdata">
-      <div><label>Preços revistos em</label><input type="date" id="s_data"></div>
+      <div><label>Preços revistos em</label>
+        <div class="dtrow"><input type="date" id="s_data">
+          <button type="button" id="b_data_man" onclick="destravaData()"></button></div>
+        <div class="hint" id="data_hint"></div></div>
     </div>
     <!-- o filamento leva a linha toda: a meia-coluna não chegava para o nome + o
          chip do stock, e o €/kg partia-se por cima dele -->
@@ -1040,6 +1130,9 @@ footer a{color:var(--blue);text-decoration:none}
 
 <script>
 function preview(on=true){
+  /* antes de mostrar o orçamento, perguntar se aquilo já foi impresso: é o
+     momento em que se sabe, e a pergunta reabre isto conforme a resposta */
+  if(on && perguntaBaixa()) return;
   el('printable').classList.toggle('show',on);
   document.body.style.overflow=on?'hidden':'';
   if(on && !document.getElementById('pvprint')){
@@ -1385,7 +1478,34 @@ let PORTES_BOB={};
 /* ---- ligação viva ao Bobina ----
    O pedido passa pelo server.py do Fatia porque entre portas o browser batia
    em CORS e o cookie de sessão não passava — ver /api/bobina/filamentos. */
-const BOB={fils:[], resumo:null, em:0, ok:false, erro:'', lido:0, puxando:false};
+const BOB={fils:[], resumo:null, em:0, ok:false, erro:'', lido:0, puxando:false, precos_em:''};
+
+/* ---- "Preços revistos em" ----
+   Era um campo à mão que ninguém se lembrava de mexer, e que por isso envelhecia
+   a mentir — e o aviso de preços velhos dependia dele. Quem anda mesmo a rever
+   preços é o tracker do Bobina, por isso a data passa a vir de lá. O ✎ destrava
+   para escrever à mão (e fica destravado, senão a leitura seguinte apagava o que
+   se escreveu); o ⟲ devolve-a ao automático. */
+let DATA_MANUAL=false;
+function aplicaDataPrecos(guardar=true){
+  const i=el('s_data'); if(!i) return;
+  const tem=!!BOB.precos_em, auto=tem&&!DATA_MANUAL;
+  i.readOnly=auto;
+  i.classList.toggle('lido',auto);
+  if(auto && i.value!==BOB.precos_em){
+    i.value=BOB.precos_em; calc();
+    if(guardar) guardaEstado();
+  }
+  const b=el('b_data_man');
+  if(b){
+    b.style.display=tem?'':'none';
+    b.textContent=DATA_MANUAL?'⟲':'✎';
+    b.title=tr(DATA_MANUAL?'dtVoltarT':'dtManualT');
+  }
+  const h=el('data_hint');
+  if(h) h.innerHTML=!tem?'':tr(DATA_MANUAL?'dtManual':'dtAuto',{d:BOB.precos_em});
+}
+function destravaData(){ DATA_MANUAL=!DATA_MANUAL; aplicaDataPrecos(); guardaEstado(); }
 const BOB_INTERVALO=45000;
 /* A última leitura dos filamentos que ESTE orçamento usa, guardada com ele.
    Um orçamento não pode mudar de valor — nem perder um filamento das mesas —
@@ -1427,7 +1547,9 @@ async function puxaBobina(forcar=false){
     const antes=impressaoBob();
     BOB.fils=(d.filamentos||[]).filter(f=>f&&f.n);
     BOB.resumo=d.resumo||null; BOB.em=d.em||0; BOB.ok=true; BOB.erro='';
-    store.set('bobina',{fils:BOB.fils,resumo:BOB.resumo,em:BOB.em});
+    BOB.precos_em=d.precos_em||'';
+    store.set('bobina',{fils:BOB.fils,resumo:BOB.resumo,em:BOB.em,precos_em:BOB.precos_em});
+    aplicaDataPrecos();
     if(impressaoBob()!==antes){
       drawFils(); sincronizaCamposFil(); calc();
       if(pickerAberto()) drawPicker();
@@ -1444,7 +1566,10 @@ const impressaoBob = () => JSON.stringify(BOB.fils.map(f=>[f.n,f.kg,f.restante_g
 
 function ligaBobina(){
   const c=store.get('bobina',null);       /* a última leitura, para a app abrir já com dados */
-  if(c && Array.isArray(c.fils)){ BOB.fils=c.fils; BOB.resumo=c.resumo||null; BOB.em=c.em||0; }
+  if(c && Array.isArray(c.fils)){
+    BOB.fils=c.fils; BOB.resumo=c.resumo||null; BOB.em=c.em||0; BOB.precos_em=c.precos_em||'';
+    aplicaDataPrecos();
+  }
   drawFils(); estadoBobina();
   puxaBobina(true);
   setInterval(()=>{ if(document.visibilityState==='visible') puxaBobina(); }, BOB_INTERVALO);
@@ -1815,15 +1940,17 @@ function ligaPicker(){
 }
 
 /* ---- o que o trabalho gasta de cada filamento ----
-   O mesmo pressuposto que já vale para o preço: numa mesa com vários
-   filamentos não há como saber quantos gramas são de cada, por isso repartem-se
-   por igual. O desperdício conta — sai da bobine na mesma. */
+   Segue o reparto da mesa: os gramas escritos à mão em cada material, e o resto
+   por igual pelos que ficaram em branco. O desperdício conta — sai da bobine na
+   mesma. É este número que vai dar baixa ao Bobina, por isso é o mesmo que o
+   aviso de stock usa: um só sítio a contar, para não dizerem coisas diferentes. */
 function gastoPorFilamento(det,fDesp){
   const m={};
   det.forEach(d=>{
-    if(!d.g||!d.fils.length) return;
-    const q=d.g*fDesp/d.fils.length;
-    d.fils.forEach(n=>{ m[n]=(m[n]||0)+q; });
+    if(!d.g) return;
+    const rep=d.rep&&d.rep.length ? d.rep
+      : (d.fils||[]).map(n=>({n, g:d.g/Math.max(d.fils.length,1)}));
+    rep.forEach(x=>{ if(x.g>0) m[x.n]=(m[x.n]||0)+x.g*fDesp; });
   });
   return m;
 }
@@ -1848,13 +1975,276 @@ function avisoStock(det,fDesp){
     + `</div>`;
 }
 
-/* ============ mesas: [gramas, tempo, custoSlicer, impressora, mostrarNoOrçamento, filamentos[]] ============ */
-let mesas = [[280,'14h58','','',true,[],1],[278,'15h34','','',true,[],1]];
-/* normaliza mesas vindas de versões anteriores (3, 4, 5 ou 6 colunas);
+/* ============ dar baixa no Bobina ============
+   Orçamentar não gasta filamento nenhum — só imprimir gasta. Por isso a baixa é
+   um acto à parte, com botão seu e uma pergunta ao abrir o orçamento do cliente,
+   e nunca acontece sozinha. Quem tem o inventário é o Bobina: daqui só sai
+   quantos gramas saíram de que bobine.
+
+   Três decisões que não são óbvias:
+   - a CHAVE nasce quando o diálogo abre e vive enquanto ele estiver aberto. Dois
+     cliques no botão, ou um retry porque a rede falhou a meio, dão a mesma baixa
+     uma vez só — é o que o Bobina garante por essa chave. Fechar e reabrir gera
+     outra, porque aí é mesmo outra impressão.
+   - a bobine escolhida é um PALPITE que se troca à mão: o Bobina sabe quanto
+     resta em cada uma, não sabe qual delas está na garagem.
+   - o que ficou dado guarda-se com o orçamento, com o desfazer à mão. */
+let BAIXA=null;          /* a baixa deste trabalho, depois de dada */
+let BAIXA_ADIADA=false;  /* respondeu "ainda não": não voltar a perguntar */
+const BX={linhas:[], chave:'', depois:false, ligado:false};
+
+const novaChave = () => 'fatia-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+const estadoBob = e => tr({selado:'bxSelado', aberto:'bxAberto', vazio:'bxVazio'}[e]||'bxAberto');
+
+/* o que este trabalho gasta de cada filamento QUE O BOBINA CONHECE.
+   Um filamento escrito à mão aqui não tem bobine nenhuma lá — não há baixa que
+   dar. Sem ligação viva também não se dá baixa nenhuma: uma leitura velha não
+   sabe o que está em casa agora, e isto escreve no inventário. */
+function gastoBobina(){
+  if(!BOB.ok || !LAST.det) return [];
+  const gasto=gastoPorFilamento(LAST.det, LAST.fDesp||1);
+  return Object.keys(gasto).map(n=>{
+    if(FILS.some(x=>x.n===n)) return null;      /* substituído por um meu */
+    const f=bobVivo(n);
+    if(!f || !(f.lista_bobines||[]).length) return null;
+    return {n, f, g:gasto[n]};
+  }).filter(x=>x && x.g>0.5);
+}
+
+/* "820 g · aberta · Oficina › Estante A · 2026-03-01" — o que chega para saber
+   qual é a bobine sem ir lá acima confirmar */
+function rotuloBobine(b){
+  const p=[kgTxt(b.restante_g), estadoBob(b.estado)];
+  if(b.etiqueta) p.push(b.etiqueta);
+  if(b.local) p.push(b.local);
+  else if(b.caixa) p.push(tr('bxNaCaixa'));
+  if(b.comprado_em) p.push(b.comprado_em);
+  return p.join(' · ');
+}
+
+/* Qual bobine gastar, por omissão:
+   1) a que menos tem mas ainda chega, preferindo uma já ABERTA — acaba-se o que
+      está começado antes de estragar uma selada;
+   2) se nenhuma chega sozinha, começa na mais antiga e vai passando à seguinte,
+      que é como se gasta de facto quando uma acaba a meio da impressão. */
+function bobinesSugeridas(f,g){
+  const bs=(f.lista_bobines||[]).filter(b=>(+b.restante_g||0)>0);
+  if(!bs.length) return [];
+  const chegam=bs.filter(b=>b.restante_g+0.5>=g).sort((a,b)=>a.restante_g-b.restante_g);
+  const aberta=chegam.find(b=>b.estado==='aberto');
+  if(aberta) return [{id:aberta.id, g}];
+  if(chegam.length) return [{id:chegam[0].id, g}];
+  const velhas=[...bs].sort((a,b)=>
+    String(a.comprado_em||'9999').localeCompare(String(b.comprado_em||'9999')) || a.id-b.id);
+  const out=[]; let falta=g;
+  velhas.forEach(b=>{
+    if(falta<=0.5) return;
+    const q=Math.min(b.restante_g, falta);
+    out.push({id:b.id, g:q}); falta-=q;
+  });
+  /* nem juntando todas chega: o resto fica na última e o aviso di-lo */
+  if(falta>0.5 && out.length) out[out.length-1].g+=falta;
+  return out;
+}
+
+function abreBaixa(){
+  const itens=gastoBobina();
+  if(!itens.length) return;
+  BX.linhas=itens.map(x=>({n:x.n, f:x.f, total:x.g, alocs:bobinesSugeridas(x.f, x.g)}));
+  BX.chave=novaChave();
+  el('bx_erro').textContent='';
+  el('baixa').style.display='flex';
+  ligaBaixa(); drawBaixa();
+}
+function fechaBaixa(){
+  el('baixa').style.display='none';
+  if(!BX.depois) return;
+  BX.depois=false;
+  /* veio da pergunta: fechar sem dar baixa vale por "ainda não". Sem isto a
+     pergunta reaparecia aqui mesmo e não havia como chegar ao orçamento sem
+     dar baixa de alguma coisa. */
+  if(!BAIXA){ BAIXA_ADIADA=true; guardaEstado(); }
+  preview(true);
+}
+
+function drawBaixa(){
+  const c=el('bx_corpo'); if(!c) return;
+  /* filamentos do trabalho que o Bobina não conhece: dizê-lo, senão parecia que
+     a baixa cobriu tudo */
+  const gasto=LAST.det?gastoPorFilamento(LAST.det, LAST.fDesp||1):{};
+  const fora=Object.keys(gasto).filter(n=>!BX.linhas.some(L=>L.n===n) && gasto[n]>0.5);
+  c.innerHTML=BX.linhas.map((L,i)=>{
+    const bs=L.f.lista_bobines||[];
+    const alocs=L.alocs.map((a,j)=>{
+      const b=bs.find(x=>x.id===+a.id);
+      const demais=b && (+a.g)>(b.restante_g+0.5);
+      return `<div class="bxal">
+        <select data-l="${i}" data-a="${j}" data-c="b">${bs.map(x=>
+          `<option value="${x.id}"${x.id===+a.id?' selected':''}>${htmlEsc(rotuloBobine(x))}</option>`
+        ).join('')}</select>
+        <span class="suffix bxg"><input type="number" min="0" step="1" value="${Math.round(a.g)}"
+              data-l="${i}" data-a="${j}" data-c="g"><i>g</i></span>
+        <button type="button" class="del" data-l="${i}" data-a="${j}" data-c="x"
+                title="${htmlEsc(tr('bxTirar'))}"${L.alocs.length<2?' style="visibility:hidden"':''}>×</button>
+        ${demais?`<div class="bxav">⚠️ ${htmlEsc(tr('bxSoTem',{g:kgTxt(b.restante_g)}))}</div>`:''}
+      </div>`;
+    }).join('');
+    return `<div class="bxlin">
+      <div class="bxhd">${desenhaFil(L.f,28)}
+        <div class="bxnome"><b>${htmlEsc(L.n)}</b>
+          <i>${htmlEsc(tr('bxEmCasa',{g:kgTxt(L.f.restante_g||0), n:L.f.bobines||0}))}</i></div>
+        <span class="bxtot">${htmlEsc(kgTxt(L.total))}</span></div>
+      ${alocs || `<div class="bxav">${htmlEsc(tr('bxSemBobines'))}</div>`}
+      <div class="bxpe2">
+        <button type="button" class="ghost" data-l="${i}" data-c="+">${htmlEsc(tr('bxOutra'))}</button>
+        <span id="bxdif${i}"></span>
+      </div></div>`;
+  }).join('')
+   + (fora.length?`<div class="bxfora">${htmlEsc(tr('bxFora',{f:fora.join(', ')}))}</div>`:'');
+  notaBaixa();
+}
+
+/* o "faltam/sobram" mexe a cada tecla, e redesenhar aqui tirava o cursor do campo */
+function notaBaixa(){
+  BX.linhas.forEach((L,i)=>{
+    const s=el('bxdif'+i); if(!s) return;
+    const soma=L.alocs.reduce((a,x)=>a+(+x.g||0),0), dif=L.total-soma;
+    s.textContent = Math.abs(dif)>0.5
+      ? (dif>0 ? tr('bxFaltam',{g:kgTxt(dif)}) : tr('bxSobram',{g:kgTxt(-dif)})) : '';
+    s.className = s.textContent?'bxdif':'';
+  });
+}
+
+function ligaBaixa(){
+  const c=el('bx_corpo'); if(!c||BX.ligado) return;
+  BX.ligado=true;
+  c.addEventListener('change',e=>{
+    const t=e.target; if(!t.dataset||t.dataset.c!=='b') return;
+    BX.linhas[+t.dataset.l].alocs[+t.dataset.a].id=+t.value; drawBaixa();
+  });
+  c.addEventListener('input',e=>{
+    const t=e.target; if(!t.dataset||t.dataset.c!=='g') return;
+    BX.linhas[+t.dataset.l].alocs[+t.dataset.a].g=Math.max(0,parseFloat(t.value)||0);
+    notaBaixa();
+  });
+  c.addEventListener('click',e=>{
+    const b=e.target.closest('button[data-c]'); if(!b) return;
+    const L=BX.linhas[+b.dataset.l]; if(!L) return;
+    if(b.dataset.c==='x'){ L.alocs.splice(+b.dataset.a,1); drawBaixa(); }
+    else if(b.dataset.c==='+'){
+      const usadas=L.alocs.map(a=>+a.id);
+      const bs=L.f.lista_bobines||[];
+      const livre=bs.find(x=>!usadas.includes(x.id))||bs[0];
+      if(!livre) return;
+      const soma=L.alocs.reduce((a,x)=>a+(+x.g||0),0);
+      L.alocs.push({id:livre.id, g:Math.max(0,L.total-soma)});
+      drawBaixa();
+    }
+  });
+}
+
+async function confirmaBaixa(){
+  const consumos=[];
+  BX.linhas.forEach(L=>L.alocs.forEach(a=>{
+    const g=Math.round((+a.g||0)*10)/10;
+    if(a.id&&g>0) consumos.push({bobine_id:+a.id, gramas:g, n:L.n});
+  }));
+  if(!consumos.length){ el('bx_erro').textContent=tr('bxSemNada'); return; }
+  const b=el('bx_ok'), txt=b.textContent;
+  b.disabled=true; b.textContent=tr('bxAEnviar'); el('bx_erro').textContent='';
+  try{
+    const r=await fetch('/api/bobina/gastar',{method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chave:BX.chave, ref:nomeTrabalho(), consumos})});
+    const d=await r.json();
+    if(!r.ok||d.error) throw new Error(d.error||('erro '+r.status));
+    BAIXA={chave:BX.chave, em:Date.now(), consumos, avisos:d.avisos||[]};
+    BAIXA_ADIADA=false;
+    guardaEstado();
+    fechaBaixa();
+    puxaBobina(true);
+    desenhaBotaoBaixa();
+    if((d.avisos||[]).length) alert(tr('bxAvisos')+'\n\n· '+d.avisos.join('\n· '));
+  }catch(e){
+    el('bx_erro').textContent=tr('bxErro',{e:(e&&e.message)||e});
+  }finally{ b.disabled=false; b.textContent=txt; }
+}
+
+async function anulaBaixa(){
+  if(!BAIXA) return;
+  if(!confirm(tr('bxAnularConf'))) return;
+  try{
+    const r=await fetch('/api/bobina/gastar/anular',{method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body:JSON.stringify({chave:BAIXA.chave})});
+    const d=await r.json();
+    if(!r.ok||d.error) throw new Error(d.error||('erro '+r.status));
+    BAIXA=null; guardaEstado(); puxaBobina(true); desenhaBotaoBaixa();
+    if((d.mexidas||[]).length) alert(tr('bxMexidas'));
+  }catch(e){ alert(tr('bxErro',{e:(e&&e.message)||e})); }
+}
+
+function desenhaBotaoBaixa(){
+  const box=el('baixa_box'); if(!box) return;
+  const itens=gastoBobina();
+  const tot=itens.reduce((a,x)=>a+x.g,0);
+  box.style.display=(itens.length||BAIXA)?'':'none';
+  const bt=el('b_baixa');
+  if(bt){ bt.textContent='📉 '+tr('bxBotao',{g:kgTxt(tot)}); bt.disabled=!itens.length; }
+  const nota=el('baixa_nota');
+  if(!nota) return;
+  if(!BAIXA){ nota.innerHTML=''; return; }
+  const g=BAIXA.consumos.reduce((a,c)=>a+(+c.gramas||0),0);
+  const quando=new Date(BAIXA.em).toLocaleString(IDIOMA==='en'?'en-GB':'pt-PT',
+                                                 {dateStyle:'short', timeStyle:'short'});
+  nota.innerHTML='✔ '+htmlEsc(tr('bxDada',{g:kgTxt(g), quando}))
+    +' — <a href="#" onclick="anulaBaixa();return false">'+htmlEsc(tr('bxAnular'))+'</a>';
+}
+
+/* A pergunta ao abrir o orçamento do cliente. Só aparece havendo mesmo o que dar
+   baixa, e só uma vez por trabalho: quem responde "ainda não" não quer isto a
+   perguntar de cada vez que espreita o orçamento. */
+function perguntaBaixa(){
+  if(BAIXA||BAIXA_ADIADA) return false;
+  const itens=gastoBobina();
+  if(!itens.length) return false;
+  el('bxq_txt').textContent=tr('bxqTxt',{
+    g:kgTxt(itens.reduce((a,x)=>a+x.g,0)), n:itens.length});
+  el('bxq').style.display='flex';
+  return true;
+}
+function respondeBaixa(sim){
+  el('bxq').style.display='none';
+  if(sim){ BX.depois=true; abreBaixa(); }
+  else { BAIXA_ADIADA=true; guardaEstado(); preview(true); }
+}
+
+/* ============ mesas: [gramas, tempo, custoSlicer, impressora, mostrarNoOrçamento,
+   filamentos[], peças, gramasDeCadaFilamento[]] ============ */
+let mesas = [[280,'14h58','','',true,[],1,[]],[278,'15h34','','',true,[],1,[]]];
+/* normaliza mesas vindas de versões anteriores (3 a 7 colunas);
    peças a null = estado antigo, em que as peças eram um número global — ver migraPecas() */
 const normMesa = m => [m[0]??0, m[1]??'', m[2]??'', m[3]??'', m[4]!==false,
                        Array.isArray(m[5])?m[5].map(String):[],
-                       Number.isFinite(+m[6]) ? Math.max(0,Math.round(+m[6])) : null];
+                       Number.isFinite(+m[6]) ? Math.max(0,Math.round(+m[6])) : null,
+                       Array.isArray(m[7])?m[7].map(gDado):[]];
+/* null = "diz tu", que é diferente de 0 g ("não entrou nada deste") */
+const gDado = v => { const x=parseFloat(v); return isFinite(x)&&x>0 ? x : null; };
+
+/* ---- quantos gramas de cada filamento nesta mesa ----
+   Numa impressão multi-material o slicer diz quantos gramas foram de cada cor;
+   é esse número que se escreve no campo do chip. O que ficar por escrever
+   reparte o que sobra por igual — que é o que a app sempre fez quando não havia
+   forma de saber. Com um filamento só, leva tudo e não se pergunta nada. */
+function repartoMesa(m, fils){
+  const tot=parseFloat(m[0])||0, dados=m[7]||[];
+  const escrito=fils.map((_,i)=>gDado(dados[i]));
+  const somaEscrita=escrito.reduce((a,v)=>a+(v||0),0);
+  const auto=escrito.filter(v=>v===null).length;
+  const sobra=Math.max(0, tot-somaEscrita);
+  return fils.map((f,i)=>({ f, n:f.n, auto:escrito[i]===null,
+    g: escrito[i]!==null ? escrito[i] : (auto ? sobra/auto : 0) }));
+}
+const somaReparto = r => r.reduce((a,x)=>a+x.g,0);
 const totalPecas = () => mesas.reduce((a,m)=>a+(m[6]||0),0);
 /* estado de uma versão sem peças por mesa: reparte o total antigo pelas mesas */
 function migraPecas(o){
@@ -1919,10 +2309,30 @@ function drawMesas(){
     td2.appendChild(box);
 
     /* que filamentos entraram nesta mesa — sem nenhum, vale o das Definições */
-    const usados=(m[5]||[]).filter(n=>filInfo(n));
-    if(usados.length!==(m[5]||[]).length) mesas[i][5]=usados;   /* limpa nomes que já não existem */
+    const todos=(m[5]||[]);
+    const usados=todos.filter(n=>filInfo(n));
+    if(usados.length!==todos.length){   /* limpa nomes que já não existem, e os gramas deles */
+      mesas[i][7]=todos.map((n,k)=>[n,(m[7]||[])[k]]).filter(([n])=>filInfo(n)).map(([,g])=>g);
+      mesas[i][5]=usados;
+    }
+    /* os gramas de cada um, para o campo mostrar o que está a valer */
+    const repM=()=>repartoMesa(mesas[i], usados.map(filInfo).filter(Boolean));
+    const campos=[];
+    const refrescaAuto=()=>{
+      const r=repM();
+      campos.forEach((c,k)=>{ if(c&&r[k]) c.placeholder=Math.round(r[k].g); });
+      const r2=repM(), tot=parseFloat(mesas[i][0])||0;
+      const escritos=r2.filter(x=>!x.auto).reduce((a,x)=>a+x.g,0);
+      const todosEscritos=r2.length>1&&r2.every(x=>!x.auto);
+      nota.textContent = r2.length<2 ? ''
+        : escritos>tot+0.5 ? tr('mgPassa',{g:Math.round(escritos-tot)})
+        : todosEscritos&&escritos<tot-0.5 ? tr('mgFaltam',{g:Math.round(tot-escritos)})
+        : '';
+      nota.className='mgnota'+(nota.textContent?' on':'');
+    };
     const fbox=document.createElement('div'); fbox.className='mfil';
-    usados.forEach(n=>{
+    const nota=document.createElement('span');
+    usados.forEach((n,k)=>{
       const f=filInfo(n);
       const c=document.createElement('span'); c.className='chipf';
       /* o ponto da cor é o do Bobina: numa mesa com três filamentos é o que
@@ -1932,9 +2342,27 @@ function drawMesas(){
         p.style.background=corVisivel(f.cor_hex); c.appendChild(p);
       }
       c.appendChild(document.createTextNode(n));
+      /* o campo dos gramas só aparece com dois materiais ou mais: com um só, os
+         gramas da mesa já são os dele e um campo a repetir isso é ruído */
+      if(usados.length>1){
+        const gi=document.createElement('input');
+        gi.type='number'; gi.min='0'; gi.step='1'; gi.className='mg';
+        gi.title=tr('mgT'); gi.value=gDado((mesas[i][7]||[])[k])??'';
+        gi.addEventListener('input',()=>{
+          const arr=(mesas[i][7]||[]).slice();
+          while(arr.length<usados.length) arr.push(null);
+          arr[k]=gi.value===''?null:Math.max(0,parseFloat(gi.value)||0);
+          mesas[i][7]=arr.slice(0,usados.length);
+          refrescaAuto(); calc(); guardaEstado();
+        });
+        campos[k]=gi; c.appendChild(gi);
+        const un=document.createElement('i'); un.className='mgu'; un.textContent='g';
+        c.appendChild(un);
+      }
       const x=document.createElement('button'); x.type='button'; x.textContent='×';
       x.title='Tirar este filamento da mesa';
       x.addEventListener('click',()=>{
+        mesas[i][7]=(mesas[i][7]||[]).filter((_,j)=>j!==k);
         mesas[i][5]=usados.filter(v=>v!==n); drawMesas(); calc(); guardaEstado(); });
       c.appendChild(x); fbox.appendChild(c);
     });
@@ -1948,8 +2376,11 @@ function drawMesas(){
       + (bobL.length?`<optgroup label="Bobina">${grupo(bobL)}</optgroup>`:'');
     add.addEventListener('change',()=>{
       if(!add.value) return;
+      mesas[i][7]=[...(mesas[i][7]||[]).slice(0,usados.length), null];
       mesas[i][5]=[...usados,add.value]; drawMesas(); calc(); guardaEstado(); });
     fbox.appendChild(add);
+    fbox.appendChild(nota);
+    refrescaAuto();
     td2.appendChild(fbox);
 
     tr2.appendChild(td2); tb.appendChild(tr2);
@@ -1961,7 +2392,7 @@ function opcoesImpressora(){
     + PRINTERS.map(x=>`<optgroup label="${x.g}">${g(x.l)}</optgroup>`).join('')
     + (custom.length?`<optgroup label="As minhas">${g(custom)}</optgroup>`:'');
 }
-function addMesa(){ mesas.push([0,'','',el('s_printer').value||'',true,[],0]); drawMesas(); mudaPecas(); }
+function addMesa(){ mesas.push([0,'','',el('s_printer').value||'',true,[],0,[]]); drawMesas(); mudaPecas(); }
 /* o total de peças mudou */
 function mudaPecas(){
   const s=autoTier(totalPecas());
@@ -2258,17 +2689,23 @@ function calc(){
   mesasAtivas.forEach((m,i)=>{
     const g=parseFloat(m[0])||0, t=parseT(m[1]), s=parseFloat(m[2]);
     const fs=filsDaMesa(m);
-    /* com vários filamentos na mesma mesa não há como saber quantos gramas são de cada:
-       a média dos preços é a melhor estimativa possível — daí o aviso lá em baixo */
-    const kgM  = fs.reduce((a,f)=>a+kgRealDe(f),0)/fs.length;
-    const fAjM = fs.reduce((a,f)=>a+fAjDe(f),0)/fs.length;
+    /* o preço da mesa é a média dos €/kg PESADA pelos gramas de cada material.
+       Enquanto ninguém escrever os gramas, o reparto é por igual e isto dá
+       exactamente a média simples de antes — só muda para quem os escreve. */
+    const rep=repartoMesa(m, fs);
+    const gRep=somaReparto(rep);
+    const pesada = calcula => gRep>0 ? rep.reduce((a,x)=>a+calcula(x.f)*x.g,0)/gRep
+                                     : fs.reduce((a,f)=>a+calcula(f),0)/fs.length;
+    const kgM  = pesada(kgRealDe);
+    const fAjM = pesada(fAjDe);
     const temSlic = isFinite(s)&&s>0;
     const cm = temSlic ? s*fAjM : g/1000*kgM;
     if(temSlic) nSlic++;
-    else if(fs.length>1 && g>0) mistura.push(i+1);
+    else if(fs.length>1 && g>0 && rep.filter(x=>x.auto).length>1) mistura.push(i+1);
     gEst+=g; mEst+=t; cEst+=cm;
     const info=impInfo(m[3]||'');
     det.push({i:i+1, g, t, cm, kgM, fAjM, fils:fs.map(f=>f.n),
+              rep:rep.map(x=>({n:x.n, g:x.g, auto:x.auto})),
               imp:info, hImp:horaImp(info,kwh), mostrar:m[4]!==false});
   });
   /* para a retificação: médias ponderadas pelo peso de cada mesa */
@@ -2489,8 +2926,9 @@ function calc(){
   /* média de preços: só avisa quando ela chega mesmo a pesar no custo */
   const avisoMix = mistura.length
     ? `<div class="warn">⚠️ ${mistura.length>1?'Mesas':'Mesa'} ${mistura.join(', ')} com mais do que um filamento
-       e sem custo do slicer — o material foi estimado pela <b>média dos preços</b> dos filamentos dessa mesa,
-       não pelos gramas de cada um. Mete o custo do slicer nessa(s) mesa(s) para o valor ficar exato.</div>`
+       e sem os gramas de cada um — o material foi repartido <b>por igual</b>. Escreve os gramas de cada
+       material no campo ao lado do nome (o slicer dá-tos) e o custo, o aviso de stock e a baixa no
+       Bobina passam a ser exactos.</div>`
     : '';
   const avisoBlocos = (!bMod&&!bImp&&!bPos)
     ? `<div class="warn">⚠️ Estão desligados todos os blocos de trabalho — não há nada para orçamentar.</div>`
@@ -2505,7 +2943,9 @@ function calc(){
 
   /* a régua horária é do tempo de máquina: modelação e acabamento saem de fora */
   LAST={pMat,pImp,pBase,pAcab,pMod,pMarg,desc,promo,arred,pPortes,total,tax,hTot,pecas,
+        det, fDesp,   /* o detalhe fica à mão: é dele que sai a baixa no Bobina */
         taxa: hTot>0?(total-pMat-pAcab-pMod-pPortes)/hTot:0};
+  desenhaBotaoBaixa();
   marketPanel({total,pMat,pAcab,pMod,pPortes,pBase,desc,hTot,pecas,det,nMesas,
     pPrepMesa:nMesas?pPrep/nMesas:0, taxaCobrada: taxaMaq>0?taxaMaq:hImpMedia});
 
@@ -3072,6 +3512,10 @@ function collect(){
      so porque o Bobina esta em baixo ou porque se abriu noutra maquina. */
   o.bob_usados=nomesEmUso().filter(eBobina).map(n=>({...bobFil(n)}));
   o.modelos=MODELOS.map(m=>({...m}));
+  /* a baixa anda com o orçamento: é o que evita perguntar duas vezes pelo mesmo
+     trabalho, e é de onde sai o desfazer */
+  o.baixa=BAIXA; o.baixa_adiada=BAIXA_ADIADA;
+  o.data_manual=DATA_MANUAL;
   o.marca={on:el('b_on').checked, qr:el('q_on').checked, nota_on:el('f_on').checked,
            logo:LOGO, qrs:QRS.map(q=>({...q}))};
   B_TXT.forEach(k=>o.marca[k]=el('b_'+k).value);
@@ -3094,6 +3538,10 @@ function apply(o){
   if(o.tax_modo!==undefined) el('s_tax_modo').value=o.tax_modo;
   if(o.tax_arred!==undefined) el('s_tax_arred').value=o.tax_arred;
   if(Array.isArray(o.modelos)){ MODELOS=o.modelos.map(normModelo); drawModelos(); }
+  BAIXA=(o.baixa&&o.baixa.chave&&Array.isArray(o.baixa.consumos))?o.baixa:null;
+  BAIXA_ADIADA=!!o.baixa_adiada;
+  if(o.data_manual!==undefined) DATA_MANUAL=!!o.data_manual;
+  aplicaDataPrecos(false);   /* a meio do apply() ainda não há estado para gravar */
   if(o.tax_nome!==undefined) el('s_tax_nome').value=o.tax_nome;
   updateTaxFieldState();
   if(o.portes){ portes=o.portes; drawPortes(); drawPortesSel(); }
@@ -3125,15 +3573,16 @@ function importSettings(e){
 function resetJob(){
   el('j_cliente').value=''; el('j_projeto').value=''; el('j_pecas').value=1;
   BLOCOS={mod:true, imp:true, pos:true}; aplicaBlocos();
-  mesas=[[0,'','',el('s_printer').value||'',true,[],1]]; drawMesas();
+  mesas=[[0,'','',el('s_printer').value||'',true,[],1,[]]]; drawMesas();
   MODELOS=[]; drawModelos();
   ['j_manual','j_pol','j_pint','j_desc','j_promo'].forEach(i=>el(i).value=0);
   ['r_g','r_t','r_e'].forEach(i=>el(i).value=''); el('r_usar').checked=true;
+  BAIXA=null; BAIXA_ADIADA=false;   /* trabalho novo, baixa nova */
   el('j_portes').value='0'; calc(); guardaEstado();
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.11.3';
+const VERSAO='1.12.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -3155,6 +3604,44 @@ const I18N={
     fpDoBobina:'do Bobina',
     fpBobines:'{n} bobine(s)',
     fpSemStock:'sem stock em casa',
+    /* ---- gramas de cada material na mesa ---- */
+    mgT:'Gramas deste material nesta mesa — o slicer dá-tos. Em branco reparte o que sobra por igual.',
+    mgFaltam:'faltam {g} g por atribuir',
+    mgPassa:'passa {g} g do total da mesa',
+    /* ---- dar baixa no Bobina ---- */
+    bxTitulo:'Dar baixa no Bobina',
+    bxSub:'Sai do inventário o que este trabalho gastou, desperdício incluído. A bobine sugerida é a que faz sentido acabar primeiro — troca-a se foi outra.',
+    bxBotao:'Dar baixa no Bobina — {g}',
+    bxDar:'Dar baixa',
+    bxCancelar:'Cancelar',
+    bxAEnviar:'A dar baixa…',
+    bxTirar:'Tirar esta bobine',
+    bxOutra:'+ outra bobine',
+    bxEmCasa:'{g} em casa · {n} bobine(s)',
+    bxFaltam:'faltam {g} por atribuir',
+    bxSobram:'sobram {g} atribuídos a mais',
+    bxSoTem:'esta bobine só tem {g} — o que passar disso fica a zero',
+    bxSemBobines:'sem bobines com filamento no Bobina',
+    bxSemNada:'Não há gramas nenhuns para dar baixa.',
+    bxFora:'Fora desta baixa: {f} — não vem do Bobina, não há inventário para mexer.',
+    bxDada:'baixa de {g} dada em {quando}',
+    bxAnular:'anular',
+    bxAnularConf:'Anular a baixa e devolver o filamento às bobines?',
+    bxMexidas:'Uma das bobines foi pesada à mão depois da baixa — essa ficou como está, para não apagar a pesagem.',
+    bxAvisos:'A baixa foi dada, com reparos:',
+    bxErro:'Não consegui dar baixa: {e}',
+    bxSelado:'selada',
+    bxAberto:'aberta',
+    bxVazio:'vazia',
+    bxNaCaixa:'na caixa',
+    bxqTitulo:'Este trabalho já foi impresso?',
+    bxqTxt:'Se já foi, dá-se baixa de {g} em {n} filamento(s) do Bobina. Se ainda não, o orçamento abre à mesma e o botão fica no cartão das mesas.',
+    bxqSim:'Já foi — dar baixa',
+    bxqNao:'Ainda não',
+    dtAuto:'Vem do <b>Bobina</b>: é a última vez que ele viu preços nas lojas.',
+    dtManual:'À mão. O <b>Bobina</b> tem preços de <b>{d}</b>.',
+    dtManualT:'Escrever a data à mão',
+    dtVoltarT:'Voltar à data do Bobina',
     fpNaLoja:'{loja}: {preco}/kg',
     fpSoStock:'só com stock',
     fpVeu:'véu',
@@ -3308,6 +3795,42 @@ const I18N={
     fpDoBobina:'from Bobina',
     fpBobines:'{n} spool(s)',
     fpSemStock:'none in stock',
+    mgT:'Grams of this material on this plate — your slicer tells you. Left blank, the rest is split evenly.',
+    mgFaltam:'{g} g still unassigned',
+    mgPassa:'{g} g over the plate total',
+    bxTitulo:'Log usage in Bobina',
+    bxSub:'What this job used comes off the inventory, waste included. The suggested spool is the one worth finishing first — change it if it was another.',
+    bxBotao:'Log usage in Bobina — {g}',
+    bxDar:'Log usage',
+    bxCancelar:'Cancel',
+    bxAEnviar:'Logging…',
+    bxTirar:'Remove this spool',
+    bxOutra:'+ another spool',
+    bxEmCasa:'{g} in stock · {n} spool(s)',
+    bxFaltam:'{g} still unassigned',
+    bxSobram:'{g} assigned over',
+    bxSoTem:'this spool only holds {g} — anything past that just hits zero',
+    bxSemBobines:'no spools with filament in Bobina',
+    bxSemNada:'Nothing to log.',
+    bxFora:'Not in this entry: {f} — not from Bobina, no inventory to touch.',
+    bxDada:'{g} logged on {quando}',
+    bxAnular:'undo',
+    bxAnularConf:'Undo this entry and put the filament back on the spools?',
+    bxMexidas:'One spool was weighed by hand after the entry — that one was left alone, so the weighing is not lost.',
+    bxAvisos:'Logged, with remarks:',
+    bxErro:'Could not log usage: {e}',
+    bxSelado:'sealed',
+    bxAberto:'open',
+    bxVazio:'empty',
+    bxNaCaixa:'boxed',
+    bxqTitulo:'Has this job been printed?',
+    bxqTxt:'If it has, {g} across {n} Bobina filament(s) comes off the inventory. If not, the quote opens anyway and the button stays on the plates card.',
+    bxqSim:'Yes — log usage',
+    bxqNao:'Not yet',
+    dtAuto:'From <b>Bobina</b>: the last time it saw shop prices.',
+    dtManual:'Set by hand. <b>Bobina</b> has prices from <b>{d}</b>.',
+    dtManualT:'Type the date by hand',
+    dtVoltarT:'Back to the Bobina date',
     fpNaLoja:'{loja}: {preco}/kg',
     fpSoStock:'in stock only',
     fpVeu:'tint',
@@ -3471,6 +3994,8 @@ function aplicarIdioma(){
   if(typeof atualizaBotaoDobrar==='function') atualizaBotaoDobrar();
   if(typeof aplicaBlocos==='function') aplicaBlocos();
   if(typeof drawTaxPresets==='function') drawTaxPresets();
+  if(typeof desenhaBotaoBaixa==='function') desenhaBotaoBaixa();
+  if(typeof aplicaDataPrecos==='function') aplicaDataPrecos(false);
   document.querySelectorAll('.card h2').forEach(h=>{ h.title=tr('foldTitle'); });
   /* traduzir um h3 reescreve-lhe o texto todo: o chevron tem de voltar */
   document.querySelectorAll('.card h3[data-sub]').forEach(h=>{

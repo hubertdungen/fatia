@@ -14,6 +14,7 @@ import re
 import secrets
 import sqlite3
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from http import cookies
@@ -96,11 +97,50 @@ def bobina_filaments() -> tuple[int, dict[str, Any]]:
             "bobines": sum(int(f.get("bobines") or 0) for f in fils),
             "total_g": round(sum(float(f.get("restante_g") or 0) for f in fils), 1),
         },
+        # a data em que o Bobina viu os preços pela última vez: é ela que
+        # preenche o "Preços revistos em", que ninguém se lembrava de mexer
+        "precos_em": data.get("precos_em", ""),
         "em": data.get("em") or now(),
         "bobina": data.get("versao", ""),
     }
     _bobina_cache = (time.time(), payload)
     return 200, payload
+
+
+def bobina_escreve(caminho: str, corpo: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    """Um pedido de escrita ao Bobina, com o segredo da ponte metido aqui.
+
+    O token nunca chega ao browser: a página pede ao Fatia, o Fatia é que fala
+    com o Bobina -- o mesmo caminho da leitura, pelas mesmas razões (CORS e
+    cookies não passam entre as duas portas).
+
+    A cache da leitura é deitada fora a seguir a uma escrita. Sem isso, dar
+    baixa e ver o stock logo a seguir mostrava o número de antes durante 10
+    segundos, e parecia que a baixa não tinha entrado."""
+    global _bobina_cache
+    if not BOBINA_TOKEN_FILE.exists():
+        return 503, {"ok": False, "error": "O Bobina ainda não arrancou nesta máquina."}
+    token = BOBINA_TOKEN_FILE.read_text().strip()
+    if not token:
+        return 503, {"ok": False, "error": "O Bobina ainda não gerou o segredo da ligação."}
+    dados = json.dumps({**corpo, "token": token}).encode("utf-8")
+    pedido = urllib.request.Request(
+        f"{BOBINA_URL}{caminho}", data=dados, method="POST",
+        headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(pedido, timeout=15) as r:
+            resposta = json.loads(r.read().decode("utf-8") or "{}")
+            codigo = r.status
+    except urllib.error.HTTPError as exc:
+        try:
+            resposta = json.loads(exc.read().decode("utf-8") or "{}")
+        except Exception:  # noqa: BLE001
+            resposta = {"error": f"O Bobina recusou: {exc}"}
+        codigo = exc.code
+    except Exception as exc:  # noqa: BLE001
+        return 502, {"ok": False, "error": f"Sem resposta do Bobina: {exc}"}
+    _bobina_cache = None
+    return codigo, resposta
 
 
 def spot_price(zone: str = "PT") -> tuple[int, dict[str, Any]]:
@@ -421,6 +461,20 @@ class FatiaHandler(SimpleHTTPRequestHandler):
             return
         if path == "/api/state":
             self.handle_state_save(data)
+            return
+        # dar baixa no Bobina do filamento que o trabalho gastou (e desfazer).
+        # Não exige sessão -- a app inteira funciona sem conta, e a leitura do
+        # inventário também não exige -- mas exige vir de casa: um pedido da
+        # Internet não mexe nas bobines de ninguém.
+        if path in ("/api/bobina/gastar", "/api/bobina/gastar/anular"):
+            cliente = first_forwarded_for(self.headers, self.client_address[0])
+            if not is_lan_or_mesh(cliente):
+                self.error_json(403, "As baixas no Bobina só se fazem da rede de casa")
+                return
+            caminho = ("/api/fatia/gastar/anular" if path.endswith("/anular")
+                       else "/api/fatia/gastar")
+            status, payload = bobina_escreve(caminho, data if isinstance(data, dict) else {})
+            self.write_json(status, payload)
             return
         self.error_json(404, "API desconhecida")
 
