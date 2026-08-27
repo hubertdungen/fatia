@@ -57,7 +57,24 @@ BOBINA_TOKEN_FILE = Path(
                    str(Path.home() / ".local/share/bobina/bridge.token")))
 
 
+# A app pergunta de 45 em 45 segundos, e há mais do que um separador aberto e
+# mais do que um aparelho em casa: uma cache curta chega para isso não passar de
+# uma leitura por vez. Curta de propósito -- mexer no Bobina e saltar para o
+# Fatia tem de mostrar o número novo.
+BOBINA_TTL = int(os.environ.get("FATIA_BOBINA_TTL", "10"))
+_bobina_cache: tuple[float, dict[str, Any]] | None = None
+
+
 def bobina_filaments() -> tuple[int, dict[str, Any]]:
+    """O inventário do Bobina, tal como ele o dá.
+
+    Vai tudo para o browser -- preço, stock, locais, cor já em hex -- porque é
+    o Fatia que escolhe o que mostrar, e a ponte não deve ter de mudar de cada
+    vez que o seletor de lá passa a dizer mais uma coisa.
+    """
+    global _bobina_cache
+    if _bobina_cache and time.time() - _bobina_cache[0] < BOBINA_TTL:
+        return 200, _bobina_cache[1]
     if not BOBINA_TOKEN_FILE.exists():
         return 503, {"ok": False, "error": "O Bobina ainda não arrancou nesta máquina."}
     token = BOBINA_TOKEN_FILE.read_text().strip()
@@ -69,7 +86,21 @@ def bobina_filaments() -> tuple[int, dict[str, Any]]:
             data = json.loads(r.read().decode("utf-8"))
     except Exception as exc:  # noqa: BLE001
         return 502, {"ok": False, "error": f"Sem resposta do Bobina: {exc}"}
-    return 200, {"ok": True, "filamentos": data.get("filamentos", [])}
+    fils = data.get("filamentos", [])
+    payload = {
+        "ok": True,
+        "filamentos": fils,
+        "resumo": data.get("resumo") or {
+            "filamentos": len(fils),
+            "com_stock": len([f for f in fils if f.get("bobines")]),
+            "bobines": sum(int(f.get("bobines") or 0) for f in fils),
+            "total_g": round(sum(float(f.get("restante_g") or 0) for f in fils), 1),
+        },
+        "em": data.get("em") or now(),
+        "bobina": data.get("versao", ""),
+    }
+    _bobina_cache = (time.time(), payload)
+    return 200, payload
 
 
 def spot_price(zone: str = "PT") -> tuple[int, dict[str, Any]]:

@@ -47,6 +47,8 @@ Fatia computes both sides in parallel: **what it costs you** and **what you char
 
 **Filament manager.** A filament is a name and its prices — price/kg and the supplier's shipping. Add your own, remove them, and they travel with your presets and inside the Export file. Each plate picks which filaments it used, and can use more than one.
 
+**Wired to [Bobina](https://github.com/hubertdungen/bobina), live.** With Bobina running on the same machine, the filament picker shows your real inventory: the spool drawn in its actual colour, the **real cost per kilo** (what you actually paid for the spools still on the shelf), how many grams are left, how many spools and where they are. **There is nothing to import and nothing to refresh** — the figures are the ones from right now and change on their own when you change them in Bobina. And because Fatia now knows what you have at home, it warns you when the job you are quoting **does not fit in stock**. A Bobina filament cannot be edited here (that belongs in Bobina); ⧉ makes an editable copy of your own at today's price. Your hand-typed filaments live on beside them.
+
 **Several filaments on one plate.** When a plate carries more than one filament and has no slicer cost, there is no way to know how many grams are of each: Fatia estimates from the average of that plate's prices — and warns you, because entering the slicer cost for that plate is all it takes to make the figure exact. The client quote lists the filaments used, and breaks them down per plate when there is more than one.
 
 **Client quote.** A clean printable view with the Fatia mini logo, a spec box and not a single margin in sight. Optionally:

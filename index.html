@@ -161,6 +161,97 @@ body.simples .avancado{display:none !important}
 body.simples #mkt{display:none}
 body.simples .hint{display:none}
 
+/* ---- filamentos: o botão, e o seletor ligado ao Bobina ---- */
+#fil_trigger{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:8px 11px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+  font:inherit;font-weight:500;color:var(--txt);cursor:pointer}
+#fil_trigger:hover{border-color:var(--accent);color:var(--txt)}
+#fil_trigger .bob{flex:none}
+#fil_trigger .ftxt{display:flex;flex-direction:column;min-width:0;line-height:1.3}
+#fil_trigger .ftxt b{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+#fil_trigger .ftxt i{font-style:normal;font-size:11.5px;color:var(--dim);
+  font-variant-numeric:tabular-nums}
+#fil_trigger .fst{margin-left:auto;font-size:11px;color:var(--dim);white-space:nowrap;
+  background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:3px 7px}
+#fil_trigger .fchev{margin-left:6px;font-size:10px;opacity:.6}
+#fil_trigger .fst + .fchev{margin-left:0}
+.filaviso{color:var(--dim)}
+input.lido{opacity:.7;cursor:not-allowed}
+
+#filpick{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:215;
+  align-items:center;justify-content:center;padding:20px;overflow:auto}
+.fpbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  width:100%;max-width:880px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.fphd{display:flex;align-items:flex-start;gap:14px;padding:16px 18px 12px;
+  border-bottom:1px solid var(--line)}
+.fptit b{font-size:18px;letter-spacing:-.3px;display:block;margin-bottom:7px}
+.fpx{padding:4px 11px;font-size:17px;line-height:1.2;margin-left:auto}
+/* o estado da ligação: verde a ler, âmbar a mostrar a última leitura, vermelho sem nada */
+.fplive{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--dim);
+  background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:4px 11px}
+.fplive .dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.fplive.on{color:var(--good);border-color:rgba(62,207,142,.35)}
+.fplive.on .dot{animation:fppulse 2.4s ease-in-out infinite}
+.fplive.velho{color:var(--accent2);border-color:rgba(255,196,107,.35)}
+.fplive.off{color:var(--bad);border-color:rgba(255,107,107,.35)}
+@keyframes fppulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+.fpfiltros{padding:12px 18px;border-bottom:1px solid var(--line);display:flex;
+  flex-direction:column;gap:9px}
+#fp_q{width:100%}
+.fpchips{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{padding:4px 10px;font-size:11.5px;font-weight:600;border-radius:20px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--dim);cursor:pointer}
+.fchip:hover{border-color:var(--accent2);color:var(--accent2)}
+.fchip.on{background:var(--accent);border-color:var(--accent);color:#1a1206}
+.fchip.on:hover{background:var(--accent2);color:#1a1206}
+
+.fpcorpo{padding:14px 18px 18px;overflow:auto}
+.fsec + .fsec{margin-top:18px}
+.fsec h4{margin:0 0 9px;font-size:11px;text-transform:uppercase;letter-spacing:1.3px;
+  color:var(--accent);font-weight:700;display:flex;align-items:baseline;gap:8px}
+.fsec h4 span{text-transform:none;letter-spacing:0;font-size:11px;color:var(--dim);font-weight:500}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:9px}
+@media(max-width:560px){.fgrid{grid-template-columns:1fr}}
+
+.fcard{display:flex;gap:11px;align-items:flex-start;background:var(--panel2);
+  border:1px solid var(--line);border-radius:12px;padding:11px 12px;cursor:pointer;
+  text-align:left;transition:border-color .15s,transform .15s;position:relative;color:var(--txt)}
+.fcard:hover{border-color:var(--accent);transform:translateY(-1px)}
+.fcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fcard.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.fcard.vazio{opacity:.55}
+.fcard .fbob{flex:none;margin-top:1px}
+.fcorpo{min-width:0;flex:1}
+.ftit{line-height:1.25;margin-bottom:5px}
+.ftit b{display:block;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.ftit .fmarca{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.7px}
+.fpreco{display:flex;align-items:baseline;gap:3px;margin-bottom:6px}
+.fpreco b{font-size:15px;font-weight:800;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.fpreco span{font-size:11px;color:var(--dim)}
+.ftag{font-style:normal;margin-left:auto;font-size:9.5px;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--dim);border:1px solid var(--line);border-radius:6px;
+  padding:1px 5px;background:var(--panel)}
+.fbar{height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:5px}
+.fbar i{display:block;height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.fmeta{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;
+  display:flex;align-items:baseline;gap:6px}
+.fmeta em{font-style:normal;margin-left:auto;opacity:.75;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:52%}
+.fmeta.fzero{color:var(--bad);opacity:.85}
+.facoes{display:flex;flex-direction:column;gap:4px}
+.fbtn{padding:2px 7px;font-size:12px;line-height:1.5;border-radius:7px;background:var(--panel);
+  border:1px solid var(--line);color:var(--dim);cursor:pointer;font-weight:600}
+.fbtn:hover{border-color:var(--accent2);color:var(--accent2)}
+.fcard.fnovo{display:flex;align-items:center;justify-content:center;color:var(--dim);
+  font-weight:600;font-size:12.5px;border-style:dashed;min-height:74px}
+.fcard.fnovo:hover{color:var(--accent2)}
+.fvazio{grid-column:1/-1;color:var(--dim);font-size:12.5px;padding:14px;text-align:center;
+  border:1px dashed var(--line);border-radius:12px}
+
 /* ---- licença ---- */
 #lic{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:200;
   align-items:center;justify-content:center;padding:20px;overflow:auto}
@@ -237,6 +328,7 @@ tr.msub td{padding:0 3px 9px;border-bottom:1px solid var(--line)}
 .chipf button{background:none;border:none;color:inherit;opacity:.65;cursor:pointer;
   font-size:12px;line-height:1;padding:0 2px;width:auto}
 .chipf button:hover{opacity:1;color:var(--bad)}
+.chipf .pt{width:8px;height:8px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
 
 /* ---- marca / faturação ---- */
 #cardMarca{margin-top:16px}
@@ -411,6 +503,24 @@ footer a{color:var(--blue);text-decoration:none}
   </div>
 </div>
 
+<div id="filpick">
+  <div class="fpbox">
+    <div class="fphd">
+      <div class="fptit">
+        <b>🧵 <span data-i18n="fpTitulo">Filamentos</span></b>
+        <div id="bob_live" class="fplive"></div>
+      </div>
+      <button class="ghost fpx" onclick="fechaPicker()" title="Fechar">×</button>
+    </div>
+    <div class="fpfiltros">
+      <input id="fp_q" oninput="filtraPicker()" data-i18n-placeholder="fpProcurar"
+             placeholder="Procurar marca, material, cor…" autocomplete="off">
+      <div id="fp_chips" class="fpchips"></div>
+    </div>
+    <div id="fp_corpo" class="fpcorpo"></div>
+  </div>
+</div>
+
 <div id="mem">
   <div class="membox">
     <div class="lichd">
@@ -575,13 +685,14 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="row r2">
       <div><label>Preços revistos em</label><input type="date" id="s_data"></div>
       <div><label>Filamento</label>
-        <div style="display:flex;gap:6px"><select id="s_fil_nome" style="flex:1"></select>
-          <button title="Guardar os preços atuais como filamento novo" onclick="addFil()" style="padding:8px 11px">+</button>
-          <button title="Mudar o nome e os preços deste filamento" onclick="editFil()" style="padding:8px 11px">✎</button>
-          <button title="Remover este filamento" onclick="delFil()" style="padding:8px 11px">×</button>
-          <button title="Importar os filamentos que tens no Bobina, com o custo real por quilo" onclick="importaBobina()" style="padding:8px 11px">⬇</button></div>
-        <div class="hint">O filamento escolhido aqui é o que vale para as mesas onde não escolheres nenhum.
-          Os preços dele são os de baixo — ou usa o <b>✎</b>.</div></div>
+        <!-- o select continua a ser a verdade sobre o que está escolhido (estado,
+             presets, Exportar); o que se vê é o botão que abre o seletor -->
+        <select id="s_fil_nome" style="display:none"></select>
+        <button type="button" id="fil_trigger" onclick="abrePicker()"
+                data-i18n-title="fpAbrirT" title="Escolher filamento"></button>
+        <div class="hint" data-i18n-html="fpHint">O filamento escolhido aqui é o que vale para as mesas
+          onde não escolheres nenhum. Os do <b>Bobina</b> vêm com o preço e o stock de agora.</div>
+        <div class="hint filaviso" id="fil_aviso" style="display:none"></div></div>
     </div>
 
     <h3 class="fechada" style="margin-top:14px">⚡ Eletricidade</h3>
@@ -1217,101 +1328,456 @@ function delModelo(){
 }
 
 /* ============ FILAMENTOS ============
-   Cada filamento é {nome, preço/kg, portes do fornecedor}. O desperdício fica de fora
-   de propósito: é da casa, não da bobine. A lista vive nos presets e no Exportar. */
+   Há duas origens, e a diferença entre elas é a razão de quase tudo o que vem
+   a seguir:
+
+   · os MEUS (FILS) — {nome, preço/kg, portes} escritos aqui à mão. Vivem no
+     estado, nos presets e no Exportar, e são editáveis.
+   · os do BOBINA — o inventário verdadeiro (:8100), lido EM DIRETO. Não se
+     importam nem se copiam para os presets: o preço, o stock e a cor são
+     sempre os de agora, por isso um filamento não pode ser editado aqui — o
+     sítio de o mudar é o Bobina.
+
+   O desperdício fica de fora dos dois de propósito: é da casa, não da bobine. */
 let FILS=[{n:DEF.fil_nome, kg:DEF.fil_kg, portes:DEF.fil_portes}];
-const filInfo = n => FILS.find(f=>f.n===n) || null;
+
+/* Os portes são a única coisa que o Bobina não sabe (não regista o que se paga
+   de envio), por isso ficam deste lado, por nome de filamento. */
+let PORTES_BOB={};
+
+/* ---- ligação viva ao Bobina ----
+   O pedido passa pelo server.py do Fatia porque entre portas o browser batia
+   em CORS e o cookie de sessão não passava — ver /api/bobina/filamentos. */
+const BOB={fils:[], resumo:null, em:0, ok:false, erro:'', lido:0, puxando:false};
+const BOB_INTERVALO=45000;
+/* A última leitura dos filamentos que ESTE orçamento usa, guardada com ele.
+   Um orçamento não pode mudar de valor — nem perder um filamento das mesas —
+   só porque o Bobina está em baixo ou porque se abriu noutra máquina. */
+let BOB_SNAP=[];
+
+const bobVivo  = n => BOB.fils.find(f=>f.n===n)||null;
+const bobGuard = n => BOB_SNAP.find(f=>f.n===n)||null;
+function bobFil(n){
+  const f=bobVivo(n)||bobGuard(n);
+  if(!f) return null;
+  f.bobina=true; f.vivo=!!bobVivo(n); f.portes=+PORTES_BOB[n]||0;
+  return f;
+}
+/* os meus primeiro: um filamento escrito à mão com o mesmo nome ganha ao do
+   Bobina, senão não havia como corrigir um preço para um orçamento */
+const filInfo = n => FILS.find(f=>f.n===n) || bobFil(n);
+const eBobina = n => !FILS.some(f=>f.n===n) && !!bobFil(n);
+function todosFils(){
+  const meus=FILS.map(f=>f.n);
+  const vivos=BOB.fils.filter(b=>!meus.includes(b.n));
+  const guardados=BOB_SNAP.filter(b=>!meus.includes(b.n)&&!vivos.some(x=>x.n===b.n));
+  return [...FILS, ...vivos.map(b=>bobFil(b.n)), ...guardados.map(b=>bobFil(b.n))];
+}
 const rotuloFil = f => `${f.n} — ${(+f.kg||0).toFixed(2)} €/kg`;
 /* o filamento das Definições: o que vale para as mesas que não escolhem nenhum */
 const filDefault = () => filInfo(el('s_fil_nome').value)
   || {n:el('s_fil_nome').value||'Filamento', kg:num('s_fil_kg'), portes:num('s_fil_portes')};
 
+async function puxaBobina(forcar=false){
+  if(BOB.puxando) return;
+  /* o focus e o visibilitychange disparam os dois ao voltar à janela */
+  if(!forcar && Date.now()-BOB.lido<3000) return;
+  BOB.puxando=true;
+  try{
+    const r=await fetch('/api/bobina/filamentos',{credentials:'same-origin'});
+    const d=await r.json();
+    if(!d.ok) throw new Error(d.error||'sem resposta do Bobina');
+    const antes=impressaoBob();
+    BOB.fils=(d.filamentos||[]).filter(f=>f&&f.n);
+    BOB.resumo=d.resumo||null; BOB.em=d.em||0; BOB.ok=true; BOB.erro='';
+    store.set('bobina',{fils:BOB.fils,resumo:BOB.resumo,em:BOB.em});
+    if(impressaoBob()!==antes){
+      drawFils(); sincronizaCamposFil(); calc();
+      if(pickerAberto()) drawPicker();
+    }
+  }catch(e){
+    BOB.ok=false; BOB.erro=e.message||String(e);
+  }finally{
+    BOB.lido=Date.now(); BOB.puxando=false;
+    estadoBobina(); drawFilTrigger();
+  }
+}
+/* só o que mexe com o orçamento e com o que se vê nos cartões */
+const impressaoBob = () => JSON.stringify(BOB.fils.map(f=>[f.n,f.kg,f.restante_g,f.bobines,f.cor_hex]));
+
+function ligaBobina(){
+  const c=store.get('bobina',null);       /* a última leitura, para a app abrir já com dados */
+  if(c && Array.isArray(c.fils)){ BOB.fils=c.fils; BOB.resumo=c.resumo||null; BOB.em=c.em||0; }
+  drawFils(); estadoBobina();
+  puxaBobina(true);
+  setInterval(()=>{ if(document.visibilityState==='visible') puxaBobina(); }, BOB_INTERVALO);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') puxaBobina(); });
+  window.addEventListener('focus',()=>puxaBobina());
+}
+const kgTxt = g => g>=1000 ? (g/1000).toFixed(g%1000?2:0).replace('.',',')+' kg' : Math.round(g)+' g';
+function haQuanto(ms){
+  const s=Math.max(0,Math.round((Date.now()-ms)/1000));
+  if(s<10) return tr('bobAgora');
+  if(s<90) return tr('bobHaSeg',{n:s});
+  const m=Math.round(s/60);
+  return m<90 ? tr('bobHaMin',{n:m}) : tr('bobHaHoras',{n:Math.round(m/60)});
+}
+/* a barra de estado da ligação, no seletor e por baixo do botão */
+function estadoBobina(){
+  const c=el('bob_live'); if(!c) return;
+  const r=BOB.resumo;
+  const ok=BOB.ok;
+  c.className='fplive '+(ok?'on':(BOB.fils.length?'velho':'off'));
+  const conta=r
+    ? tr('bobResumo',{f:r.filamentos, b:r.bobines, kg:kgTxt(r.total_g)})
+    : tr('bobSemDados');
+  c.innerHTML='<i class="dot"></i><span>'+htmlEsc(
+      ok ? conta+' · '+haQuanto(BOB.lido)
+         : (BOB.fils.length ? tr('bobOffline',{quando:haQuanto(BOB.lido)}) : tr('bobSemLigacao'))
+    )+'</span>';
+  c.title=BOB.erro||tr('bobTitulo');
+}
+
+/* ---- a bobine desenhada ----
+   O mesmo traço da app do Bobina: aro, filamento enrolado com a folga por onde
+   sai a ponta, e o núcleo. A COR vem já resolvida da ponte (lexicon.cor_hex do
+   lado de lá) — aqui não há léxico nenhum, de propósito. */
+const COR_NEUTRA='#8892a0';
+const hex2rgb = h => { const n=parseInt(String(h).slice(1),16); return [n>>16&255,n>>8&255,n&255]; };
+const rgb2hex = ([r,g,b]) => '#'+[r,g,b]
+  .map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+function rgb2hsl([r,g,b]){
+  r/=255; g/=255; b/=255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
+  let h=0; const l=(mx+mn)/2;
+  const sat=d===0?0:d/(1-Math.abs(2*l-1));
+  if(d!==0){
+    if(mx===r) h=((g-b)/d)%6; else if(mx===g) h=(b-r)/d+2; else h=(r-g)/d+4;
+    h*=60; if(h<0) h+=360;
+  }
+  return [h,sat,l];
+}
+function hsl2rgb([h,s,l]){
+  const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2;
+  const t = h<60?[c,x,0] : h<120?[x,c,0] : h<180?[0,c,x]
+          : h<240?[0,x,c] : h<300?[x,0,c] : [c,0,x];
+  return t.map(v=>(v+m)*255);
+}
+const luz = hex => { const [r,g,b]=hex2rgb(hex).map(v=>{
+    v/=255; return v<=0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+  return 0.2126*r+0.7152*g+0.0722*b; };
+/* Um preto #141414 não se distingue no painel escuro. O traço sobe de
+   luminosidade o suficiente para existir; o ENCHIMENTO fica com a cor
+   verdadeira — é o filamento. Cópia exata do visivel() do Bobina: as duas apps
+   têm de desenhar a mesma bobine. */
+function corVisivel(hex){
+  if(!/^#[0-9a-f]{6}$/i.test(hex||'')) return COR_NEUTRA;
+  let [h,s,l]=rgb2hsl(hex2rgb(hex));
+  const y=luz(hex);
+  if(y<0.05) l=Math.max(l,0.32);
+  else if(y<0.16) l=Math.max(l,0.40);
+  if(y>0.88) l=Math.min(l,0.85);
+  return rgb2hex(hsl2rgb([h,s,l]));
+}
+function bobineSVG(cor,tam,transp){
+  const c=/^#[0-9a-f]{6}$/i.test(cor||'')?cor:COR_NEUTRA, linha=corVisivel(c);
+  return `<svg class="bob" viewBox="0 0 48 48" width="${tam}" height="${tam}" aria-hidden="true">
+    <circle cx="24" cy="24" r="20.5" fill="none" stroke="${linha}" stroke-width="1.8" opacity=".75"/>
+    <path d="M35.69 30.75 A13.5 13.5 0 1 1 35.69 17.25" fill="none" stroke="${c}"
+          stroke-width="7.5" stroke-linecap="round" opacity="${transp?'.45':'.95'}"/>
+    <path d="M35.69 17.25 c 4 -1.5, 6.5 2, 3.6 4.8" fill="none" stroke="${linha}"
+          stroke-width="2" stroke-linecap="round"/>
+    <circle cx="24" cy="24" r="6" fill="none" stroke="${linha}" stroke-width="1.8"/>
+  </svg>`;
+}
+const desenhaFil = (f,tam=34) => f&&f.bobina
+  ? bobineSVG(f.cor_hex,tam,f.transparente)
+  : bobineSVG(COR_NEUTRA,tam,false);
+
+/* ---- o botão que abre o seletor ---- */
+function drawFilTrigger(){
+  const b=el('fil_trigger'); if(!b) return;
+  const n=el('s_fil_nome').value, f=filInfo(n);
+  if(!f){ b.innerHTML=`<span class="ftxt"><b>${tr('fpNenhum')}</b></span><span class="fchev">▾</span>`; return; }
+  const stock=f.bobina&&f.restante_g!==undefined
+    ? `<span class="fst">${f.bobines?kgTxt(f.restante_g)+' · '+tr('fpBobines',{n:f.bobines}):tr('fpSemStock')}</span>`
+    : '';
+  b.innerHTML=`${desenhaFil(f,32)}<span class="ftxt"><b>${htmlEsc(f.n)}</b>`
+    +`<i>${eur(f.kg)}/kg${f.bobina?' · '+tr('fpDoBobina'):''}</i></span>${stock}<span class="fchev">▾</span>`;
+}
+
 function drawFils(redesenhaMesas=true){
-  const s=el('s_fil_nome'), keep=s.value;
-  s.innerHTML = FILS.length
-    ? FILS.map(f=>`<option value="${htmlEsc(f.n)}">${htmlEsc(rotuloFil(f))}</option>`).join('')
-    : '<option value="">— sem filamentos —</option>';
-  s.value = FILS.some(f=>f.n===keep) ? keep : (FILS[0]?FILS[0].n:'');
+  const s=el('s_fil_nome'); if(!s) return;
+  const keep=s.value;
+  const op=f=>`<option value="${htmlEsc(f.n)}">${htmlEsc(rotuloFil(f))}</option>`;
+  const meus=FILS.map(op).join('');
+  const doBob=todosFils().filter(f=>f.bobina).map(op).join('');
+  let html='';
+  if(meus) html+=`<optgroup label="${htmlEsc(tr('fpMeus'))}">${meus}</optgroup>`;
+  if(doBob) html+=`<optgroup label="Bobina">${doBob}</optgroup>`;
+  s.innerHTML = html || '<option value="">— sem filamentos —</option>';
+  s.value = filInfo(keep) ? keep : (todosFils()[0] ? todosFils()[0].n : '');
+  drawFilTrigger();
   if(redesenhaMesas && el('tbl_mesas') && el('tbl_mesas').querySelector('tbody').children.length) drawMesas();
 }
 /* escolher um filamento traz os preços dele para os campos */
 function aplicaFilamento(){
-  const f=filInfo(el('s_fil_nome').value);
-  if(f){ el('s_fil_kg').value=f.kg; el('s_fil_portes').value=f.portes; }
+  sincronizaCamposFil();
   calc(); guardaEstado();
+}
+/* Os campos de preço seguem o filamento escolhido. Num filamento do Bobina o
+   €/kg é só de leitura: quem manda nele é o inventário, e escrever aqui por
+   cima dava um número que desaparecia na leitura seguinte. Os portes ficam
+   editáveis porque o Bobina não os conhece. */
+function sincronizaCamposFil(){
+  const n=el('s_fil_nome').value, f=filInfo(n);
+  if(!f) return;
+  el('s_fil_kg').value=f.kg; el('s_fil_portes').value=f.portes;
+  const doBob=eBobina(n);
+  el('s_fil_kg').readOnly=doBob;
+  el('s_fil_kg').classList.toggle('lido',doBob);
+  const av=el('fil_aviso');
+  if(av){
+    av.style.display=doBob?'block':'none';
+    if(doBob) av.innerHTML=tr('fpLido',{n:htmlEsc(f.n)})
+      +(f.vivo?'':' <b>'+htmlEsc(tr('fpDesligado'))+'</b>');
+  }
+  drawFilTrigger();
 }
 /* mexer nos preços escreve-os de volta no filamento escolhido, sem redesenhar nada */
 function marcaFilamento(){
-  const f=filInfo(el('s_fil_nome').value);
+  const n=el('s_fil_nome').value, f=filInfo(n);
   if(!f) return;
+  if(eBobina(n)){                     /* só os portes são deste lado */
+    PORTES_BOB[n]=num('s_fil_portes');
+    el('s_fil_kg').value=f.kg;
+    calc(); guardaEstado(); return;
+  }
   f.kg=num('s_fil_kg'); f.portes=num('s_fil_portes');
   const o=[...el('s_fil_nome').options].find(x=>x.value===f.n);
   if(o) o.textContent=rotuloFil(f);
-  guardaEstado();
+  drawFilTrigger(); guardaEstado();
 }
-function addFil(){
-  const n=(prompt('Nome do filamento:', '')||'').trim();
+function escolheFil(n){
+  if(!filInfo(n)) return;
+  el('s_fil_nome').value=n;
+  aplicaFilamento();
+  if(pickerAberto()) drawPicker();
+}
+function addFil(nome){
+  const n=(typeof nome==='string'?nome:(prompt(tr('fpNomeNovo'),'')||'')).trim();
   if(!n) return;
   const f={n, kg:num('s_fil_kg'), portes:num('s_fil_portes')};
   const i=FILS.findIndex(x=>x.n===n);
-  if(i>=0){ if(!confirm(`Já tens "${n}". Substituir os preços?`)) return; FILS[i]=f; }
+  if(i>=0){ if(!confirm(tr('fpJaTens',{n}))) return; FILS[i]=f; }
   else FILS.push(f);
   drawFils(); el('s_fil_nome').value=n; aplicaFilamento();
+  if(pickerAberto()) drawPicker();
 }
-/* ---- ligação ao Bobina ----
-   O inventário de filamento vive no Bobina (:8100). Aqui só se puxa o que ele
-   sabe: nome e custo REAL por quilo, calculado pelo que foi mesmo pago pelas
-   bobines que estão em casa. O pedido passa pelo server.py do Fatia porque
-   entre portas o browser batia em CORS. */
-async function importaBobina(){
-  try{
-    const r=await fetch('/api/bobina/filamentos',{credentials:'same-origin'});
-    const d=await r.json();
-    if(!d.ok) return alert(d.error||'Não consegui falar com o Bobina.');
-    const lista=(d.filamentos||[]).filter(f=>f.n);
-    if(!lista.length) return alert('O Bobina ainda não tem filamentos no inventário.');
-    let novos=0, actualizados=0, semPreco=0;
-    lista.forEach(b=>{
-      const kg=+b.kg||0;
-      const i=FILS.findIndex(x=>x.n===b.n);
-      if(i>=0){ if(kg>0 && FILS[i].kg!==kg){ FILS[i].kg=kg; actualizados++; } }
-      else { FILS.push({n:b.n, kg, portes:+b.portes||0}); novos++; if(!kg) semPreco++; }
-    });
-    drawFils(); aplicaFilamento(); guardaEstado(); calc();
-    alert(`Do Bobina: ${novos} filamento(s) novo(s), ${actualizados} preço(s) atualizado(s).`
-      + (semPreco?`\n${semPreco} sem custo — no Bobina ainda não têm compra registada.`:''));
-  }catch(e){ alert('Não consegui falar com o Bobina: '+e.message); }
+/* Copiar um do Bobina para os meus: o valor de agora, congelado e editável.
+   Serve para orçamentar com um preço combinado sem mexer no inventário. */
+function copiaBob(n){
+  const f=bobFil(n); if(!f) return;
+  let nome=n+' '+tr('fpSufixoCopia');
+  while(FILS.some(x=>x.n===nome)) nome+=' ·';
+  FILS.push({n:nome, kg:+f.kg||0, portes:+f.portes||0});
+  drawFils(); el('s_fil_nome').value=nome; aplicaFilamento();
+  if(pickerAberto()) drawPicker();
 }
-
 /* mudar nome e preços sem depender dos campos avançados — em Modo simples estão escondidos */
-function editFil(){
-  const f=filInfo(el('s_fil_nome').value);
+function editFil(nome){
+  const alvo=typeof nome==='string'?nome:el('s_fil_nome').value;
+  if(eBobina(alvo)) return alert(tr('fpEditarBobina'));
+  const f=filInfo(alvo);
   if(!f) return;
-  const n=(prompt('Nome do filamento:', f.n)||'').trim();
+  const n=(prompt(tr('fpNomeNovo'), f.n)||'').trim();
   if(!n) return;
-  const kg=prompt(`Preço por kg de "${n}" (€):`, f.kg);
+  const kg=prompt(tr('fpPrecoDe',{n}), f.kg);
   if(kg===null) return;
-  const pt=prompt(`Portes do fornecedor de "${n}" (€):`, f.portes);
+  const pt=prompt(tr('fpPortesDe',{n}), f.portes);
   if(pt===null) return;
   const numero = v => parseFloat(String(v).replace(',','.'))||0;
   if(n!==f.n){
-    if(filInfo(n)) return alert(`Já tens um filamento chamado "${n}".`);
+    if(FILS.some(x=>x!==f&&x.n===n)) return alert(tr('fpNomeOcupado',{n}));
     mesas.forEach(m=>{ if(m[5]) m[5]=m[5].map(v=>v===f.n?n:v); });   /* as mesas seguem o nome novo */
     f.n=n;
   }
   f.kg=numero(kg); f.portes=numero(pt);
   drawFils(); el('s_fil_nome').value=f.n; aplicaFilamento();
+  if(pickerAberto()) drawPicker();
 }
-function delFil(){
-  const n=el('s_fil_nome').value, i=FILS.findIndex(x=>x.n===n);
+function delFil(nome){
+  const n=typeof nome==='string'?nome:el('s_fil_nome').value;
+  if(eBobina(n)) return alert(tr('fpApagarBobina'));
+  const i=FILS.findIndex(x=>x.n===n);
   if(i<0) return;
-  if(FILS.length<2) return alert('Tem de sobrar pelo menos um filamento.');
+  if(todosFils().length<2) return alert(tr('fpUltimo'));
   const emMesas=mesas.filter(m=>(m[5]||[]).includes(n)).length;
-  if(!confirm(`Remover "${n}"?`+(emMesas?`\n\nEstá em ${emMesas} mesa(s) — passam a usar o filamento das Definições.`:''))) return;
+  if(!confirm(tr('fpApagar',{n})+(emMesas?'\n\n'+tr('fpApagarMesas',{n:emMesas}):''))) return;
   FILS.splice(i,1);
   mesas.forEach(m=>{ if(m[5]) m[5]=m[5].filter(v=>v!==n); });
-  el('s_fil_nome').value=FILS[0].n;
+  const resto=todosFils();
+  el('s_fil_nome').value=resto.length?resto[0].n:'';
   drawFils(); aplicaFilamento();
+  if(pickerAberto()) drawPicker();
+}
+
+/* os filamentos que este orcamento usa: o das Definicoes e os das mesas */
+function nomesEmUso(){
+  const l=[el('s_fil_nome').value, ...mesas.flatMap(m=>m[5]||[])];
+  return [...new Set(l.filter(Boolean))];
+}
+
+/* ---- o seletor ---- */
+let FP={q:'',mat:'',stock:false};
+const pickerAberto = () => el('filpick') && el('filpick').style.display==='flex';
+function abrePicker(){
+  const p=el('filpick'); if(!p) return;
+  p.style.display='flex';
+  drawPicker();
+  puxaBobina(true);
+  setTimeout(()=>{ const q=el('fp_q'); if(q) q.focus(); },40);
+}
+function fechaPicker(){ const p=el('filpick'); if(p) p.style.display='none'; }
+function filtraPicker(){ FP.q=el('fp_q').value.trim().toLowerCase(); drawPicker(); }
+function chipPicker(m){ FP.mat=FP.mat===m?'':m; drawPicker(); }
+function togglaStock(){ FP.stock=!FP.stock; drawPicker(); }
+
+const semAcentos = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function casaFiltro(f){
+  if(FP.mat && semAcentos(f.material||'')!==semAcentos(FP.mat)) return false;
+  if(FP.stock && !(f.bobines>0)) return false;
+  if(!FP.q) return true;
+  return semAcentos([f.n,f.marca,f.material,f.cor,(f.locais||[]).join(' '),f.loja].join(' '))
+    .includes(semAcentos(FP.q));
+}
+
+/* Os cartões falam por índice (data-i) e não pelo nome do filamento: o htmlEsc
+   daqui não escapa aspas, e um nome com uma plica dentro de um onclick partia
+   o cartão todo. FP.lista é a ordem que está no ecrã. */
+function cartaoFil(f,i,escolhido){
+  const meu=!f.bobina;
+  const tag = meu ? tr('fpTagMeu')
+    : f.origem_preco==='compras' ? tr('fpTagPago')
+    : f.origem_preco==='lojas'   ? tr('fpTagLoja') : tr('fpTagSemPreco');
+  const cheio = f.capacidade_g>0 ? Math.max(0,Math.min(1,f.restante_g/f.capacidade_g)) : 0;
+  const stock = !f.bobina ? ''
+    : f.bobines
+      ? `<div class="fbar"><i style="width:${(cheio*100).toFixed(0)}%"></i></div>
+         <div class="fmeta">${htmlEsc(kgTxt(f.restante_g))} · ${htmlEsc(tr('fpBobines',{n:f.bobines}))}`
+        + (f.locais&&f.locais.length?`<em title="${htmlEsc(f.locais.join(' · '))}">${htmlEsc(f.locais[0])}</em>`:'')
+        + `</div>`
+      : `<div class="fmeta fzero">${htmlEsc(tr('fpSemStock'))}`
+        + (f.preco_loja_kg?' · '+htmlEsc(tr('fpNaLoja',{loja:f.loja||'—',preco:eur(f.preco_loja_kg)})):'')
+        + `</div>`;
+  const acoes = meu
+    ? `<button class="fbtn" data-a="editar" title="${htmlEsc(tr('fpEditar'))}">✎</button>`
+      + `<button class="fbtn" data-a="apagar" title="${htmlEsc(tr('fpApagarT'))}">×</button>`
+    : `<button class="fbtn" data-a="copiar" title="${htmlEsc(tr('fpCopiarT'))}">⧉</button>`;
+  const titulo = f.bobina && (f.material||f.cor)
+    ? `<b>${htmlEsc([f.material,f.cor].filter(Boolean).join(' '))}</b>`
+      + (f.marca?`<span class="fmarca">${htmlEsc(f.marca)}</span>`:'')
+    : `<b>${htmlEsc(f.n)}</b>`;
+  return `<div class="fcard${escolhido?' sel':''}${f.bobina&&!f.bobines?' vazio':''}"
+      data-i="${i}" tabindex="0" role="button" title="${htmlEsc(f.n)}">
+    <div class="fbob">${desenhaFil(f,42)}</div>
+    <div class="fcorpo">
+      <div class="ftit">${titulo}</div>
+      <div class="fpreco"><b>${eur(f.kg)}</b><span>/kg</span><i class="ftag">${htmlEsc(tag)}</i></div>
+      ${stock}
+    </div>
+    <div class="facoes">${acoes}</div>
+  </div>`;
+}
+function drawPicker(){
+  const cx=el('fp_corpo'); if(!cx) return;
+  const escolhido=el('s_fil_nome').value;
+  const todos=todosFils();
+  const mats=[...new Set(todos.filter(f=>f.bobina&&f.material).map(f=>f.material))].sort();
+  el('fp_chips').innerHTML=mats.map((m,i)=>
+      `<button class="fchip${FP.mat===m?' on':''}" data-m="${i}">${htmlEsc(m)}</button>`).join('')
+    + `<button class="fchip${FP.stock?' on':''}" data-m="stock">${htmlEsc(tr('fpSoStock'))}</button>`;
+  FP.mats=mats;
+
+  /* com stock primeiro: é o que se pode mesmo imprimir hoje */
+  const doBob=todos.filter(f=>f.bobina&&casaFiltro(f))
+    .sort((a,b)=>(b.bobines>0)-(a.bobines>0) || a.n.localeCompare(b.n,'pt'));
+  const meus=todos.filter(f=>!f.bobina&&casaFiltro(f));
+  FP.lista=[...doBob,...meus];
+  const vazio=`<div class="fvazio">${htmlEsc(tr('fpNada'))}</div>`;
+  cx.innerHTML=
+     `<div class="fsec"><h4>Bobina <span>${htmlEsc(tr('fpEmDireto'))}</span></h4>`
+    + `<div class="fgrid">${doBob.map((f,i)=>cartaoFil(f,i,f.n===escolhido)).join('')||vazio}</div></div>`
+    + `<div class="fsec"><h4>${htmlEsc(tr('fpMeus'))} <span>${htmlEsc(tr('fpMeusSub'))}</span></h4>`
+    + `<div class="fgrid">${meus.map((f,i)=>cartaoFil(f,doBob.length+i,f.n===escolhido)).join('')}`
+    + `<button class="fcard fnovo" data-novo="1">＋ ${htmlEsc(tr('fpNovo'))}</button></div></div>`;
+  estadoBobina();
+}
+/* uma escuta só, montada no arranque */
+function ligaPicker(){
+  const p=el('filpick'); if(!p) return;
+  p.addEventListener('click',e=>{ if(e.target===p) fechaPicker(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&pickerAberto()) fechaPicker(); });
+  el('fp_chips').addEventListener('click',e=>{
+    const b=e.target.closest('.fchip'); if(!b) return;
+    if(b.dataset.m==='stock') togglaStock(); else chipPicker(FP.mats[+b.dataset.m]);
+  });
+  el('fp_corpo').addEventListener('click',e=>{
+    if(e.target.closest('[data-novo]')) return addFil();
+    const cartao=e.target.closest('.fcard[data-i]'); if(!cartao) return;
+    const f=FP.lista[+cartao.dataset.i]; if(!f) return;
+    const b=e.target.closest('.fbtn');
+    if(b){
+      e.stopPropagation();
+      if(b.dataset.a==='editar') editFil(f.n);
+      else if(b.dataset.a==='apagar') delFil(f.n);
+      else if(b.dataset.a==='copiar') copiaBob(f.n);
+      return;
+    }
+    escolheFil(f.n); fechaPicker();
+  });
+  el('fp_corpo').addEventListener('keydown',e=>{
+    if(e.key!=='Enter'&&e.key!==' ') return;
+    const cartao=e.target.closest('.fcard[data-i]'); if(!cartao) return;
+    e.preventDefault();
+    const f=FP.lista[+cartao.dataset.i];
+    if(f){ escolheFil(f.n); fechaPicker(); }
+  });
+}
+
+/* ---- o que o trabalho gasta de cada filamento ----
+   O mesmo pressuposto que já vale para o preço: numa mesa com vários
+   filamentos não há como saber quantos gramas são de cada, por isso repartem-se
+   por igual. O desperdício conta — sai da bobine na mesma. */
+function gastoPorFilamento(det,fDesp){
+  const m={};
+  det.forEach(d=>{
+    if(!d.g||!d.fils.length) return;
+    const q=d.g*fDesp/d.fils.length;
+    d.fils.forEach(n=>{ m[n]=(m[n]||0)+q; });
+  });
+  return m;
+}
+/* Só avisa do que o Bobina sabe mesmo: um filamento escrito à mão aqui não tem
+   stock nenhum associado, e um do Bobina lido de uma leitura velha também não
+   serve para dizer "não chega". */
+function avisoStock(det,fDesp){
+  if(!BOB.ok) return '';
+  const gasto=gastoPorFilamento(det,fDesp);
+  const faltam=[];
+  Object.keys(gasto).forEach(n=>{
+    const f=bobVivo(n); if(!f) return;
+    if(FILS.some(x=>x.n===n)) return;          /* foi substituído por um meu */
+    if(gasto[n]>f.restante_g+0.5)
+      faltam.push({n, precisa:gasto[n], tem:f.restante_g, bobines:f.bobines});
+  });
+  if(!faltam.length) return '';
+  return `<div class="warn">⚠️ ${htmlEsc(tr('fpFaltaTitulo'))}`
+    + faltam.map(x=>`<div style="margin-top:4px">· <b>${htmlEsc(x.n)}</b> — `
+        + htmlEsc(tr('fpFaltaLinha',{precisa:kgTxt(x.precisa), tem:kgTxt(x.tem),
+                                     falta:kgTxt(x.precisa-x.tem)}))+`</div>`).join('')
+    + `</div>`;
 }
 
 /* ============ mesas: [gramas, tempo, custoSlicer, impressora, mostrarNoOrçamento, filamentos[]] ============ */
@@ -1385,7 +1851,15 @@ function drawMesas(){
     if(usados.length!==(m[5]||[]).length) mesas[i][5]=usados;   /* limpa nomes que já não existem */
     const fbox=document.createElement('div'); fbox.className='mfil';
     usados.forEach(n=>{
-      const c=document.createElement('span'); c.className='chipf'; c.textContent=n;
+      const f=filInfo(n);
+      const c=document.createElement('span'); c.className='chipf';
+      /* o ponto da cor é o do Bobina: numa mesa com três filamentos é o que
+         permite ver qual é qual sem ler os nomes todos */
+      if(f&&f.bobina){
+        const p=document.createElement('i'); p.className='pt';
+        p.style.background=corVisivel(f.cor_hex); c.appendChild(p);
+      }
+      c.appendChild(document.createTextNode(n));
       const x=document.createElement('button'); x.type='button'; x.textContent='×';
       x.title='Tirar este filamento da mesa';
       x.addEventListener('click',()=>{
@@ -1393,10 +1867,13 @@ function drawMesas(){
       c.appendChild(x); fbox.appendChild(c);
     });
     const add=document.createElement('select');
-    const livres=FILS.filter(f=>!usados.includes(f.n));
+    const livres=todosFils().filter(f=>!usados.includes(f.n));
+    const grupo=l=>l.map(f=>`<option value="${htmlEsc(f.n)}">${htmlEsc(f.n)}</option>`).join('');
+    const meusL=livres.filter(f=>!f.bobina), bobL=livres.filter(f=>f.bobina);
     add.title='Filamentos usados nesta mesa';
     add.innerHTML=`<option value="">${usados.length?'+ outro filamento':'↳ o filamento das Definições'}</option>`
-      + livres.map(f=>`<option value="${htmlEsc(f.n)}">${htmlEsc(f.n)}</option>`).join('');
+      + (meusL.length?`<optgroup label="${htmlEsc(tr('fpMeus'))}">${grupo(meusL)}</optgroup>`:'')
+      + (bobL.length?`<optgroup label="Bobina">${grupo(bobL)}</optgroup>`:'');
     add.addEventListener('change',()=>{
       if(!add.value) return;
       mesas[i][5]=[...usados,add.value]; drawMesas(); calc(); guardaEstado(); });
@@ -1946,7 +2423,9 @@ function calc(){
   const avisoBlocos = (!bMod&&!bImp&&!bPos)
     ? `<div class="warn">⚠️ Estão desligados todos os blocos de trabalho — não há nada para orçamentar.</div>`
     : '';
-  el('stale').innerHTML = avisoBlocos + avisoMix + (lucro<0
+  /* o inventário do Bobina é de agora: dá para dizer, aqui, que o trabalho não cabe */
+  const avisoFalta = avisoStock(det,fDesp);
+  el('stale').innerHTML = avisoBlocos + avisoFalta + avisoMix + (lucro<0
     ? `<div class="warn">⚠️ Este orçamento dá prejuízo de ${eur(-lucro)}.</div>`
     : marg<mMin
     ? `<div class="warn">⚠️ Margem de ${marg.toFixed(1)}% — abaixo do teu mínimo de ${mMin}%. Sobe a margem final ou reduz o desconto.</div>`
@@ -2507,6 +2986,11 @@ function collect(){
            tax_modo:el('s_tax_modo').value,tax_arred:el('s_tax_arred').value};
   S_NUM.forEach(k=>o[k]=el('s_'+k).value);
   o.fils=FILS.map(f=>({...f}));
+  o.portes_bob={...PORTES_BOB};
+  /* Os do Bobina que ESTE orcamento usa, como estavam na ultima leitura. Um
+     orcamento nao pode mudar de valor -- nem perder um filamento das mesas --
+     so porque o Bobina esta em baixo ou porque se abriu noutra maquina. */
+  o.bob_usados=nomesEmUso().filter(eBobina).map(n=>({...bobFil(n)}));
   o.modelos=MODELOS.map(m=>({...m}));
   o.marca={on:el('b_on').checked, qr:el('q_on').checked, nota_on:el('f_on').checked,
            logo:LOGO, qrs:QRS.map(q=>({...q}))};
@@ -2515,6 +2999,8 @@ function collect(){
 }
 function apply(o){
   /* os filamentos primeiro: o s_fil_nome é um select e precisa das opções antes do valor */
+  PORTES_BOB=(o.portes_bob&&typeof o.portes_bob==='object')?{...o.portes_bob}:{};
+  BOB_SNAP=Array.isArray(o.bob_usados)?o.bob_usados.filter(f=>f&&f.n):[];
   if(Array.isArray(o.fils)&&o.fils.length)
     FILS=o.fils.map(f=>({n:String(f.n||''), kg:+f.kg||0, portes:+f.portes||0})).filter(f=>f.n);
   else if(o.fil_nome && !filInfo(o.fil_nome))   /* estado de uma versão sem gestor de filamentos */
@@ -2567,7 +3053,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.9.0';
+const VERSAO='1.10.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -2575,6 +3061,53 @@ const store={
 };
 const I18N={
   pt:{
+    /* ---- seletor de filamentos + ligação ao Bobina ---- */
+    fpTitulo:'Filamentos',
+    fpAbrirT:'Escolher filamento — os do Bobina vêm com o preço e o stock de agora',
+    fpHint:'O filamento escolhido aqui é o que vale para as mesas onde não escolheres nenhum. Os do <b>Bobina</b> vêm com o preço e o stock de agora.',
+    fpProcurar:'Procurar marca, material, cor…',
+    fpNenhum:'Escolher filamento',
+    fpEmDireto:'em direto, do teu inventário',
+    fpMeus:'Os meus',
+    fpMeusSub:'escritos à mão, editáveis',
+    fpNovo:'novo filamento',
+    fpNada:'Nada que case com a procura.',
+    fpDoBobina:'do Bobina',
+    fpBobines:'{n} bobine(s)',
+    fpSemStock:'sem stock em casa',
+    fpNaLoja:'{loja}: {preco}/kg',
+    fpSoStock:'só com stock',
+    fpTagMeu:'meu',
+    fpTagPago:'pago',
+    fpTagLoja:'loja',
+    fpTagSemPreco:'sem preço',
+    fpEditar:'Mudar o nome e os preços',
+    fpApagarT:'Remover este filamento',
+    fpCopiarT:'Copiar para os meus, com o preço de agora',
+    fpSufixoCopia:'(meu)',
+    fpLido:'<b>{n}</b> vem do Bobina: o €/kg é de lá e muda quando lá mudar. Os portes são deste lado — o Bobina não os regista.',
+    fpDesligado:'Sem ligação ao Bobina — este valor é da última leitura.',
+    fpEditarBobina:'Este filamento vive no Bobina. Muda-o lá, ou usa o ⧉ para ficares com uma cópia tua, editável.',
+    fpApagarBobina:'Este filamento vive no Bobina — apaga-se lá. Aqui só se apagam os teus.',
+    fpNomeNovo:'Nome do filamento:',
+    fpPrecoDe:'Preço por kg de "{n}" (€):',
+    fpPortesDe:'Portes do fornecedor de "{n}" (€):',
+    fpJaTens:'Já tens "{n}". Substituir os preços?',
+    fpNomeOcupado:'Já tens um filamento chamado "{n}".',
+    fpApagar:'Remover "{n}"?',
+    fpApagarMesas:'Está em {n} mesa(s) — passam a usar o filamento das Definições.',
+    fpUltimo:'Tem de sobrar pelo menos um filamento.',
+    fpFaltaTitulo:'Não tens filamento que chegue para este trabalho:',
+    fpFaltaLinha:'precisa de {precisa}, tens {tem} em casa — faltam {falta}.',
+    bobResumo:'{f} filamentos · {b} bobines · {kg} em casa',
+    bobSemDados:'Bobina ligado',
+    bobOffline:'Sem ligação ao Bobina — última leitura {quando}',
+    bobSemLigacao:'Sem ligação ao Bobina',
+    bobTitulo:'O Fatia lê o inventário do Bobina em direto, sem importar nada.',
+    bobAgora:'agora mesmo',
+    bobHaSeg:'há {n} s',
+    bobHaMin:'há {n} min',
+    bobHaHoras:'há {n} h',
     tagline:'Preços de impressão 3D — a partir do teu slicer',
     tGuardarPreset:'Guardar o estado atual como preset',
     tApagarPreset:'Apagar o preset selecionado',
@@ -2677,6 +3210,53 @@ const I18N={
     installUnavailable:'O teu browser não oferece instalação nesta página. No Chrome ou Edge: menu ⋮ → "Instalar Fatia". No telemóvel: partilhar → "Adicionar ao ecrã principal".'
   },
   en:{
+    /* ---- filament picker + live Bobina link ---- */
+    fpTitulo:'Filaments',
+    fpAbrirT:'Pick a filament — the ones from Bobina carry today\'s price and stock',
+    fpHint:'The filament picked here is the one used by plates that do not pick their own. The ones from <b>Bobina</b> carry the price and stock as they are right now.',
+    fpProcurar:'Search brand, material, colour…',
+    fpNenhum:'Pick a filament',
+    fpEmDireto:'live, from your inventory',
+    fpMeus:'Mine',
+    fpMeusSub:'typed here, editable',
+    fpNovo:'new filament',
+    fpNada:'Nothing matches that search.',
+    fpDoBobina:'from Bobina',
+    fpBobines:'{n} spool(s)',
+    fpSemStock:'none in stock',
+    fpNaLoja:'{loja}: {preco}/kg',
+    fpSoStock:'in stock only',
+    fpTagMeu:'mine',
+    fpTagPago:'paid',
+    fpTagLoja:'shop',
+    fpTagSemPreco:'no price',
+    fpEditar:'Rename and change prices',
+    fpApagarT:'Remove this filament',
+    fpCopiarT:'Copy to mine, at the current price',
+    fpSufixoCopia:'(mine)',
+    fpLido:'<b>{n}</b> comes from Bobina: the €/kg is read from there and changes when it changes there. Shipping stays on this side — Bobina does not record it.',
+    fpDesligado:'No link to Bobina — this is the last reading.',
+    fpEditarBobina:'This filament lives in Bobina. Change it there, or use ⧉ to keep an editable copy of your own.',
+    fpApagarBobina:'This filament lives in Bobina — delete it there. Only your own can be deleted here.',
+    fpNomeNovo:'Filament name:',
+    fpPrecoDe:'Price per kg for "{n}" (€):',
+    fpPortesDe:'Supplier shipping for "{n}" (€):',
+    fpJaTens:'You already have "{n}". Replace the prices?',
+    fpNomeOcupado:'You already have a filament called "{n}".',
+    fpApagar:'Remove "{n}"?',
+    fpApagarMesas:'It is used by {n} plate(s) — they fall back to the Settings filament.',
+    fpUltimo:'At least one filament has to remain.',
+    fpFaltaTitulo:'You do not have enough filament for this job:',
+    fpFaltaLinha:'needs {precisa}, you have {tem} at home — {falta} short.',
+    bobResumo:'{f} filaments · {b} spools · {kg} at home',
+    bobSemDados:'Bobina connected',
+    bobOffline:'No link to Bobina — last read {quando}',
+    bobSemLigacao:'No link to Bobina',
+    bobTitulo:'Fatia reads the Bobina inventory live, with nothing to import.',
+    bobAgora:'just now',
+    bobHaSeg:'{n} s ago',
+    bobHaMin:'{n} min ago',
+    bobHaHoras:'{n} h ago',
     tagline:'3D printing prices — from your slicer',
     tGuardarPreset:'Save the current state as a preset',
     tApagarPreset:'Delete the selected preset',
@@ -2791,6 +3371,10 @@ function aplicarIdioma(){
   document.querySelectorAll('[data-i18n]').forEach(n=>{ n.textContent=tr(n.dataset.i18n); });
   document.querySelectorAll('[data-i18n-html]').forEach(n=>{ n.innerHTML=tr(n.dataset.i18nHtml); });
   document.querySelectorAll('[data-i18n-title]').forEach(n=>{ n.title=tr(n.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(n=>{ n.placeholder=tr(n.dataset.i18nPlaceholder); });
+  if(typeof drawFils==='function') drawFils(false);
+  if(typeof estadoBobina==='function') estadoBobina();
+  if(typeof pickerAberto==='function' && pickerAberto()) drawPicker();
   if(el('lic_v')) el('lic_v').textContent=LICENCA_V;
   if(typeof aplicaSimples==='function') aplicaSimples();
   if(typeof estadoMemoria==='function') estadoMemoria();
@@ -3168,13 +3752,18 @@ el('s_tax_modo').addEventListener('change',()=>{ updateTaxFieldState(); calc(); 
 el('s_tax_arred').addEventListener('change',()=>{ calc(); guardaEstado(); });
 el('j_mostrar_mod').addEventListener('change',calc);
 ['s_tax_nome','s_tax_rate'].forEach(i=>el(i).addEventListener('input',marcarTaxCustom));
-document.querySelectorAll('input,select').forEach(i=>i.addEventListener('input',calc));
+/* o :not(#filpick *) tira a caixa de procura do seletor: escrever lá dentro
+   não é mexer no orçamento, e a cada tecla corria um calc() inteiro */
+document.querySelectorAll('input:not(#filpick input),select:not(#filpick select)')
+  .forEach(i=>i.addEventListener('input',calc));
 el('s_auto_kwh').addEventListener('change',toggleAuto);
 ['s_iva','s_kwh_add'].forEach(i=>el(i).addEventListener('input',applySpot));
 /* j_pecas é derivado das mesas: quem mexe no escalão de desconto é mudaPecas() */
-document.querySelectorAll('input,select').forEach(i=>{
+document.querySelectorAll('input:not(#filpick input),select:not(#filpick select)').forEach(i=>{
   i.addEventListener('input',guardaEstado); i.addEventListener('change',guardaEstado);
 });
+ligaPicker();
+ligaBobina();
 const ultimo=store.get('ultimo',null);
 if(ultimo){ try{ repor(ultimo); }catch(_){ calc(); } } else calc();
 aplicarIdioma();

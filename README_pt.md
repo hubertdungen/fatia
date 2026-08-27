@@ -45,6 +45,8 @@ O Fatia calcula as duas coisas em paralelo: **o que te custa** e **o que cobras*
 
 **Gestor de filamentos.** Cada filamento é um nome e os seus preços — preço/kg e portes do fornecedor. Acrescentas e removes os teus, e ficam guardados nos presets e dentro do ficheiro do Exportar. Cada mesa escolhe que filamentos usou, e pode levar mais do que um.
 
+**Ligado ao [Bobina](https://github.com/hubertdungen/bobina), em direto.** Se tiveres o Bobina a correr nesta máquina, o seletor de filamentos mostra o teu inventário verdadeiro: a bobine desenhada na cor certa, o **custo real por quilo** (o que foi mesmo pago pelas bobines que ainda tens), quantos gramas te restam, quantas bobines e onde estão. **Não há nada para importar nem para atualizar** — os números são os de agora e mudam sozinhos quando mexes no Bobina. E como o Fatia passa a saber o que tens em casa, avisa-te quando o trabalho que estás a orçamentar **não cabe no stock**. Um filamento do Bobina não se edita aqui (o sítio de o mudar é lá); o ⧉ faz uma cópia tua, editável, com o preço de agora. Os teus filamentos escritos à mão continuam a existir ao lado dos dele.
+
 **Vários filamentos na mesma mesa.** Quando uma mesa leva mais do que um filamento e não tem o custo do slicer, não há como saber quantos gramas são de cada: o Fatia estima pela média dos preços dessa mesa — e avisa-te, porque basta meteres o custo do slicer nessa mesa para o valor ficar exato. O orçamento do cliente mostra os filamentos usados, e discrimina-os por mesa quando há mais do que um.
 
 **Orçamento do cliente.** Vista limpa e imprimível, com logo mini do Fatia, ficha técnica e sem uma única margem à vista. Opcionalmente:
