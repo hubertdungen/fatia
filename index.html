@@ -207,6 +207,18 @@ body.simples .hint{display:none}
 .bxcorpo{padding:14px 18px;overflow:auto}
 .bxlin{border:1px solid var(--line);border-radius:12px;padding:10px 11px;margin-bottom:10px;
   background:var(--panel2)}
+.bxmesa{border:1px solid var(--line);border-radius:12px;background:var(--panel2);
+  padding:10px 11px;margin-bottom:10px}
+.bxmesa.done{border-color:rgba(62,207,142,.36)}
+.bxmhd{display:flex;align-items:center;gap:10px}
+.bxmhd b{font-size:13.5px}
+.bxmhd i{font-style:normal;font-size:11px;color:var(--dim)}
+.bxmmeta{display:flex;flex-direction:column;min-width:0;line-height:1.35}
+.bxmacao{margin-left:auto;flex:none}
+.bxmacao button{padding:5px 10px;font-size:11.5px}
+.bxmdet{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.bxmdone{font-size:11.5px;color:var(--good)}
+.bxvazio{font-size:12.5px;color:var(--dim);padding:8px 0}
 .bxhd{display:flex;align-items:center;gap:9px;margin-bottom:8px}
 .bxnome{display:flex;flex-direction:column;min-width:0;overflow:hidden;line-height:1.3}
 .bxnome b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -625,7 +637,7 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="fphd">
       <div class="fptit">
         <b>📉 <span data-i18n="bxTitulo">Dar baixa no Bobina</span></b>
-        <div class="fpsub" data-i18n="bxSub">Sai do inventário o que este trabalho gastou, desperdício incluído. A bobine sugerida é a que faz sentido acabar primeiro — troca-a se foi outra.</div>
+        <div class="fpsub" data-i18n="bxSub">Escolhe a mesa que já foi impressa. Cada mesa fica com a sua baixa e pode ser anulada à parte.</div>
       </div>
       <button class="ghost fpx" onclick="fechaBaixa()" title="Fechar">×</button>
     </div>
@@ -633,7 +645,7 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="bxpe">
       <div class="bxerro" id="bx_erro"></div>
       <button class="ghost" onclick="fechaBaixa()" data-i18n="bxCancelar">Cancelar</button>
-      <button class="primary" id="bx_ok" onclick="confirmaBaixa()" data-i18n="bxDar">Dar baixa</button>
+      <button class="primary" id="bx_ok" onclick="confirmaBaixa()" data-i18n="bxDar" style="display:none">Dar baixa</button>
     </div>
   </div>
 </div>
@@ -2047,26 +2059,56 @@ function avisoStock(det,fDesp){
    - a bobine escolhida é um PALPITE que se troca à mão: o Bobina sabe quanto
      resta em cada uma, não sabe qual delas está na garagem.
    - o que ficou dado guarda-se com o orçamento, com o desfazer à mão. */
-let BAIXA=null;          /* a baixa deste trabalho, depois de dada */
+let BAIXAS=[];           /* baixas deste trabalho, uma por mesa */
 let BAIXA_ADIADA=false;  /* respondeu "ainda não": não voltar a perguntar */
-const BX={linhas:[], chave:'', depois:false, ligado:false};
+const BX={mesas:[], mesa:null, linhas:[], chave:'', depois:false, ligado:false};
 
 const novaChave = () => 'fatia-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
 const estadoBob = e => tr({selado:'bxSelado', aberto:'bxAberto', vazio:'bxVazio'}[e]||'bxAberto');
 
-/* o que este trabalho gasta de cada filamento QUE O BOBINA CONHECE.
+function baixaDaMesa(i){
+  return BAIXAS.find(b=>+b.mesa===+i) || BAIXAS.find(b=>!b.mesa);
+}
+function totalBaixa(B){
+  return (B&&B.consumos||[]).reduce((a,c)=>a+(+c.gramas||0),0);
+}
+function quandoBaixa(B){
+  return new Date(B.em).toLocaleString(IDIOMA==='en'?'en-GB':'pt-PT',
+                                      {dateStyle:'short', timeStyle:'short'});
+}
+
+/* o que uma mesa gasta de cada filamento QUE O BOBINA CONHECE.
    Um filamento escrito à mão aqui não tem bobine nenhuma lá — não há baixa que
    dar. Sem ligação viva também não se dá baixa nenhuma: uma leitura velha não
    sabe o que está em casa agora, e isto escreve no inventário. */
-function gastoBobina(){
-  if(!BOB.ok || !LAST.det) return [];
-  const gasto=gastoPorFilamento(LAST.det, LAST.fDesp||1);
+function itensBobinaDeDet(det){
+  if(!BOB.ok || !det || !det.length) return [];
+  const gasto=gastoPorFilamento(det, LAST.fDesp||1);
   return Object.keys(gasto).map(n=>{
     if(FILS.some(x=>x.n===n)) return null;      /* substituído por um meu */
     const f=bobVivo(n);
     if(!f || !(f.lista_bobines||[]).length) return null;
     return {n, f, g:gasto[n]};
   }).filter(x=>x && x.g>0.5);
+}
+function mesasBobina(){
+  if(!BOB.ok || !LAST.det) return [];
+  return LAST.det.map(d=>{
+    const itens=itensBobinaDeDet([d]);
+    return {i:d.i, det:d, itens, total:itens.reduce((a,x)=>a+x.g,0)};
+  }).filter(M=>M.itens.length);
+}
+function mesasPendentes(){
+  return mesasBobina().filter(M=>!baixaDaMesa(M.i));
+}
+/* agregado das mesas ainda por dar baixa: só serve para o botão e a pergunta */
+function gastoBobina(){
+  const m={};
+  mesasPendentes().forEach(M=>M.itens.forEach(x=>{
+    if(!m[x.n]) m[x.n]={n:x.n, f:x.f, g:0};
+    m[x.n].g+=x.g;
+  }));
+  return Object.values(m).filter(x=>x.g>0.5);
 }
 
 /* "820 g · aberta · Oficina › Estante A · 2026-03-01" — o que chega para saber
@@ -2115,11 +2157,20 @@ function bobinesSugeridas(f,g){
   return out;
 }
 
-function abreBaixa(){
-  const itens=gastoBobina();
-  if(!itens.length) return;
-  BX.linhas=itens.map(x=>({n:x.n, f:x.f, total:x.g, alocs:bobinesSugeridas(x.f, x.g)}));
+function preparaBaixaMesa(mesa){
+  const M=mesasBobina().find(x=>+x.i===+mesa);
+  if(!M || baixaDaMesa(M.i)) return;
+  BX.mesa=M.i;
+  BX.linhas=M.itens.map(x=>({n:x.n, f:x.f, total:x.g, alocs:bobinesSugeridas(x.f, x.g)}));
   BX.chave=novaChave();
+  el('bx_erro').textContent='';
+  drawBaixa();
+}
+
+function abreBaixa(){
+  BX.mesas=mesasBobina();
+  BX.mesa=null; BX.linhas=[]; BX.chave='';
+  if(!BX.mesas.length && !BAIXAS.length) return;
   el('bx_erro').textContent='';
   el('baixa').style.display='flex';
   ligaBaixa(); drawBaixa();
@@ -2131,17 +2182,14 @@ function fechaBaixa(){
   /* veio da pergunta: fechar sem dar baixa vale por "ainda não". Sem isto a
      pergunta reaparecia aqui mesmo e não havia como chegar ao orçamento sem
      dar baixa de alguma coisa. */
-  if(!BAIXA){ BAIXA_ADIADA=true; guardaEstado(); }
+  if(mesasPendentes().length){ BAIXA_ADIADA=true; guardaEstado(); }
   preview(true);
 }
 
-function drawBaixa(){
-  const c=el('bx_corpo'); if(!c) return;
-  /* filamentos do trabalho que o Bobina não conhece: dizê-lo, senão parecia que
-     a baixa cobriu tudo */
-  const gasto=LAST.det?gastoPorFilamento(LAST.det, LAST.fDesp||1):{};
+function renderLinhasBaixa(M){
+  const gasto=gastoPorFilamento([M.det], LAST.fDesp||1);
   const fora=Object.keys(gasto).filter(n=>!BX.linhas.some(L=>L.n===n) && gasto[n]>0.5);
-  c.innerHTML=BX.linhas.map((L,i)=>{
+  return BX.linhas.map((L,i)=>{
     const bs=L.f.lista_bobines||[];
     const alocs=L.alocs.map((a,j)=>{
       const b=bs.find(x=>x.id===+a.id);
@@ -2168,7 +2216,35 @@ function drawBaixa(){
         <span id="bxdif${i}"></span>
       </div></div>`;
   }).join('')
-   + (fora.length?`<div class="bxfora">${htmlEsc(tr('bxFora',{f:fora.join(', ')}))}</div>`:'');
+   + (fora.length?`<div class="bxfora">${htmlEsc(tr('bxFora',{f:fora.join(', ')}))}</div>`:'')
+   + `<div class="bxpe2"><button type="button" class="primary" data-c="dar">
+        ${htmlEsc(tr('bxDarMesa',{m:M.i}))}</button></div>`;
+}
+
+function drawBaixa(){
+  const c=el('bx_corpo'); if(!c) return;
+  BX.mesas=mesasBobina();
+  if(BX.mesa && baixaDaMesa(BX.mesa)){ BX.mesa=null; BX.linhas=[]; BX.chave=''; }
+  if(!BX.mesas.length){
+    c.innerHTML=`<div class="bxvazio">${htmlEsc(tr('bxSemPendentes'))}</div>`;
+    return;
+  }
+  c.innerHTML=BX.mesas.map(M=>{
+    const feita=baixaDaMesa(M.i), aberta=BX.mesa===M.i && !feita;
+    const info=tr('bxMesaInfo',{g:kgTxt(M.total), n:M.itens.length});
+    const acao=feita
+      ? `<button type="button" class="ghost" data-c="anular" data-m="${M.i}">${htmlEsc(tr('bxAnular'))}</button>`
+      : `<button type="button" class="${aberta?'ghost':'primary'}" data-c="abrir" data-m="${M.i}">
+           ${htmlEsc(tr(aberta?'bxEditarMesa':'bxDarMesa',{m:M.i}))}</button>`;
+    return `<div class="bxmesa${feita?' done':''}">
+      <div class="bxmhd">
+        <div class="bxmmeta"><b>${htmlEsc(tr('bxMesa',{m:M.i}))}</b><i>${htmlEsc(info)}</i></div>
+        <div class="bxmacao">${acao}</div>
+      </div>
+      ${feita?`<div class="bxmdone">✔ ${htmlEsc(tr('bxDadaMesa',{m:M.i,g:kgTxt(totalBaixa(feita)),quando:quandoBaixa(feita)}))}</div>`:''}
+      ${aberta?`<div class="bxmdet">${renderLinhasBaixa(M)}</div>`:''}
+    </div>`;
+  }).join('');
   notaBaixa();
 }
 
@@ -2197,6 +2273,9 @@ function ligaBaixa(){
   });
   c.addEventListener('click',e=>{
     const b=e.target.closest('button[data-c]'); if(!b) return;
+    if(b.dataset.c==='abrir') return preparaBaixaMesa(+b.dataset.m);
+    if(b.dataset.c==='anular') return anulaBaixa(+b.dataset.m);
+    if(b.dataset.c==='dar') return confirmaBaixa(b);
     const L=BX.linhas[+b.dataset.l]; if(!L) return;
     if(b.dataset.c==='x'){ L.alocs.splice(+b.dataset.a,1); drawBaixa(); }
     else if(b.dataset.c==='+'){
@@ -2211,14 +2290,15 @@ function ligaBaixa(){
   });
 }
 
-async function confirmaBaixa(){
+async function confirmaBaixa(botao){
+  if(!BX.mesa || baixaDaMesa(BX.mesa)) return;
   const consumos=[];
   BX.linhas.forEach(L=>L.alocs.forEach(a=>{
     const g=Math.round((+a.g||0)*10)/10;
     if(a.id&&g>0) consumos.push({bobine_id:+a.id, gramas:g, n:L.n});
   }));
   if(!consumos.length){ el('bx_erro').textContent=tr('bxSemNada'); return; }
-  const b=el('bx_ok'), txt=b.textContent;
+  const b=botao||el('bx_ok'), txt=b.textContent;
   b.disabled=true; b.textContent=tr('bxAEnviar'); el('bx_erro').textContent='';
   try{
     const r=await fetch('/api/bobina/gastar',{method:'POST', credentials:'same-origin',
@@ -2226,57 +2306,64 @@ async function confirmaBaixa(){
       body:JSON.stringify({chave:BX.chave, ref:nomeTrabalho(), consumos})});
     const d=await r.json();
     if(!r.ok||d.error) throw new Error(d.error||('erro '+r.status));
-    BAIXA={chave:BX.chave, em:Date.now(), consumos, avisos:d.avisos||[]};
+    BAIXAS=BAIXAS.filter(x=>+x.mesa!==+BX.mesa && x.mesa);
+    BAIXAS.push({mesa:BX.mesa, chave:BX.chave, em:Date.now(), consumos, avisos:d.avisos||[]});
     BAIXA_ADIADA=false;
     guardaEstado();
-    fechaBaixa();
-    puxaBobina(true);
+    BX.mesa=null; BX.linhas=[]; BX.chave='';
+    await puxaBobina(true);
     desenhaBotaoBaixa();
+    drawBaixa();
     if((d.avisos||[]).length) alert(tr('bxAvisos')+'\n\n· '+d.avisos.join('\n· '));
   }catch(e){
     el('bx_erro').textContent=tr('bxErro',{e:(e&&e.message)||e});
   }finally{ b.disabled=false; b.textContent=txt; }
 }
 
-async function anulaBaixa(){
-  if(!BAIXA) return;
+async function anulaBaixa(mesa){
+  const B=mesa!==undefined ? baixaDaMesa(mesa) : BAIXAS[0];
+  if(!B) return;
   if(!confirm(tr('bxAnularConf'))) return;
   try{
     const r=await fetch('/api/bobina/gastar/anular',{method:'POST', credentials:'same-origin',
-      headers:{'Content-Type':'application/json'}, body:JSON.stringify({chave:BAIXA.chave})});
+      headers:{'Content-Type':'application/json'}, body:JSON.stringify({chave:B.chave})});
     const d=await r.json();
     if(!r.ok||d.error) throw new Error(d.error||('erro '+r.status));
-    BAIXA=null; guardaEstado(); puxaBobina(true); desenhaBotaoBaixa();
+    BAIXAS=BAIXAS.filter(x=>x!==B);
+    guardaEstado(); await puxaBobina(true); desenhaBotaoBaixa(); drawBaixa();
     if((d.mexidas||[]).length) alert(tr('bxMexidas'));
   }catch(e){ alert(tr('bxErro',{e:(e&&e.message)||e})); }
 }
 
 function desenhaBotaoBaixa(){
   const box=el('baixa_box'); if(!box) return;
-  const itens=gastoBobina();
-  const tot=itens.reduce((a,x)=>a+x.g,0);
-  box.style.display=(itens.length||BAIXA)?'':'none';
+  const pend=mesasPendentes();
+  const tot=pend.reduce((a,M)=>a+M.total,0);
+  box.style.display=(pend.length||BAIXAS.length)?'':'none';
   const bt=el('b_baixa');
-  if(bt){ bt.textContent='📉 '+tr('bxBotao',{g:kgTxt(tot)}); bt.disabled=!itens.length; }
+  if(bt){
+    bt.textContent='📉 '+(pend.length?tr('bxBotao',{g:kgTxt(tot)}):tr('bxBotaoVer'));
+    bt.disabled=!(pend.length||BAIXAS.length);
+  }
   const nota=el('baixa_nota');
   if(!nota) return;
-  if(!BAIXA){ nota.innerHTML=''; return; }
-  const g=BAIXA.consumos.reduce((a,c)=>a+(+c.gramas||0),0);
-  const quando=new Date(BAIXA.em).toLocaleString(IDIOMA==='en'?'en-GB':'pt-PT',
-                                                 {dateStyle:'short', timeStyle:'short'});
-  nota.innerHTML='✔ '+htmlEsc(tr('bxDada',{g:kgTxt(g), quando}))
-    +' — <a href="#" onclick="anulaBaixa();return false">'+htmlEsc(tr('bxAnular'))+'</a>';
+  nota.innerHTML=BAIXAS.map(B=>{
+    const k=B.mesa ? tr('bxDadaMesa',{m:B.mesa,g:kgTxt(totalBaixa(B)),quando:quandoBaixa(B)})
+                   : tr('bxDada',{g:kgTxt(totalBaixa(B)),quando:quandoBaixa(B)});
+    return '✔ '+htmlEsc(k)+' — <a href="#" onclick="anulaBaixa('+(B.mesa||0)+');return false">'
+      +htmlEsc(tr('bxAnular'))+'</a>';
+  }).join('<br>');
 }
 
 /* A pergunta ao abrir o orçamento do cliente. Só aparece havendo mesmo o que dar
    baixa, e só uma vez por trabalho: quem responde "ainda não" não quer isto a
    perguntar de cada vez que espreita o orçamento. */
 function perguntaBaixa(){
-  if(BAIXA||BAIXA_ADIADA) return false;
-  const itens=gastoBobina();
-  if(!itens.length) return false;
+  if(BAIXA_ADIADA) return false;
+  const pend=mesasPendentes();
+  if(!pend.length) return false;
   el('bxq_txt').textContent=tr('bxqTxt',{
-    g:kgTxt(itens.reduce((a,x)=>a+x.g,0)), n:itens.length});
+    g:kgTxt(pend.reduce((a,M)=>a+M.total,0)), n:pend.length});
   el('bxq').style.display='flex';
   return true;
 }
@@ -3585,9 +3672,9 @@ function collect(){
      so porque o Bobina esta em baixo ou porque se abriu noutra maquina. */
   o.bob_usados=nomesEmUso().filter(eBobina).map(n=>({...bobFil(n)}));
   o.modelos=MODELOS.map(m=>({...m}));
-  /* a baixa anda com o orçamento: é o que evita perguntar duas vezes pelo mesmo
-     trabalho, e é de onde sai o desfazer */
-  o.baixa=BAIXA; o.baixa_adiada=BAIXA_ADIADA;
+  /* as baixas andam com o orçamento: é o que evita repetir mesa já lançada,
+     e é de onde sai o desfazer */
+  o.baixas=BAIXAS; o.baixa_adiada=BAIXA_ADIADA;
   o.data_manual=DATA_MANUAL;
   o.marca={on:el('b_on').checked, qr:el('q_on').checked, nota_on:el('f_on').checked,
            logo:LOGO, qrs:QRS.map(q=>({...q}))};
@@ -3611,7 +3698,9 @@ function apply(o){
   if(o.tax_modo!==undefined) el('s_tax_modo').value=o.tax_modo;
   if(o.tax_arred!==undefined) el('s_tax_arred').value=o.tax_arred;
   if(Array.isArray(o.modelos)){ MODELOS=o.modelos.map(normModelo); drawModelos(); }
-  BAIXA=(o.baixa&&o.baixa.chave&&Array.isArray(o.baixa.consumos))?o.baixa:null;
+  BAIXAS=Array.isArray(o.baixas)
+    ? o.baixas.filter(b=>b&&b.chave&&Array.isArray(b.consumos))
+    : ((o.baixa&&o.baixa.chave&&Array.isArray(o.baixa.consumos))?[{...o.baixa, mesa:0}]:[]);
   BAIXA_ADIADA=!!o.baixa_adiada;
   if(o.data_manual!==undefined) DATA_MANUAL=!!o.data_manual;
   aplicaDataPrecos(false);   /* a meio do apply() ainda não há estado para gravar */
@@ -3650,12 +3739,12 @@ function resetJob(){
   MODELOS=[]; drawModelos();
   ['j_manual','j_pol','j_pint','j_desc','j_promo'].forEach(i=>el(i).value=0);
   ['r_g','r_t','r_e'].forEach(i=>el(i).value=''); el('r_usar').checked=true;
-  BAIXA=null; BAIXA_ADIADA=false;   /* trabalho novo, baixa nova */
+  BAIXAS=[]; BAIXA_ADIADA=false;   /* trabalho novo, baixas novas */
   el('j_portes').value='0'; calc(); guardaEstado();
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.13.0';
+const VERSAO='1.14.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -3683,13 +3772,19 @@ const I18N={
     mgPassa:'passa {g} g do total da mesa',
     /* ---- dar baixa no Bobina ---- */
     bxTitulo:'Dar baixa no Bobina',
-    bxSub:'Sai do inventário o que este trabalho gastou, desperdício incluído. A bobine sugerida é a que faz sentido acabar primeiro — troca-a se foi outra.',
+    bxSub:'Escolhe a mesa que já foi impressa. Cada mesa fica com a sua baixa e pode ser anulada à parte.',
     bxBotao:'Dar baixa no Bobina — {g}',
+    bxBotaoVer:'Ver baixas no Bobina',
     bxDar:'Dar baixa',
+    bxDarMesa:'Dar baixa da mesa {m}',
+    bxEditarMesa:'editar',
     bxCancelar:'Cancelar',
     bxAEnviar:'A dar baixa…',
     bxTirar:'Tirar esta bobine',
     bxOutra:'+ outra bobine',
+    bxMesa:'Mesa {m}',
+    bxMesaInfo:'{g} · {n} filamento(s) do Bobina',
+    bxSemPendentes:'Não há mesas com filamento do Bobina por dar baixa.',
     bxEmCasa:'{g} em casa · {n} bobine(s)',
     bxFaltam:'faltam {g} por atribuir',
     bxSobram:'sobram {g} atribuídos a mais',
@@ -3698,6 +3793,7 @@ const I18N={
     bxSemNada:'Não há gramas nenhuns para dar baixa.',
     bxFora:'Fora desta baixa: {f} — não vem do Bobina, não há inventário para mexer.',
     bxDada:'baixa de {g} dada em {quando}',
+    bxDadaMesa:'mesa {m}: baixa de {g} dada em {quando}',
     bxAnular:'anular',
     bxAnularConf:'Anular a baixa e devolver o filamento às bobines?',
     bxMexidas:'Uma das bobines foi pesada à mão depois da baixa — essa ficou como está, para não apagar a pesagem.',
@@ -3709,8 +3805,8 @@ const I18N={
     bxNaCaixa:'na caixa',
     bxMontada:'na impressora',
     bxqTitulo:'Este trabalho já foi impresso?',
-    bxqTxt:'Se já foi, dá-se baixa de {g} em {n} filamento(s) do Bobina. Se ainda não, o orçamento abre à mesma e o botão fica no cartão das mesas.',
-    bxqSim:'Já foi — dar baixa',
+    bxqTxt:'Se já foi, escolhe no menu que mesas queres dar baixa. Há {g} em {n} mesa(s) com filamento do Bobina. Se ainda não, o orçamento abre à mesma e o botão fica no cartão das mesas.',
+    bxqSim:'Já foi — escolher mesas',
     bxqNao:'Ainda não',
     dtAuto:'Vem do <b>Bobina</b>: é a última vez que ele viu preços nas lojas.',
     dtManual:'À mão. O <b>Bobina</b> tem preços de <b>{d}</b>.',
@@ -3879,13 +3975,19 @@ const I18N={
     mgFaltam:'{g} g still unassigned',
     mgPassa:'{g} g over the plate total',
     bxTitulo:'Log usage in Bobina',
-    bxSub:'What this job used comes off the inventory, waste included. The suggested spool is the one worth finishing first — change it if it was another.',
+    bxSub:'Choose the plate that has already printed. Each plate gets its own inventory entry and can be undone separately.',
     bxBotao:'Log usage in Bobina — {g}',
+    bxBotaoVer:'View Bobina entries',
     bxDar:'Log usage',
+    bxDarMesa:'Log plate {m}',
+    bxEditarMesa:'edit',
     bxCancelar:'Cancel',
     bxAEnviar:'Logging…',
     bxTirar:'Remove this spool',
     bxOutra:'+ another spool',
+    bxMesa:'Plate {m}',
+    bxMesaInfo:'{g} · {n} Bobina filament(s)',
+    bxSemPendentes:'No plates with Bobina filament left to log.',
     bxEmCasa:'{g} in stock · {n} spool(s)',
     bxFaltam:'{g} still unassigned',
     bxSobram:'{g} assigned over',
@@ -3894,6 +3996,7 @@ const I18N={
     bxSemNada:'Nothing to log.',
     bxFora:'Not in this entry: {f} — not from Bobina, no inventory to touch.',
     bxDada:'{g} logged on {quando}',
+    bxDadaMesa:'plate {m}: {g} logged on {quando}',
     bxAnular:'undo',
     bxAnularConf:'Undo this entry and put the filament back on the spools?',
     bxMexidas:'One spool was weighed by hand after the entry — that one was left alone, so the weighing is not lost.',
@@ -3905,8 +4008,8 @@ const I18N={
     bxNaCaixa:'boxed',
     bxMontada:'on the printer',
     bxqTitulo:'Has this job been printed?',
-    bxqTxt:'If it has, {g} across {n} Bobina filament(s) comes off the inventory. If not, the quote opens anyway and the button stays on the plates card.',
-    bxqSim:'Yes — log usage',
+    bxqTxt:'If it has, choose in the menu which plates to log. There is {g} across {n} plate(s) with Bobina filament. If not, the quote opens anyway and the button stays on the plates card.',
+    bxqSim:'Yes — choose plates',
     bxqNao:'Not yet',
     dtAuto:'From <b>Bobina</b>: the last time it saw shop prices.',
     dtManual:'Set by hand. <b>Bobina</b> has prices from <b>{d}</b>.',
