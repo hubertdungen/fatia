@@ -140,6 +140,25 @@ td input.slic{border-color:rgba(62,207,142,.35)}
 .warn{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.4);color:#ffb3b3;
   padding:10px 12px;border-radius:10px;font-size:12.5px;margin-bottom:14px}
 .hint{font-size:11.5px;color:var(--dim);margin-top:6px;line-height:1.4}
+.hintpop{position:relative;display:inline-flex;align-items:center;min-height:22px;margin-top:6px}
+.hintpop .tipbtn{width:22px;height:22px;padding:0;display:grid;place-items:center;border-radius:50%;
+  background:rgba(255,159,46,.12);border:1px solid rgba(255,159,46,.34);color:var(--accent2);
+  font-size:12px;font-weight:800;line-height:1;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.hintpop .tipbtn:hover,.hintpop .tipbtn:focus-visible{background:var(--accent);border-color:var(--accent);
+  color:#1a1206;outline:none}
+.hintpop .tipbox{position:absolute;z-index:190;left:0;top:calc(100% + 9px);
+  width:min(360px,calc(100vw - 48px));max-width:calc(100vw - 48px);padding:11px 13px;
+  background:linear-gradient(180deg,#222a35,#1a2029);border:1px solid rgba(255,196,107,.32);
+  border-radius:8px;color:var(--txt);box-shadow:0 18px 42px rgba(0,0,0,.42);
+  opacity:0;transform:translateY(-4px) scale(.98);pointer-events:none;
+  transition:opacity .16s ease,transform .16s ease;line-height:1.5}
+.hintpop .tipbox::before{content:"";position:absolute;left:7px;top:-6px;width:10px;height:10px;
+  background:#222a35;border-left:1px solid rgba(255,196,107,.32);border-top:1px solid rgba(255,196,107,.32);
+  transform:rotate(45deg)}
+.hintpop:hover .tipbox,.hintpop:focus-within .tipbox{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.hintpop .tipbox b{color:var(--accent2)}
+@media (prefers-reduced-motion: reduce){.hintpop .tipbox{transition:none}}
+@media(max-width:560px){.hintpop .tipbox{left:-6px;width:calc(100vw - 44px)}}
 .tierbtns{display:flex;gap:6px;margin-top:6px}
 .tierbtns button{padding:5px 8px;font-size:11px;flex:1}
 .tierbtns button.on{background:var(--accent);color:#1a1206;border-color:var(--accent)}
@@ -2864,7 +2883,7 @@ function calc(){
     else if(fs.length>1 && g>0 && rep.filter(x=>x.auto).length>1) mistura.push(i+1);
     gEst+=g; mEst+=t; cEst+=cm;
     const info=impInfo(m[3]||'');
-    det.push({i:i+1, g, t, cm, kgM, fAjM, fils:fs.map(f=>f.n),
+    det.push({i:i+1, g, t, cm, kgM, fAjM, pecas:m[6]||0, fils:fs.map(f=>f.n),
               rep:rep.map(x=>({n:x.n, g:x.g, auto:x.auto})),
               imp:info, hImp:horaImp(info,kwh), mostrar:m[4]!==false});
   });
@@ -2914,6 +2933,8 @@ function calc(){
   /* pecas é a contagem real — pode ser 0; pecasDiv só serve de divisor seguro */
   const hTot=mTot/60, pecas=pecasTot, pecasDiv=Math.max(pecasTot,1);
   const pMat=cMat*(1+num('s_mmat')/100);
+  const cMatMesas=det.reduce((a,m)=>a+m.cm,0);
+  const fMatMesa=cMatMesas>0 ? cMat/cMatMesas : 1;
 
   const usou = usarReal&&((isFinite(rG)&&rG>0)||rT>0||(isFinite(rE)&&rE>0));
   el('d_mesas').innerHTML=
@@ -2937,8 +2958,9 @@ function calc(){
   const cImpBase = mBruto>0 ? det.reduce((a,m)=>a+m.hReal*m.hImp,0) : hTot*hImpressaoDef;
   const hImpMedia = hTot>0 ? cImpBase/hTot : hImpressaoDef;
   const taxaMaq=num('s_taxa_maq');
-  det.forEach(m=>m.rate = taxaMaq>0?taxaMaq:m.hImp);
-  const pImp= taxaMaq>0 ? hTot*taxaMaq : cImpBase*(1+num('s_mimp')/100);
+  const fImp=1+num('s_mimp')/100;
+  det.forEach(m=>m.rate = taxaMaq>0?taxaMaq:m.hImp*fImp);
+  const pImp= taxaMaq>0 ? hTot*taxaMaq : cImpBase*fImp;
   const pBase=num('s_base')*pecasTot + num('s_base_mesa')*mesasAtivas.length;
   const fMao=1+num('s_mmao')/100;
   const nMesas=mesasAtivas.length;
@@ -2952,6 +2974,7 @@ function calc(){
   const pMod=hMod*num('s_modh')*fMao;
   const cMod=hMod*num('s_pc_kw2')*kwh;                 /* o custo real é o PC ligado */
   const pMarg=(pMat+pImp+pBase)*num('s_margem')/100;
+  const pPrint=pMat+pImp+pBase+pPrep+pMarg;            /* só impressão: sem modelação, portes nem acabamento manual */
   const desc=(pBase+pPrep+pMan+pPol+pPin)*num('j_desc')/100;
   const promo=(pMat+pImp)*num('j_promo')/100;
 
@@ -3102,12 +3125,13 @@ function calc(){
     : (dias>90 ? `<div class="warn">⚠️ Definições sem revisão há <b>${dias} dias</b>. Confirma o preço do filamento antes de enviar.</div>` : ''));
 
   /* a régua horária é do tempo de máquina: modelação e acabamento saem de fora */
-  LAST={pMat,pImp,pBase,pAcab,pMod,pMarg,desc,promo,arred,pPortes,total,tax,hTot,pecas,
+  LAST={pMat,pImp,pBase,pPrep,pAcab,pMod,pMarg,pPrint,desc,promo,arred,pPortes,total,tax,hTot,pecas,
         det, fDesp,   /* o detalhe fica à mão: é dele que sai a baixa no Bobina */
-        taxa: hTot>0?(total-pMat-pAcab-pMod-pPortes)/hTot:0};
+        taxa: hTot>0?pImp/hTot:0};
   desenhaBotaoBaixa();
-  marketPanel({total,pMat,pAcab,pMod,pPortes,pBase,desc,hTot,pecas,det,nMesas,
-    pPrepMesa:nMesas?pPrep/nMesas:0, taxaCobrada: taxaMaq>0?taxaMaq:hImpMedia});
+  marketPanel({total,pPrint,pMat,pImp,pAcab,pMod,pPortes,pBase,pPrep,desc,hTot,pecas,det,nMesas,fMatMesa,
+    basePeca:num('s_base'), baseMesa:num('s_base_mesa'), margemFinal:num('s_margem')/100,
+    pPrepMesa:nMesas?pPrep/nMesas:0, taxaCobrada: taxaMaq>0?taxaMaq:hImpMedia*fImp});
 
   el('d_mod').innerHTML = minMod>0
     ? `<div><span>${MODELOS.length} modelo(s) · ${hm(minMod)} de modelação</span><b>${eur(pMod)}</b></div>`
@@ -3184,11 +3208,11 @@ function bandasAtuais(){
 
 /* desenha uma régua com bandas e marca a posição */
 function gauge(pre, valor, segs, fmt){
-  const tot=segs[segs.length-1].ate;
+  const tot=Math.max(segs[segs.length-1].ate,.0001);
   el(pre+'t').innerHTML=segs.map(s=>
-    `<i style="width:${(s.ate-(s.de||0))/tot*100}%;background:${s.cor}"></i>`).join('');
+    `<i style="width:${Math.max(0,(s.ate-(s.de||0))/tot*100)}%;background:${s.cor}"></i>`).join('');
   el(pre+'k').innerHTML=segs.map(s=>
-    `<span style="width:${(s.ate-(s.de||0))/tot*100}%">${s.rot}</span>`).join('');
+    `<span style="width:${Math.max(0,(s.ate-(s.de||0))/tot*100)}%">${s.rot}</span>`).join('');
   const pct=Math.max(0,Math.min(100, valor/tot*100));
   const p=el(pre+'p');
   p.style.left=pct+'%';
@@ -3199,10 +3223,11 @@ function gauge(pre, valor, segs, fmt){
 function marketPanel(x){
   const B=bandasAtuais();
   const horas=x.hTot, pecas=x.pecas;
+  const printTotal=isFinite(x.pPrint)?x.pPrint:Math.max(0,x.total-(x.pMod||0)-x.pPortes);
 
-  /* taxa horária de máquina: o que sobra depois de material, acabamento, modelação e portes */
-  const taxa = horas>0 ? (x.total - x.pMat - x.pAcab - (x.pMod||0) - x.pPortes)/horas : 0;
-  const porPeca = pecas>0 ? (x.total-(x.pMod||0))/pecas : 0;   /* a modelação é do trabalho, não de cada peça */
+  /* taxa horária de máquina: a rubrica de impressão por hora, sem modelação nem portes */
+  const taxa = horas>0 ? (x.pImp||0)/horas : 0;
+  const porPeca = pecas>0 ? printTotal/pecas : 0;   /* só impressão; modelação é do trabalho, não da peça */
 
   el('g1v').textContent = horas>0 ? taxa.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €/h' : '—';
   el('g2v').textContent = pecas>0 ? eur(porPeca) : '—';
@@ -3226,22 +3251,32 @@ function marketPanel(x){
   ], v=>eur(v));
 
   /* ---- rateio por mesa ---- */
-  /* cada mesa fica com a sua fatia do total, proporcional ao que consome:
-     material próprio + tempo de máquina + a preparação fixa que lhe pertence */
-  const pesos=x.det.map(m=>m.cm + (m.hReal||0)*(m.rate??x.taxaCobrada) + x.pPrepMesa);
-  const somaP=pesos.reduce((a,b)=>a+b,0)||1;
-  const mesasP=x.det.map((m,i)=>{
-    const preco=x.total*pesos[i]/somaP;
-    const matC=m.cm*(1+num('s_mmat')/100);
-    return {...m, preco, matC, eurH: m.hReal>0 ? (preco-matC-x.pPrepMesa)/m.hReal : 0};
+  /* cada mesa mostra só a parte de impressão: material, máquina, base, preparação e margem final.
+     Modelação, acabamento manual, portes, descontos globais e arredondamentos não entram aqui. */
+  const margem=x.margemFinal||0, basePeca=x.basePeca||0, baseMesa=x.baseMesa||0;
+  const mesasP=x.det.map(m=>{
+    const matC=m.cm*(x.fMatMesa||1)*(1+num('s_mmat')/100);
+    const maqC=(m.hReal||0)*(m.rate??x.taxaCobrada??taxa);
+    const baseC=basePeca*(m.pecas||0)+baseMesa;
+    const prepC=x.pPrepMesa||0;
+    const margC=(matC+maqC+baseC)*margem;
+    const preco=matC+maqC+baseC+prepC+margC;
+    return {...m, preco, matC, maqC, baseC, prepC, margC,
+      eurH: m.hReal>0 ? maqC/m.hReal : 0};
   });
-  const porMesa=x.nMesas? x.total/x.nMesas : 0;
+  const somaMesas=mesasP.reduce((a,m)=>a+m.preco,0);
+  const porMesa=x.nMesas? somaMesas/x.nMesas : 0;
   const horasMedias=x.hTot/Math.max(x.nMesas,1);
   const matMedio=mesasP.reduce((a,m)=>a+m.matC,0)/Math.max(x.nMesas,1);
+  const baseMedio=mesasP.reduce((a,m)=>a+m.baseC,0)/Math.max(x.nMesas,1);
+  const prepMedio=mesasP.reduce((a,m)=>a+m.prepC,0)/Math.max(x.nMesas,1);
 
   /* a banda por mesa é derivada, não inventada: é a banda horária aplicada
      à duração média destas mesas, mais o material e a preparação dessa mesa */
-  const mesaBanda=r=>matMedio + x.pPrepMesa + horasMedias*r;
+  const mesaBanda=r=>{
+    const bruto=matMedio + baseMedio + horasMedias*r;
+    return bruto*(1+margem) + prepMedio;
+  };
   el('g3v').textContent=eur(porMesa);
   gauge('g3', porMesa, [
     {de:0, ate:mesaBanda(B.bandas[0].lo), rot:'abaixo', cor:'#ff6b6b'},
@@ -3268,6 +3303,7 @@ function marketPanel(x){
   const prepPorPeca=x.pPrepMesa/Math.max(pecasPorMesa,0.0001);
   el('d_mesa_eff').innerHTML=
     `<div><span>${x.nMesas} mesa(s) · ${pecasPorMesa.toFixed(1)} peça(s) por mesa</span><b>${eur(porMesa)} por mesa</b></div>
+     <div><span>Preço por mesa conta só impressão</span><b>sem modelação nem portes</b></div>
      <div><span>Preparação fixa diluída em cada peça</span><b>${eur(prepPorPeca)}</b></div>
      ${x.pPrepMesa<=0?'<div class="sep"><span style="color:var(--accent2)">Não estás a cobrar preparação por mesa. Define os minutos em Definições → O que cobras: é o trabalho fixo de cada impressão, independente de quantas peças lá caibam.</span><b></b></div>':''}
      <div class="sep"><span>${pecasPorMesa<2
@@ -3283,26 +3319,26 @@ function marketPanel(x){
   const alvoB=B.bandas.find(b=>b.id===bandaEscolhida);
   const A=(alvoB.lo+alvoB.hi)/2;
 
-  /* Resolve a taxa de máquina r que faz a taxa horária efetiva dar exatamente A.
-     A margem final compõe por cima de (material+impressão+base) e a promoção desconta
-     sobre (material+impressão), por isso não basta somar horas×A. */
-  const m=num('s_margem')/100, p=num('j_promo')/100, den=1+m-p;
-  if(horas>0 && den>0){
-    const X=(A*horas - x.pBase*(1+m) + x.desc + x.pMat)/den;   // X = material + impressão
-    ALVO_HORA=Math.max(0,(X-x.pMat)/horas);
-    const Xr=x.pMat+horas*ALVO_HORA;
-    ALVO=(Xr+x.pBase)*(1+m)+x.pAcab-x.desc-Xr*p+x.pPortes;
-  } else { ALVO_HORA=A; ALVO=x.pMat+x.pAcab+x.pPortes+horas*A; }
-  if(ALVO<B.minimo[0]) ALVO=B.minimo[0];
+  /* alvo do painel de mercado: só impressão. O botão continua a mexer na hora de
+     máquina cobrada, que é a alavanca que posiciona trabalhos longos. */
+  const alvoPrint=r=>(x.pMat+horas*r+x.pBase)*(1+margem)+(x.pPrep||0);
+  if(horas>0 && 1+margem>0){
+    ALVO_HORA=A;
+    ALVO=alvoPrint(ALVO_HORA);
+    if(ALVO<B.minimo[0]){
+      ALVO_HORA=Math.max(0,((B.minimo[0]-(x.pPrep||0))/(1+margem)-x.pMat-x.pBase)/horas);
+      ALVO=alvoPrint(ALVO_HORA);
+    }
+  } else { ALVO_HORA=A; ALVO=Math.max(B.minimo[0], printTotal); }
   const tol=el('j_round').checked?0.55:0.05;   /* o arredondamento aos 0,50 pode limar um degrau */
 
-  const dif=ALVO-x.total, pct=x.total? dif/x.total*100 : 0;
+  const dif=ALVO-printTotal, pct=printTotal? dif/printTotal*100 : 0;
   el('t_val').textContent=eur(ALVO);
   el('t_txt').innerHTML = Math.abs(dif)<tol
     ? `Estás dentro do patamar <b style="color:var(--good)">${alvoB.nome}</b>. Nada a mudar.`
     : `A ${ALVO_HORA.toFixed(2).replace('.',',')} €/h de máquina — o meio do patamar <b>${alvoB.nome}</b>.
        ${dif>0?`<span style="color:var(--accent2)">${eur(dif)} acima</span>`:`<span style="color:var(--good)">${eur(-dif)} abaixo</span>`}
-       do teu preço (${pct>0?'+':''}${pct.toFixed(0)}%).
+       do teu preço de impressão (${pct>0?'+':''}${pct.toFixed(0)}%).
        ${horas>0?'Aplicar define a hora de máquina cobrada.':'Aplicar ajusta a margem final.'}`;
   el("t_btn").style.display=Math.abs(dif)<tol?"none":"block";
 
@@ -3341,8 +3377,7 @@ function aplicarAlvo(){
   } else {
     const base=LAST.pMat+LAST.pImp+LAST.pBase;
     if(!isFinite(base)||base<=0) return;
-    const fixo=base+LAST.pAcab-LAST.desc-LAST.promo+LAST.pPortes;
-    const marg=Math.round((ALVO-fixo)/base*1000)/10;
+    const marg=Math.round(((ALVO-(LAST.pPrep||0)-base)/base)*1000)/10;
     if(!isFinite(marg)) return;
     el('s_margem').value=marg;
   }
@@ -3744,7 +3779,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.14.0';
+const VERSAO='1.15.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -3752,6 +3787,7 @@ const store={
 };
 const I18N={
   pt:{
+    infoTipLabel:'Informação',
     /* ---- seletor de filamentos + ligação ao Bobina ---- */
     fpTitulo:'Filamentos',
     fpAbrirT:'Escolher filamento — os do Bobina vêm com o preço e o stock de agora',
@@ -3957,6 +3993,7 @@ const I18N={
     installUnavailable:'O teu browser não oferece instalação nesta página. No Chrome ou Edge: menu ⋮ → "Instalar Fatia". No telemóvel: partilhar → "Adicionar ao ecrã principal".'
   },
   en:{
+    infoTipLabel:'Information',
     /* ---- filament picker + live Bobina link ---- */
     fpTitulo:'Filaments',
     fpAbrirT:'Pick a filament — the ones from Bobina carry today\'s price and stock',
@@ -4169,10 +4206,20 @@ function tr(k,v={}){
 function aplicarIdioma(){
   document.documentElement.lang=IDIOMA==='en'?'en':'pt-PT';
   const sel=el('lang_sel'); if(sel) sel.value=IDIOMA;
-  document.querySelectorAll('[data-i18n]').forEach(n=>{ n.textContent=tr(n.dataset.i18n); });
-  document.querySelectorAll('[data-i18n-html]').forEach(n=>{ n.innerHTML=tr(n.dataset.i18nHtml); });
+  const tipDe=n=>n.classList&&n.classList.contains('hintpop') ? n.querySelector('.tipbox') : null;
+  document.querySelectorAll('[data-i18n]').forEach(n=>{
+    const t=tipDe(n);
+    if(t) t.textContent=tr(n.dataset.i18n);
+    else n.textContent=tr(n.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(n=>{
+    const t=tipDe(n);
+    if(t) t.innerHTML=tr(n.dataset.i18nHtml);
+    else n.innerHTML=tr(n.dataset.i18nHtml);
+  });
   document.querySelectorAll('[data-i18n-title]').forEach(n=>{ n.title=tr(n.dataset.i18nTitle); });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(n=>{ n.placeholder=tr(n.dataset.i18nPlaceholder); });
+  document.querySelectorAll('.hintpop .tipbtn').forEach(n=>{ n.setAttribute('aria-label',tr('infoTipLabel')); });
   if(typeof drawFils==='function') drawFils(false);
   if(typeof estadoBobina==='function') estadoBobina();
   if(typeof desenhaRealces==='function') desenhaRealces();
@@ -4191,6 +4238,18 @@ function aplicarIdioma(){
   document.querySelectorAll('.card h3[data-sub]').forEach(h=>{
     h.title=tr('foldTitle');
     if(!h.querySelector('.chev')) h.insertAdjacentHTML('beforeend','<span class="chev">▾</span>');
+  });
+}
+let INFO_TIP_SEQ=0;
+function ligaInfoPopups(){
+  document.querySelectorAll('.hint:not(.hintpop)').forEach(h=>{
+    if(h.id || h.classList.contains('filaviso')) return;
+    const conteudo=h.innerHTML.trim();
+    if(!conteudo) return;
+    const id='tip_'+(++INFO_TIP_SEQ);
+    h.classList.add('hintpop');
+    h.innerHTML=`<button type="button" class="tipbtn" aria-label="${htmlEsc(tr('infoTipLabel'))}" aria-describedby="${id}">?</button>
+      <span class="tipbox" id="${id}" role="tooltip">${conteudo}</span>`;
   });
 }
 function mudarIdioma(lang){
@@ -4571,6 +4630,7 @@ ligaBobina();
 const ultimo=store.get('ultimo',null);
 if(ultimo){ try{ repor(ultimo); }catch(_){ calc(); } } else calc();
 aplicarIdioma();
+ligaInfoPopups();
 mostrarLicenca();
 procurarAtualizacoes(true);
 iniciarMemoriaRemota();
