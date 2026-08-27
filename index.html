@@ -88,6 +88,7 @@ input[readonly]{opacity:.75;cursor:default;border-style:dashed}
 .row{display:grid;gap:10px;margin-bottom:10px}
 .row>*{min-width:0}   /* pela mesma razao: as celulas encolhem, o texto e que corta */
 .r2{grid-template-columns:1fr 1fr}
+.rdata{grid-template-columns:minmax(0,210px)}   /* a data não precisa da largura toda */
 .r3{grid-template-columns:1fr 1fr 1fr}
 .r4{grid-template-columns:1fr 1fr 1fr 1fr}
 .suffix{position:relative}
@@ -170,9 +171,12 @@ body.simples .hint{display:none}
   font:inherit;font-weight:500;color:var(--txt);cursor:pointer}
 #fil_trigger:hover{border-color:var(--accent);color:var(--txt)}
 #fil_trigger .bob{flex:none}
-#fil_trigger .ftxt{display:flex;flex-direction:column;flex:1 1 auto;min-width:0;line-height:1.3}
-#fil_trigger .ftxt b{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis}
+#fil_trigger .ftxt{display:flex;flex-direction:column;flex:1 1 auto;min-width:0;
+  overflow:hidden;line-height:1.3}
+#fil_trigger .ftxt b,#fil_trigger .ftxt i{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#fil_trigger .ftxt b{font-size:13.5px;font-weight:700}
+/* sem o nowrap aqui o "24,90 €/kg · do Bobina" partia-se palavra a palavra e saía
+   do .ftxt por cima do chip do stock -- foi o que estragou o botão em 1.11.2 */
 #fil_trigger .ftxt i{font-style:normal;font-size:11.5px;color:var(--dim);
   font-variant-numeric:tabular-nums}
 /* flex:none -- o nome e que corta com reticencias, o stock nunca fica esmagado */
@@ -711,8 +715,12 @@ footer a{color:var(--blue);text-decoration:none}
   <div class="card" id="cardDefs">
     <h2><i class="n">2</i>Definições de custo</h2>
 
-    <div class="row r2">
+    <div class="row rdata">
       <div><label>Preços revistos em</label><input type="date" id="s_data"></div>
+    </div>
+    <!-- o filamento leva a linha toda: a meia-coluna não chegava para o nome + o
+         chip do stock, e o €/kg partia-se por cima dele -->
+    <div class="row">
       <div><label>Filamento</label>
         <!-- o select continua a ser a verdade sobre o que está escolhido (estado,
              presets, Exportar); o que se vê é o botão que abre o seletor -->
@@ -3125,7 +3133,7 @@ function resetJob(){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.11.2';
+const VERSAO='1.11.3';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
