@@ -1789,8 +1789,11 @@ function ligaBobina(){
    disto. O que ele faz é responder a uma pergunta que só se faz depois de haver
    lucro -- "quanto disto vai para quem eu devo?" -- e lançar a resposta no Giro. */
 const GIRO_INTERVALO=60000;
+/* O titular escolhido: '@empresa' (tudo o que nao e' meu -- o que este painel
+   mostra por omissao), '' para ver a carteira toda, ou o nome de um titular. */
+const GIRO_EMPRESA='@empresa';
 const GIRO={dividas:[],titulares:[],resumo:null,em:0,lido:0,ok:false,erro:'',puxando:false,
-            titular:'', alvo:0, aLancar:false};
+            titular:GIRO_EMPRESA, alvo:0, aLancar:false};
 
 async function puxaGiro(forcar=false){
   if(GIRO.puxando) return;
@@ -1817,7 +1820,10 @@ function ligaGiro(){
   if(c && Array.isArray(c.dividas)){
     GIRO.dividas=c.dividas; GIRO.titulares=c.titulares||[]; GIRO.resumo=c.resumo||null; GIRO.em=c.em||0;
   }
-  GIRO.titular=store.get('giro_titular','');
+  /* Quem nunca escolheu fica na empresa: o Fatia e' a oficina, e as dividas
+     pessoais tratam-se no Giro e no Rumo, nao no orcamento de um trabalho. */
+  const guardado=store.get('giro_titular',null);
+  GIRO.titular = (guardado===null||guardado===undefined) ? GIRO_EMPRESA : guardado;
   const pct=+store.get('giro_pct',0)||0;
   if(el('cr_pct')) el('cr_pct').value=pct;
   if(el('cr_pctn')) el('cr_pctn').value=pct;
@@ -1845,10 +1851,22 @@ function giroMudaPct(origem){
 }
 
 function giroFiltra(nome){
-  GIRO.titular = (GIRO.titular===nome) ? '' : nome;
+  /* Voltar a carregar no chip aceso nao desliga o filtro: cairia na carteira
+     toda sem se ter pedido. Para isso ha' o chip "Todos". */
+  GIRO.titular = nome;
   store.set('giro_titular',GIRO.titular);
   renderCredores();
 }
+
+/* As dividas que o filtro deixa passar. */
+function giroLista(){
+  if(GIRO.titular===GIRO_EMPRESA) return GIRO.dividas.filter(d=>!d.titular_meu);
+  if(!GIRO.titular) return GIRO.dividas.slice();
+  return GIRO.dividas.filter(d=>d.titular===GIRO.titular);
+}
+
+const giroSaldoEmpresa = () =>
+  Math.round(GIRO.dividas.filter(d=>!d.titular_meu).reduce((a,d)=>a+(+d.saldo||0),0)*100)/100;
 
 function renderCredores(){
   const card=el('cred'); if(!card) return;
@@ -1863,23 +1881,26 @@ function renderCredores(){
   live.innerHTML='<s></s><span>'+htmlEsc(GIRO.ok?tr('crEmDireto')
     :(GIRO.dividas.length?tr('crUltima')+' · '+haQuanto(GIRO.lido||Date.now()):tr('crSemGiro')))+'</span>';
 
-  const nomes=GIRO.titulares.map(t=>t.holder);
-  el('cr_tits').innerHTML = nomes.length>1 ? (
-    `<button type="button" class="crtit ${GIRO.titular?'':'on'}" onclick="giroFiltra('')">
-       <span>${htmlEsc(tr('crTodos'))}</span><b>${eur((GIRO.resumo&&GIRO.resumo.saldo)||0)}</b></button>`
-    + GIRO.titulares.map(t=>`
-      <button type="button" class="crtit ${GIRO.titular===t.holder?'on':''}"
-              onclick="giroFiltra(${JSON.stringify(t.holder).replace(/"/g,'&quot;')})">
-        <span>${htmlEsc(t.holder)}</span><b>${eur(t.balance)}</b></button>`).join('')
-  ) : '';
+  /* A barra esta' sempre ca': e' por ela que se ve' que o painel esta' a mostrar
+     so' a empresa, e por onde se vai ver o resto sem ter de adivinhar. */
+  const chip=(chave,rotulo,saldo)=>`
+      <button type="button" class="crtit ${GIRO.titular===chave?'on':''}"
+              onclick="giroFiltra(${JSON.stringify(chave).replace(/"/g,'&quot;')})">
+        <span>${htmlEsc(rotulo)}</span><b>${eur(saldo)}</b></button>`;
+  el('cr_tits').innerHTML =
+      chip(GIRO_EMPRESA, tr('crEmpresa'), giroSaldoEmpresa())
+    + GIRO.titulares.map(t=>chip(t.holder, t.holder, t.balance)).join('')
+    + chip('', tr('crTodos'), (GIRO.resumo&&GIRO.resumo.saldo)||0);
 
   const lucro=lucroDoTrabalho();
   el('cr_lucro').textContent=eur(lucro);
   el('cr_val').textContent=eur(Math.round(lucro*giroPct())/100);
 
-  const lista=GIRO.dividas.filter(d=>!GIRO.titular || d.titular===GIRO.titular);
+  const lista=giroLista();
   if(!lista.length){
-    el('cr_lista').innerHTML=`<div class="crvazio">${htmlEsc(GIRO.titular?tr('crVazioFiltro'):tr('crVazio'))}</div>`;
+    const vazio = GIRO.titular===GIRO_EMPRESA ? 'crVazioEmpresa'
+                : (GIRO.titular ? 'crVazioFiltro' : 'crVazio');
+    el('cr_lista').innerHTML=`<div class="crvazio">${htmlEsc(tr(vazio))}</div>`;
     return;
   }
   const pct=giroPct();
@@ -4261,7 +4282,7 @@ function fechaAba(i,ev){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.19.0';
+const VERSAO='1.19.1';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -4296,8 +4317,10 @@ const I18N={
     crOrientar:'A orientar',
     crNota:'Nada disto aparece no orçamento do cliente. O valor sai do <b>lucro</b> deste trabalho — o que sobra depois dos custos — e é lançado no Giro como um pagamento normal, que de lá segue para o Rumo.',
     crTodos:'Todos',
+    crEmpresa:'Da empresa',
     crVazio:'Sem dívidas abertas no Giro.',
     crVazioFiltro:'Nada em aberto para este titular.',
+    crVazioEmpresa:'Nenhuma dívida em nome da empresa. No Giro, põe o titular na dívida — ou vê aqui a carteira toda.',
     crEmDireto:'em direto',
     crUltima:'última leitura',
     crSemGiro:'Giro em baixo',
@@ -4547,8 +4570,10 @@ const I18N={
     crOrientar:'Sending',
     crNota:'None of this shows on the client quote. The amount comes out of this job\u2019s <b>profit</b> — what is left after costs — and is logged in Giro as a normal payment, which flows on to Rumo.',
     crTodos:'All',
+    crEmpresa:'Company',
     crVazio:'No open debts in Giro.',
     crVazioFiltro:'Nothing open for this holder.',
+    crVazioEmpresa:'No debt held by the company. Set the holder on the debt in Giro — or show the whole book here.',
     crEmDireto:'live',
     crUltima:'last reading',
     crSemGiro:'Giro is down',
