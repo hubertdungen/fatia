@@ -143,6 +143,73 @@ def bobina_escreve(caminho: str, corpo: dict[str, Any]) -> tuple[int, dict[str, 
     return codigo, resposta
 
 
+# -------------------------------------------------------------------- Giro --
+# As dívidas vivem no Giro (porta 8101). Mesma ponte do Bobina, pelas mesmas
+# razões: o pedido é feito daqui, do lado do servidor, com o segredo que o Giro
+# escreve no ficheiro dele. O Fatia mostra-as para se poder orientar uma fatia
+# do lucro de um trabalho aos credores -- nunca no orçamento do cliente.
+GIRO_URL = os.environ.get("FATIA_GIRO_URL", "http://127.0.0.1:8101")
+GIRO_TOKEN_FILE = Path(
+    os.environ.get("FATIA_GIRO_TOKEN",
+                   str(Path.home() / ".local/share/giro/bridge.token")))
+GIRO_TTL = int(os.environ.get("FATIA_GIRO_TTL", "10"))
+_giro_cache: tuple[float, dict[str, Any]] | None = None
+
+
+def _giro_token() -> tuple[str, dict[str, Any] | None]:
+    if not GIRO_TOKEN_FILE.exists():
+        return "", {"ok": False, "error": "O Giro ainda não arrancou nesta máquina."}
+    token = GIRO_TOKEN_FILE.read_text().strip()
+    if not token:
+        return "", {"ok": False, "error": "O Giro ainda não gerou o segredo da ligação."}
+    return token, None
+
+
+def giro_dividas() -> tuple[int, dict[str, Any]]:
+    """As dívidas abertas do Giro, tal como ele as dá."""
+    global _giro_cache
+    if _giro_cache and time.time() - _giro_cache[0] < GIRO_TTL:
+        return 200, _giro_cache[1]
+    token, erro = _giro_token()
+    if erro:
+        return 503, erro
+    url = f"{GIRO_URL}/api/fatia/dividas?token={urllib.parse.quote(token)}"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as r:
+            data = json.loads(r.read().decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        return 502, {"ok": False, "error": f"Sem resposta do Giro: {exc}"}
+    _giro_cache = (time.time(), data)
+    return 200, data
+
+
+def giro_pagamento(corpo: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    """Lançar um pagamento no Giro. A cache é deitada fora a seguir, senão
+    abater dívida e ver o saldo logo a seguir mostrava o número de antes."""
+    global _giro_cache
+    token, erro = _giro_token()
+    if erro:
+        return 503, erro
+    dados = json.dumps({**corpo, "token": token}).encode("utf-8")
+    pedido = urllib.request.Request(
+        f"{GIRO_URL}/api/fatia/pagamento", data=dados, method="POST",
+        headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(pedido, timeout=15) as r:
+            resposta = json.loads(r.read().decode("utf-8") or "{}")
+            codigo = r.status
+    except urllib.error.HTTPError as exc:
+        try:
+            resposta = json.loads(exc.read().decode("utf-8") or "{}")
+        except Exception:  # noqa: BLE001
+            resposta = {"ok": False, "error": f"O Giro recusou: {exc}"}
+        codigo = exc.code
+    except Exception as exc:  # noqa: BLE001
+        return 502, {"ok": False, "error": f"Sem resposta do Giro: {exc}"}
+    _giro_cache = None
+    return codigo, resposta
+
+
 def spot_price(zone: str = "PT") -> tuple[int, dict[str, Any]]:
     """Preço de mercado da eletricidade, pedido daqui em vez do browser.
 
@@ -375,6 +442,10 @@ class FatiaHandler(SimpleHTTPRequestHandler):
             status, payload = bobina_filaments()
             self.write_json(status, payload)
             return
+        if path == "/api/giro/dividas":
+            status, payload = giro_dividas()
+            self.write_json(status, payload)
+            return
         if path == "/api/health":
             self.write_json(200, {"ok": True, "name": "Fatia", "memory": True})
             return
@@ -477,6 +548,16 @@ class FatiaHandler(SimpleHTTPRequestHandler):
                 caminho = ("/api/fatia/gastar/anular" if path.endswith("/anular")
                            else "/api/fatia/gastar")
             status, payload = bobina_escreve(caminho, data if isinstance(data, dict) else {})
+            self.write_json(status, payload)
+            return
+        # abater dívida no Giro com o lucro de um trabalho. A mesma trava das
+        # escritas no Bobina: só da rede de casa.
+        if path == "/api/giro/pagamento":
+            cliente = first_forwarded_for(self.headers, self.client_address[0])
+            if not is_lan_or_mesh(cliente):
+                self.error_json(403, "As escritas no Giro só se fazem da rede de casa")
+                return
+            status, payload = giro_pagamento(data if isinstance(data, dict) else {})
             self.write_json(status, payload)
             return
         self.error_json(404, "API desconhecida")
