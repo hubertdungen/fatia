@@ -181,6 +181,9 @@ td input.slic{border-color:rgba(62,207,142,.35)}
 @media(max-width:560px){.hintpop .tipbox{left:-6px;width:calc(100vw - 44px)}}
 .tierbtns{display:flex;gap:6px;margin-top:6px}
 .pacchk{display:flex;flex-wrap:wrap;gap:0 12px}
+.promoalvo{display:flex;gap:6px;margin-top:6px}
+.promoalvo .suffix{flex:1}
+.promoalvo button{padding:5px 10px;font-size:12px}
 .tierbtns button{padding:5px 8px;font-size:11px;flex:1}
 .tierbtns button.on{background:var(--accent);color:#1a1206;border-color:var(--accent)}
 details summary{cursor:pointer;list-style:none;color:var(--dim);font-size:12px;padding:6px 0}
@@ -287,6 +290,14 @@ body.simples .hint{display:none}
 .bxqtxt{font-size:12.5px;color:var(--dim);line-height:1.6}
 .bxqbt{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
 .bxqbt button{flex:1}
+.impqest{display:flex;gap:8px;margin:14px 0 6px}
+.impqest label{flex:1;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;cursor:pointer;font-size:13.5px;font-weight:600}
+.impqest label:has(input:checked){border-color:var(--good);background:rgba(62,207,142,.1)}
+.impqest input{accent-color:var(--good)}
+.rest{font-size:10.5px;padding:1px 6px;border-radius:5px;margin-left:4px;vertical-align:1px}
+.rest.mandado{background:rgba(90,169,255,.16);color:var(--blue)}
+.rest.impresso{background:rgba(62,207,142,.16);color:var(--good)}
 input.lido{opacity:.7;cursor:not-allowed}
 
 /* ---- credores: as dívidas do Giro, e a fatia do lucro que as abate ---- */
@@ -448,6 +459,23 @@ input.lido{opacity:.7;cursor:not-allowed}
 .lictxt ul{margin:6px 0 10px;padding-left:20px} .lictxt li{margin-bottom:4px}
 
 /* ---- memória remota ---- */
+/* ---- cabeçalho: presets + orçamento + menu ---- */
+.pgrupo{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pgrupo select{width:auto;min-width:150px;font-size:13px;border:0;border-radius:0}
+.pgrupo button{border:0;border-left:1px solid var(--line);border-radius:0;padding:6px 10px}
+#veu{display:none;position:fixed;inset:0;background:rgba(6,9,13,.55);z-index:204}
+#veu.on{display:block}
+#menu{position:fixed;top:0;left:0;bottom:0;width:min(300px,86vw);background:var(--panel);border-right:1px solid var(--line);
+  z-index:206;transform:translateX(-100%);transition:transform .2s;display:flex;flex-direction:column;box-shadow:12px 0 30px rgba(0,0,0,.4)}
+#menu.on{transform:none}
+#menu .rhd{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+#menu .rhd b{flex:1;font-size:16px}
+#menu .mcorpo{overflow:auto;padding:6px 12px 20px;display:flex;flex-direction:column;gap:4px}
+#menu .mcorpo button{text-align:left;border-color:transparent;padding:8px 10px}
+#menu .mcorpo button:hover{border-color:var(--line)}
+.mgrupo{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin:12px 10px 2px}
+.mlang{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 10px;font-size:13.5px}
+.mlang select{width:auto}
 /* ---- registo de impressos: botão verde e gaveta lateral ---- */
 button.feito{width:100%;margin-top:12px;background:var(--good);color:#06150e;border-color:var(--good);font-weight:700}
 button.feito:hover{background:#5fe0a6;color:#06150e}
@@ -657,23 +685,17 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="sub" data-i18n="tagline">Preços de impressão 3D — a partir do teu slicer</div>
     </div>
   </div>
+  <!-- em cima só o que se usa a cada orçamento: os presets e o orçamento do
+       cliente. O resto vive no menu lateral, arrumado por grupos -->
   <div class="hbtns">
-    <select id="lang_sel" onchange="mudarIdioma(this.value)" style="width:auto;font-size:13px"
-      title="Idioma / Language"><option value="pt">PT</option><option value="en">EN</option></select>
-    <select id="p_sel" onchange="carregarPreset()" style="width:auto;min-width:150px;font-size:13px"></select>
-    <button class="ghost" onclick="guardarPreset()" data-i18n-title="tGuardarPreset" title="Guardar o estado atual como preset">💾</button>
-    <button class="ghost" onclick="renomearPreset()" data-i18n-title="tRenomearPreset" title="Renomear o preset selecionado">✏️</button>
-    <button class="ghost" onclick="apagarPreset()" data-i18n-title="tApagarPreset" title="Apagar o preset selecionado">🗑</button>
-    <button class="ghost" onclick="exportSettings()" data-i18n="bExportar">↓ Exportar</button>
-    <button class="ghost" onclick="document.getElementById('imp').click()" data-i18n="bImportar">↑ Importar</button>
-    <input type="file" id="imp" accept=".json" style="display:none" onchange="importSettings(event)">
-    <button class="ghost" id="b_memoria" onclick="mostrarMemoria()" data-i18n="bMemoria">Memória</button>
-    <button class="ghost" id="b_instalar" style="display:none" onclick="instalarApp()" data-i18n="bInstalar">⤓ Instalar app</button>
-    <button class="ghost" id="b_dobrar" onclick="dobrarTudo()" title="Fechar ou abrir todas as secções">⌃ Fechar secções</button>
-    <button class="ghost" id="b_simples" onclick="toggleSimples()">Modo simples</button>
-    <button class="ghost" onclick="abreRegisto()" data-i18n="bRegisto">📒 Registo</button>
-    <button class="ghost" onclick="resetJob()" data-i18n="bNovo">Novo orçamento</button>
+    <div class="pgrupo">
+      <select id="p_sel" onchange="carregarPreset()"></select>
+      <button class="ghost" onclick="guardarPreset()" data-i18n-title="tGuardarPreset" title="Guardar o estado atual como preset">💾</button>
+      <button class="ghost" onclick="renomearPreset()" data-i18n-title="tRenomearPreset" title="Renomear o preset selecionado">✏️</button>
+      <button class="ghost" onclick="apagarPreset()" data-i18n-title="tApagarPreset" title="Apagar o preset selecionado">🗑</button>
+    </div>
     <button class="primary" onclick="preview()" data-i18n="bOrcamento">👁 Orçamento do cliente</button>
+    <button class="ghost" onclick="abreMenu()" data-i18n="bMenu">☰ Menu</button>
   </div>
 </header>
 
@@ -752,18 +774,46 @@ footer a{color:var(--blue);text-decoration:none}
   </div>
 </div>
 
-<!-- a pergunta que aparece ao abrir o orçamento do cliente -->
+<!-- o único sítio onde se diz que um trabalho foi para a impressora:
+     regista, e dá baixa no Bobina se se quiser, tudo de uma vez -->
 <div id="bxq">
   <div class="bxqbox">
-    <b data-i18n="bxqTitulo">Este trabalho já foi impresso?</b>
+    <b data-i18n="impqTitulo">Registar este trabalho</b>
     <div class="bxqtxt" id="bxq_txt"></div>
+    <div class="impqest">
+      <label><input type="radio" name="impq_est" value="mandado" onchange="impqEstado()"><span data-i18n="impqMandado">🖨 Mandado imprimir</span></label>
+      <label><input type="radio" name="impq_est" value="impresso" onchange="impqEstado()"><span data-i18n="impqImpresso">✅ Já impresso</span></label>
+    </div>
+    <label class="toggle" id="impq_baixa_l"><input type="checkbox" id="impq_baixa"> <span id="impq_baixa_t"></span></label>
     <div class="bxqbt">
-      <button class="primary" onclick="respondeBaixa(1)" data-i18n="bxqSim">Já foi — dar baixa</button>
-      <button class="ghost" onclick="respondeBaixa(0)" data-i18n="bxqNao">Ainda não</button>
+      <button class="feito" style="margin:0" onclick="confirmaImpresso()" data-i18n="impqOk">Registar</button>
+      <button class="ghost" onclick="el('bxq').style.display='none'" data-i18n="impqCancelar">Cancelar</button>
     </div>
   </div>
 </div>
 
+<div id="veu" onclick="abreMenu(false);abreRegisto(false)"></div>
+<aside id="menu" aria-label="Menu" onclick="if(event.target.closest('button'))abreMenu(false)">
+  <div class="rhd"><b>Fatia</b><button class="ghost" onclick="abreMenu(false)">✕</button></div>
+  <div class="mcorpo">
+    <div class="mgrupo" data-i18n="mTrabalho">Trabalho</div>
+    <button class="ghost" onclick="resetJob()" data-i18n="bNovo">Novo orçamento</button>
+    <button class="ghost" onclick="abreRegisto()" data-i18n="bRegistoMenu">📒 Registo e clientes</button>
+    <div class="mgrupo" data-i18n="mVista">Vista</div>
+    <button class="ghost" id="b_simples" onclick="toggleSimples()">Modo simples</button>
+    <button class="ghost" id="b_dobrar" onclick="dobrarTudo()" title="Fechar ou abrir todas as secções">⌃ Fechar secções</button>
+    <label class="mlang"><span data-i18n="mIdioma">Idioma</span>
+      <select id="lang_sel" onchange="mudarIdioma(this.value)"><option value="pt">Português</option><option value="en">English</option></select></label>
+    <div class="mgrupo" data-i18n="mDados">Dados</div>
+    <button class="ghost" onclick="exportSettings()" data-i18n="bExportar">↓ Exportar</button>
+    <button class="ghost" onclick="document.getElementById('imp').click()" data-i18n="bImportar">↑ Importar</button>
+    <input type="file" id="imp" accept=".json" style="display:none" onchange="importSettings(event)">
+    <button class="ghost" id="b_memoria" onclick="mostrarMemoria()" data-i18n="bMemoria">Memória</button>
+    <button class="ghost" id="b_instalar" style="display:none" onclick="instalarApp()" data-i18n="bInstalar">⤓ Instalar app</button>
+    <div class="mgrupo" data-i18n="mSobre">Sobre</div>
+    <button class="ghost" onclick="mostrarLicenca(1)" data-i18n="mLicenca">Licença</button>
+  </div>
+</aside>
 <datalist id="dl_clientes"></datalist>
 <aside id="reg" aria-label="Registo">
   <div class="rhd"><b data-i18n="regTitulo">📒 Registo de trabalhos</b>
@@ -985,6 +1035,12 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="avancado">
         <label>Promoção</label>
         <div class="suffix"><input type="number" id="j_promo" value="0" min="0" max="100" step="0.5"><i>%</i></div>
+        <!-- o caminho ao contrário: diz-se o total e a percentagem faz-se sozinha -->
+        <div class="promoalvo">
+          <div class="suffix"><input type="number" id="j_promo_alvo" min="0" step="0.5" placeholder="ou o total final"><i>€</i></div>
+          <button type="button" class="ghost" onclick="promoParaTotal()">Fixar</button>
+        </div>
+        <div class="hint viva tierlido" id="j_promo_lido"></div>
         <div class="hint">Sobre o preço de todos os serviços (modelação, impressão, acabamento), já depois do desconto por quantidade e do pacote. 100% deixa só os portes.</div>
       </div>
     </div>
@@ -1159,7 +1215,7 @@ footer a{color:var(--blue);text-decoration:none}
           <div class="pacchk">
             <label class="toggle"><input type="checkbox" id="s_pac_c_mod" checked> Modelação</label>
             <label class="toggle"><input type="checkbox" id="s_pac_c_imp" checked> Impressão</label>
-            <label class="toggle"><input type="checkbox" id="s_pac_c_pos" checked> Acabamento</label></div></div>
+            <label class="toggle"><input type="checkbox" id="s_pac_c_pos"> Acabamento</label></div></div>
         <div><label>Desconta sobre</label>
           <div class="pacchk">
             <label class="toggle"><input type="checkbox" id="s_pac_a_mod" checked> Modelação</label>
@@ -1404,11 +1460,7 @@ footer a{color:var(--blue);text-decoration:none}
 <button id="pvclose" onclick="preview(false)">Fechar ✕</button>
 
 <script>
-function preview(on=true, guardado=false){
-  /* antes de mostrar o orçamento, perguntar se aquilo já foi impresso: é o
-     momento em que se sabe, e a pergunta reabre isto conforme a resposta.
-     Um orçamento do registo já foi impresso -- não se pergunta nada. */
-  if(on && !guardado && perguntaBaixa()) return;
+function preview(on=true){
   /* ao fechar um orçamento do registo, o de agora volta para o seu lugar */
   if(!on && el('printable').dataset.guardado){ delete el('printable').dataset.guardado; calc(); }
   el('printable').classList.toggle('show',on);
@@ -2615,13 +2667,6 @@ function abreBaixa(){
 }
 function fechaBaixa(){
   el('baixa').style.display='none';
-  if(!BX.depois) return;
-  BX.depois=false;
-  /* veio da pergunta: fechar sem dar baixa vale por "ainda não". Sem isto a
-     pergunta reaparecia aqui mesmo e não havia como chegar ao orçamento sem
-     dar baixa de alguma coisa. */
-  if(mesasPendentes().length){ BAIXA_ADIADA=true; guardaEstado(); }
-  preview(true);
 }
 
 function renderLinhasBaixa(M){
@@ -2796,20 +2841,6 @@ function desenhaBotaoBaixa(){
 /* A pergunta ao abrir o orçamento do cliente. Só aparece havendo mesmo o que dar
    baixa, e só uma vez por trabalho: quem responde "ainda não" não quer isto a
    perguntar de cada vez que espreita o orçamento. */
-function perguntaBaixa(){
-  if(BAIXA_ADIADA) return false;
-  const pend=mesasPendentes();
-  if(!pend.length) return false;
-  el('bxq_txt').textContent=tr('bxqTxt',{
-    g:kgTxt(pend.reduce((a,M)=>a+M.total,0)), n:pend.length});
-  el('bxq').style.display='flex';
-  return true;
-}
-function respondeBaixa(sim){
-  el('bxq').style.display='none';
-  if(sim){ BX.depois=true; abreBaixa(); }
-  else { BAIXA_ADIADA=true; guardaEstado(); preview(true); }
-}
 
 /* ============ mesas: [gramas, tempo, custoSlicer, impressora, mostrarNoOrçamento,
    filamentos[], peças, gramasDeCadaFilamento[]] ============ */
@@ -3316,6 +3347,25 @@ function lePacote(x){
     : tr('pacJobSim',{p:P, juntos:pacLista(x.juntos), sobre:x.sobre(x.alvo), v:eur(x.valor)});
 }
 
+/* ---- promoção pelo total ----
+   "Quero que fique em 12 €": procura a percentagem que lá chega. Por bissecção e
+   com o calc() a sério, porque entre a promoção e o total ainda há imposto e
+   arredondamento -- uma fórmula fechada enganava-se nos cêntimos. */
+let PROMO_LIDO='';
+function promoParaTotal(){
+  const alvo=num('j_promo_alvo'), p=el('j_promo');
+  if(!(alvo>0)) return el('j_promo_alvo').focus();
+  const total=x=>{ p.value=x; calc(); return LAST.totalCli; };
+  if(total(0)<=alvo+0.004){ el('j_promo_alvo').value=''; guardaEstado(); return alert(tr('promoAcima',{t:eur(LAST.totalCli)})); }
+  if(total(100)>alvo+0.004){ guardaEstado(); return alert(tr('promoAbaixo',{t:eur(LAST.totalCli)})); }
+  let lo=0, hi=100;
+  for(let i=0;i<40;i++){ const m=(lo+hi)/2; total(m)<=alvo+0.004 ? hi=m : lo=m; }
+  /* a percentagem mais pequena que lá chega, arredondada PARA CIMA ao centésimo */
+  total(Math.min(100,Math.ceil(hi*100)/100));
+  el('j_promo_alvo').value='';
+  guardaEstado();
+}
+
 /* ============ CÁLCULO ============ */
 /* blocos de trabalho — dá para orçamentar só modelação, só impressão ou só acabamento */
 let BLOCOS={mod:true, imp:true, pos:true};
@@ -3466,6 +3516,7 @@ function calc(){
      serviços depois dos outros descontos. 100% = serviços de graça; os portes ficam */
   const servicos=pMod+pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg;
   const promo=Math.max(0,servicos-desc-pPac)*Math.min(num('j_promo'),100)/100;
+  PROMO_LIDO = promo>0.004 ? tr('promoLido',{v:eur(promo)}) : '';
   lePacote(pac);
 
   /* ---- portes ---- */
@@ -3641,6 +3692,7 @@ function calc(){
         taxa: hTot>0?pImp/hTot:0};
   desenhaBotaoBaixa();
   desenhaRegEstado();
+  el('j_promo_lido').textContent = PROMO_LIDO && tr('promoLidoTot',{l:PROMO_LIDO, t:eur(totalCliente)});
   if(typeof renderCredores==='function') renderCredores();
   marketPanel({total,pPrint,pMat,pImp,pAcab,pMod,pPortes,pBase,pPrep,desc,hTot,pecas,det,nMesas,fMatMesa,
     basePeca:num('s_base'), baseMesa:num('s_base_mesa'), margemFinal:num('s_margem')/100,
@@ -4444,28 +4496,52 @@ function defsParaRegisto(){
 }
 function desenhaRegEstado(){
   const b=el('b_impresso'); if(!b) return;
-  b.textContent=tr(REG?'bImpressoOutra':'bImpresso');
-  el('reg_estado').textContent=REG?tr('regFeito',{id:REG.id, d:dataReg(REG.em)}):'';
+  const mandado=REG&&REG.estado==='mandado';
+  b.textContent=tr(!REG?'bImpresso':mandado?'bImpressoJa':'bImpressoOutra');
+  el('reg_estado').textContent=REG?tr(mandado?'regFeitoMandado':'regFeito',{id:REG.id, d:dataReg(REG.em)}):'';
 }
-async function marcarImpresso(){
+function marcarImpresso(){
   const cli=el('j_cliente').value.trim(), proj=el('j_projeto').value.trim();
-  if(REG && !confirm(tr('regJaFoi',{id:REG.id, d:dataReg(REG.em)}))) return;
-  if(!confirm(tr('regConfirma',{cli:cli||tr('regSemCliente'), proj:proj||'—', total:eur(LAST.totalCli)}))) return;
+  /* o passo seguinte: o que foi mandado imprimir passa a impresso no mesmo registo */
+  const passo = REG && REG.estado==='mandado';
+  el('bxq_txt').innerHTML=tr('impqResumo',{cli:htmlEsc(cli||tr('regSemCliente')), proj:htmlEsc(proj||'—'), total:eur(LAST.totalCli)})
+    + (passo ? '<br>'+tr('impqPasso',{id:REG.id}) : REG ? '<br><b style="color:var(--accent2);font-size:12.5px;display:inline">'+tr('regJaFoi',{id:REG.id, d:dataReg(REG.em)})+'</b>' : '');
+  document.querySelector(`input[name=impq_est][value=${REG&&REG.estado!=='mandado'||passo?'impresso':'mandado'}]`).checked=true;
+  document.querySelectorAll('input[name=impq_est]').forEach(r=>r.disabled=passo);
+  impqEstado();
+  el('bxq').style.display='flex';
+}
+/* a baixa só se oferece com filamento do Bobina por lançar, e vem marcada quando já se imprimiu */
+function impqEstado(){
+  const pend=mesasPendentes(), imp=document.querySelector('input[name=impq_est]:checked').value==='impresso';
+  el('impq_baixa_l').style.display=pend.length?'':'none';
+  el('impq_baixa').checked=imp;
+  el('impq_baixa_t').textContent=tr('impqBaixa',{g:pend.length?kgTxt(pend.reduce((a,M)=>a+M.total,0)):'', n:pend.length});
+}
+async function confirmaImpresso(){
+  const estado=document.querySelector('input[name=impq_est]:checked').value;
+  const baixa=el('impq_baixa').checked && mesasPendentes().length;
+  const cli=el('j_cliente').value.trim(), proj=el('j_projeto').value.trim();
   const serv=[LAST.pMod>0?tr('pacSrv_mod'):'', LAST.det&&LAST.det.length?tr('pacSrv_imp'):'',
               LAST.pAcab-LAST.pPrep>0.004?tr('pacSrv_pos'):''].filter(Boolean).join(' + ');
   try{
-    const r=await apiReg('registos',{
-      cliente:cli, projeto:proj, estado:'impresso',
-      total:LAST.totalCli, custo:LAST.custo, lucro:LAST.lucro, pecas:LAST.pecas,
-      resumo:[serv, LAST.pecas?LAST.pecas+' peça(s)':'', LAST.hTot>0?hm(LAST.hTot*60)+' de impressão':''].filter(Boolean).join(' · '),
-      snapshot:{versao:VERSAO, job:jobSnapshot(), defs:defsParaRegisto()},
-      orcamento_html:el('printable').innerHTML
-    });
-    REG={id:r.id, em:Math.floor(Date.now()/1000)};
-    desenhaRegEstado(); guardaEstado(); carregaRegisto();
-    /* o filamento gastou-se: é a altura de o tirar do Bobina, se houver mesas por lançar */
-    if(mesasPendentes().length && confirm(tr('regBaixa'))){ BX.depois=false; abreBaixa(); }
-  }catch(e){ alert(tr('regErro',{e:e.message})); }
+    if(REG && REG.estado==='mandado'){
+      await apiReg('registos/estado',{id:REG.id, estado});
+      REG={...REG, estado};
+    } else {
+      const r=await apiReg('registos',{
+        cliente:cli, projeto:proj, estado,
+        total:LAST.totalCli, custo:LAST.custo, lucro:LAST.lucro, pecas:LAST.pecas,
+        resumo:[serv, LAST.pecas?LAST.pecas+' peça(s)':'', LAST.hTot>0?hm(LAST.hTot*60)+' de impressão':''].filter(Boolean).join(' · '),
+        snapshot:{versao:VERSAO, job:jobSnapshot(), defs:defsParaRegisto()},
+        orcamento_html:el('printable').innerHTML
+      });
+      REG={id:r.id, em:Math.floor(Date.now()/1000), estado};
+    }
+  }catch(e){ return alert(tr('regErro',{e:e.message})); }
+  el('bxq').style.display='none';
+  desenhaRegEstado(); guardaEstado(); carregaRegisto();
+  if(baixa){ BX.depois=false; abreBaixa(); }
 }
 async function carregaRegisto(){
   try{
@@ -4486,16 +4562,22 @@ function drawRegistos(){
   const soma=k=>l.reduce((a,r)=>a+r[k],0);
   el('reg_sum').textContent=tr('regSoma',{n:l.length, t:eur(soma('total')), l:eur(soma('lucro'))});
   el('reg_lista').innerHTML=l.length ? l.map(r=>`<div class="ritem">
-      <div class="l1"><span><b>${htmlEsc(r.projeto||'—')}</b> · <span class="cli" onclick="filtraCliente(${r.cliente_id||'\'-\''})">${htmlEsc(r.cliente_nome||tr('regSemCliente'))}</span></span><b>${eur(r.total)}</b></div>
+      <div class="l1"><span><b>${htmlEsc(r.projeto||'—')}</b> · <span class="cli" onclick="filtraCliente(${r.cliente_id||'\'-\''})">${htmlEsc(r.cliente_nome||tr('regSemCliente'))}</span><span class="rest ${r.estado}">${tr(r.estado==='mandado'?'estMandado':'estImpresso')}</span></span><b>${eur(r.total)}</b></div>
       <div class="l2">#${r.id} · ${dataReg(r.criado)} · ${htmlEsc(r.resumo)} · ${tr('regLucro')} ${eur(r.lucro)}</div>
       <details ontoggle="this.open&&verDefs(${r.id},this)"><summary>${tr('regVerDefs')}</summary><div class="dd">…</div></details>
       <div class="acts">
+        ${r.estado==='mandado'?`<button class="ghost" onclick="regImpresso(${r.id})">✅ ${tr('regPassaImp')}</button>`:''}
         <button class="ghost" onclick="verOrcGuardado(${r.id})">👁 ${tr('regVerOrc')}</button>
         <button class="ghost" onclick="abrirRegisto(${r.id})">↺ ${tr('regAbrir')}</button>
         <button class="ghost" onclick="reporDefs(${r.id})">⚙ ${tr('regReporDefs')}</button>
         <button class="ghost" onclick="apagaRegisto(${r.id})">🗑</button>
       </div></div>`).join('')
     : `<div class="rsum">${tr('regVazio')}</div>`;
+}
+async function regImpresso(id){
+  try{ await apiReg('registos/estado',{id, estado:'impresso'}); }catch(e){ return alert(tr('regErro',{e:e.message})); }
+  if(REG&&REG.id===id){ REG={...REG, estado:'impresso'}; desenhaRegEstado(); guardaEstado(); }
+  carregaRegisto();
 }
 function filtraCliente(id){ regTab('trab'); el('reg_filtro').value=String(id); drawRegistos(); }
 const REG_CACHE={};
@@ -4518,14 +4600,14 @@ async function verOrcGuardado(id){
   abreRegisto(false);
   el('printable').innerHTML=r.orcamento_html;
   el('printable').dataset.guardado='1';
-  preview(true,true);
+  preview(true);
 }
 /* reabrir = um separador novo com o trabalho; as Definições de agora não mudam */
 async function abrirRegisto(id){
   const r=await registoCompleto(id);
   if(ABAS[ABA]) ABAS[ABA].job=jobSnapshot();
   ABAS.push({id:idAba(), job:null}); ABA=ABAS.length-1;
-  jobRepor({...r.snapshot.job, registo:{id:r.id, em:r.criado}});
+  jobRepor({...r.snapshot.job, registo:{id:r.id, em:r.criado, estado:r.estado}});
   abreRegisto(false); drawAbas(); guardaEstado();
 }
 async function reporDefs(id){
@@ -4574,13 +4656,19 @@ function usaCliente(id){
 function regTab(t){
   ['trab','cli'].forEach(k=>{ el('rc_'+k).style.display=k===t?'':'none'; el('rt_'+k).classList.toggle('on',k===t); });
 }
+function abreMenu(on=true){
+  el('menu').classList.toggle('on',on);
+  el('veu').classList.toggle('on',on||el('reg').classList.contains('on'));
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ abreMenu(false); abreRegisto(false); } });
 function abreRegisto(on=true){
   el('reg').classList.toggle('on',on);
+  el('veu').classList.toggle('on',on||el('menu').classList.contains('on'));
   if(on) carregaRegisto();
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.21.1';
+const VERSAO='1.22.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -4665,10 +4753,6 @@ const I18N={
     bxVazio:'vazia',
     bxNaCaixa:'na caixa',
     bxMontada:'na impressora',
-    bxqTitulo:'Este trabalho já foi impresso?',
-    bxqTxt:'Se já foi, escolhe no menu que mesas queres dar baixa. Há {g} em {n} mesa(s) com filamento do Bobina. Se ainda não, o orçamento abre à mesma e o botão fica no cartão das mesas.',
-    bxqSim:'Já foi — escolher mesas',
-    bxqNao:'Ainda não',
     dtAuto:'Vem do <b>Bobina</b>: é a última vez que ele viu preços nas lojas.',
     dtManual:'À mão. O <b>Bobina</b> tem preços de <b>{d}</b>.',
     dtManualT:'Escrever a data à mão',
@@ -4834,13 +4918,23 @@ const I18N={
     descPromoLinha:'promoção de {p}%',
     descArred:'arredondamento a favor do cliente',
     /* ---- registo de impressos ---- */
-    bRegisto:'📒 Registo', bImpresso:'✅ Marcar como impresso', bImpressoOutra:'✅ Registado — registar outra vez',
+    bMenu:'☰ Menu', bRegistoMenu:'📒 Registo e clientes', mTrabalho:'Trabalho', mVista:'Vista', mIdioma:'Idioma',
+    mDados:'Dados', mSobre:'Sobre', mLicenca:'Licença',
+    bRegisto:'📒 Registo', bImpresso:'🖨 Imprimir / registar', bImpressoOutra:'✅ Impresso — registar outra impressão', bImpressoJa:'✅ Já saiu da impressora',
+    impqTitulo:'Registar este trabalho', impqMandado:'🖨 Mandado imprimir', impqImpresso:'✅ Já impresso',
+    impqOk:'Registar', impqCancelar:'Cancelar',
+    impqResumo:'<b style="display:inline;font-size:13px">{cli}</b> · {proj} · <b style="display:inline;font-size:13px">{total}</b><br>Fica no registo com as Definições de hoje e o orçamento do cliente como está.',
+    impqPasso:'Estava como mandado imprimir (#{id}) — passa a impresso no mesmo registo.',
+    impqBaixa:'Dar baixa do filamento no Bobina — {g} em {n} mesa(s)',
+    regFeitoMandado:'Mandado imprimir a {d} · registo #{id}.',
+    estMandado:'mandado imprimir', estImpresso:'impresso', regPassaImp:'já impresso',
+    promoLido:'−{v} nos serviços', promoLidoTot:'{l} → total {t}',
+    promoAcima:'Sem promoção o total já é {t} — não há nada a descontar para lá chegar.',
+    promoAbaixo:'Mesmo com 100% o total fica em {t} (são os portes) — não desce mais.',
     regTitulo:'📒 Registo de trabalhos', regTabTrab:'Trabalhos', regTabCli:'Clientes',
     regFeito:'No registo como #{id}, impresso a {d}.',
     regJaFoi:'Este orçamento já está no registo (#{id}, de {d}). Registar outra impressão?',
-    regConfirma:'Marcar como impresso (ou mandado imprimir)?\n\nCliente: {cli}\nProjeto: {proj}\nTotal: {total}\n\nFica no registo com as Definições de hoje e o orçamento do cliente como está.',
     regSemCliente:'sem cliente', regTodos:'Todos os clientes',
-    regBaixa:'Registado. Dar também baixa do filamento no Bobina?',
     regErro:'O registo não respondeu: {e}',
     regSoma:'{n} trabalho(s) · faturado {t} · lucro {l}',
     regLucro:'lucro', regVerDefs:'Definições usadas', regVerOrc:'orçamento', regAbrir:'reabrir', regReporDefs:'repor definições',
@@ -4950,10 +5044,6 @@ const I18N={
     bxVazio:'empty',
     bxNaCaixa:'boxed',
     bxMontada:'on the printer',
-    bxqTitulo:'Has this job been printed?',
-    bxqTxt:'If it has, choose in the menu which plates to log. There is {g} across {n} plate(s) with Bobina filament. If not, the quote opens anyway and the button stays on the plates card.',
-    bxqSim:'Yes — choose plates',
-    bxqNao:'Not yet',
     dtAuto:'From <b>Bobina</b>: the last time it saw shop prices.',
     dtManual:'Set by hand. <b>Bobina</b> has prices from <b>{d}</b>.',
     dtManualT:'Type the date by hand',
@@ -5119,13 +5209,23 @@ const I18N={
     descPromoLinha:'{p}% promotion',
     descArred:'rounded down in your favour',
     /* ---- print log ---- */
-    bRegisto:'📒 Log', bImpresso:'✅ Mark as printed', bImpressoOutra:'✅ Logged — log again',
+    bMenu:'☰ Menu', bRegistoMenu:'📒 Log and clients', mTrabalho:'Job', mVista:'View', mIdioma:'Language',
+    mDados:'Data', mSobre:'About', mLicenca:'Licence',
+    bRegisto:'📒 Log', bImpresso:'🖨 Print / log', bImpressoOutra:'✅ Printed — log another print', bImpressoJa:'✅ Off the printer',
+    impqTitulo:'Log this job', impqMandado:'🖨 Sent to print', impqImpresso:'✅ Already printed',
+    impqOk:'Log', impqCancelar:'Cancel',
+    impqResumo:'<b style="display:inline;font-size:13px">{cli}</b> · {proj} · <b style="display:inline;font-size:13px">{total}</b><br>It goes into the log with today\'s Settings and the client quote as it stands.',
+    impqPasso:'It was sent to print (#{id}) — becomes printed in the same entry.',
+    impqBaixa:'Deduct the filament in Bobina — {g} across {n} plate(s)',
+    regFeitoMandado:'Sent to print on {d} · entry #{id}.',
+    estMandado:'sent to print', estImpresso:'printed', regPassaImp:'printed now',
+    promoLido:'−{v} off the services', promoLidoTot:'{l} → total {t}',
+    promoAcima:'Without a promotion the total is already {t} — nothing to discount.',
+    promoAbaixo:'Even at 100% the total stays at {t} (that is shipping) — it goes no lower.',
     regTitulo:'📒 Job log', regTabTrab:'Jobs', regTabCli:'Clients',
     regFeito:'In the log as #{id}, printed on {d}.',
     regJaFoi:'This quote is already in the log (#{id}, {d}). Log another print?',
-    regConfirma:'Mark as printed (or sent to print)?\n\nClient: {cli}\nProject: {proj}\nTotal: {total}\n\nIt goes into the log with today\'s Settings and the client quote as it stands.',
     regSemCliente:'no client', regTodos:'All clients',
-    regBaixa:'Logged. Also deduct the filament in Bobina?',
     regErro:'The log did not answer: {e}',
     regSoma:'{n} job(s) · billed {t} · profit {l}',
     regLucro:'profit', regVerDefs:'Settings used', regVerOrc:'quote', regAbrir:'reopen', regReporDefs:'restore settings',

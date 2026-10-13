@@ -702,7 +702,7 @@ class FatiaHandler(SimpleHTTPRequestHandler):
                     return
                 nome = texto(d, "cliente", 120)
                 cid = cliente_id_por_nome(db, nome)
-                estado = "enviado" if d.get("estado") == "enviado" else "impresso"
+                estado = "mandado" if d.get("estado") == "mandado" else "impresso"
                 rid = db.execute(
                     """
                     INSERT INTO registos(cliente_id, cliente_nome, projeto, estado, total, custo, lucro,
@@ -715,6 +715,10 @@ class FatiaHandler(SimpleHTTPRequestHandler):
                      str(d.get("orcamento_html") or "")[:2_000_000], now()),
                 ).lastrowid
                 self.write_json(200, {"ok": True, "id": rid, "cliente_id": cid})
+            elif path == "/api/registos/estado":
+                estado = "mandado" if d.get("estado") == "mandado" else "impresso"
+                db.execute("UPDATE registos SET estado = ? WHERE id = ?", (estado, int(numero(d, "id"))))
+                self.write_json(200, {"ok": True})
             elif path == "/api/registos/apagar":
                 db.execute("DELETE FROM registos WHERE id = ?", (int(numero(d, "id")),))
                 self.write_json(200, {"ok": True})
