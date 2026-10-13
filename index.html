@@ -180,6 +180,7 @@ td input.slic{border-color:rgba(62,207,142,.35)}
 @media (prefers-reduced-motion: reduce){.hintpop .tipbox{transition:none}}
 @media(max-width:560px){.hintpop .tipbox{left:-6px;width:calc(100vw - 44px)}}
 .tierbtns{display:flex;gap:6px;margin-top:6px}
+.pacchk{display:flex;flex-wrap:wrap;gap:0 12px}
 .tierbtns button{padding:5px 8px;font-size:11px;flex:1}
 .tierbtns button.on{background:var(--accent);color:#1a1206;border-color:var(--accent)}
 details summary{cursor:pointer;list-style:none;color:var(--dim);font-size:12px;padding:6px 0}
@@ -936,6 +937,9 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="hint">Só sobre material + impressão.</div>
       </div>
     </div>
+    <label class="toggle"><input type="checkbox" id="j_pacote" checked> 🎁 Desconto de pacote neste orçamento</label>
+    <!-- viva: diz a cada mudança se o trabalho chega ao pacote -->
+    <div class="hint viva" id="j_pacote_lido"></div>
     <div class="row r2">
       <div><label>Transporte / entrega</label><select id="j_portes"></select></div>
       <div><label>Valor manual dos portes</label><div class="suffix"><input type="number" id="j_portes_man" step="0.01" min="0" value="0" disabled><i>€</i></div></div>
@@ -1092,6 +1096,30 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="hint viva tierlido" id="s_tiers_lido"></div></div>
       <div><label>Margem mínima aceitável</label><div class="suffix"><input type="number" id="s_mmin" step="1"><i>%</i></div>
         <div class="hint">Abaixo disto recebes aviso.</div></div>
+    </div>
+    <div class="avancado pacote" style="margin-top:10px">
+      <label class="toggle"><input type="checkbox" id="s_pac_on" checked> 🎁 Desconto de pacote — quando o trabalho junta vários serviços</label>
+      <div class="row r2">
+        <div><label>Desconto</label><div class="suffix"><input type="number" id="s_pac_pct" value="20" min="0" max="100" step="0.5"><i>%</i></div></div>
+        <div><label>Ativa com pelo menos</label><div class="suffix"><input type="number" id="s_pac_min" value="2" min="1" max="3" step="1"><i>serviços</i></div></div>
+      </div>
+      <div class="row r2">
+        <div><label>Contam para ativar</label>
+          <div class="pacchk">
+            <label class="toggle"><input type="checkbox" id="s_pac_c_mod" checked> Modelação</label>
+            <label class="toggle"><input type="checkbox" id="s_pac_c_imp" checked> Impressão</label>
+            <label class="toggle"><input type="checkbox" id="s_pac_c_pos" checked> Acabamento</label></div></div>
+        <div><label>Desconta sobre</label>
+          <div class="pacchk">
+            <label class="toggle"><input type="checkbox" id="s_pac_a_mod" checked> Modelação</label>
+            <label class="toggle"><input type="checkbox" id="s_pac_a_imp" checked> Impressão</label>
+            <label class="toggle"><input type="checkbox" id="s_pac_a_pos" checked> Acabamento</label></div></div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="s_pac_desc" checked> Explicar o pacote no orçamento do cliente</label>
+      <div class="hint viva tierlido" id="s_pac_lido"></div>
+      <div class="hint">Um serviço conta quando entra mesmo no trabalho: modelação com tempo, impressão com mesas,
+        acabamento com minutos de trabalho manual, polimento ou pintura. Os portes nunca levam desconto.
+        Fica nos presets, como o resto das Definições — e desliga-se por orçamento no painel 1.</div>
     </div>
 
     <h3 class="avancado fechada">📦 Embalagem e entrega</h3>
@@ -1352,14 +1380,14 @@ const DEF = {
   emb_peso:150, emb_custo:0.50, prep_min:0, base_mesa:0,
   km:0.40, km_hora:0, km_minimo:0,
   base:1, taxa_maq:0, mao:25, polh:30, pinth:35, tiers:'3:5, 10:10, 15:15',
-  mmat:3.50, mimp:0, mmao:0, margem:10, mmin:20,
+  mmat:3.50, mimp:0, mmao:0, margem:10, mmin:20, pac_pct:20, pac_min:2,
   dev_mat:0, dev_t:0,
   portes:[[250,0],[500,0],[1000,0],[2000,0],[5000,0]]
 };
 const S_NUM = ['data','fil_nome','kwh','kwh_add','iva','tax_rate','fil_kg','fil_portes','desp','mmat',
   'imp_preco','imp_vida','imp_kw','pc_kw','pc_kw2','fer_preco','fer_vida','fer_kw',
   'tinta_l','tinta_ml','emb_peso','emb_custo','km','km_hora','km_minimo','prep_min','base','base_mesa','taxa_maq','mao','polh','pinth','modh','tiers',
-  'mimp','mmao','margem','mmin','dev_mat','dev_t'];
+  'mimp','mmao','margem','mmin','pac_pct','pac_min','dev_mat','dev_t'];
 
 const eur = n => (isFinite(n)?n:0).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 const num = id => parseFloat(document.getElementById(id).value)||0;
@@ -3195,6 +3223,43 @@ function toggleAuto(){
   else { el('live').innerHTML='<span class="st">Modo manual — liga o automático se tiveres tarifa indexada.</span>'; calc(); }
 }
 
+/* ============ DESCONTO DE PACOTE ============
+   Quem pede mais do que um serviço (modelação + impressão, por exemplo) leva um
+   desconto por isso. Quais contam, quantos são precisos e sobre que serviços
+   desconta é das Definições — e por isso anda nos presets; o painel 1 só o
+   tira de um orçamento em particular. */
+const PAC_K=['mod','imp','pos'];
+const PAC_CHK=['s_pac_on','s_pac_desc',...PAC_K.map(k=>'s_pac_c_'+k),...PAC_K.map(k=>'s_pac_a_'+k)];
+const pacLista = ks => ks.map(k=>tr('pacSrv_'+k)).join(' + ');
+/* ativos: os serviços que entram mesmo no trabalho; val: quanto vale cada um ao cliente */
+function pacote(ativos, val){
+  const conta=PAC_K.filter(k=>el('s_pac_c_'+k).checked);
+  const juntos=conta.filter(k=>ativos[k]);
+  const min=Math.max(1,Math.round(num('s_pac_min')));
+  const marcados=PAC_K.filter(k=>el('s_pac_a_'+k).checked);
+  const alvo=marcados.filter(k=>val[k]>0);
+  const p=Math.min(Math.max(num('s_pac_pct'),0),100);
+  const ligado=el('s_pac_on').checked && p>0;
+  const chega=ligado && juntos.length>=min;
+  const aplica=chega && el('j_pacote').checked;
+  /* "todos os serviços" só quando não fica nenhum com valor de fora */
+  const sobre=ks=>tr('pacSobre',{alvo: PAC_K.every(k=>ks.includes(k)||!(val[k]>0)) ? tr('pacTudo') : pacLista(ks)});
+  return {p, conta, juntos, min, marcados, alvo, ligado, chega, aplica, sobre,
+          valor: aplica ? alvo.reduce((a,k)=>a+val[k],0)*p/100 : 0};
+}
+function lePacote(x){
+  const P=pct(x.p);
+  el('s_pac_lido').textContent = !el('s_pac_on').checked ? tr('pacLidoOff')
+    : x.conta.length<x.min ? tr('pacLidoNunca',{n:x.min, k:x.conta.length})
+    : tr('pacLido',{n:x.min, lista:pacLista(x.conta), p:P,
+        sobre:tr('pacSobre',{alvo: x.marcados.length===PAC_K.length ? tr('pacTudo') : (pacLista(x.marcados)||'—')})});
+  el('j_pacote_lido').textContent = !x.ligado ? tr('pacJobOff')
+    : !x.chega ? tr('pacJobFalta',{n:x.min, lista:pacLista(x.conta)||'—', k:x.juntos.length})
+    : !x.aplica ? tr('pacJobDesl',{p:P, juntos:pacLista(x.juntos)})
+    : x.valor<=0 ? tr('pacJobNada')
+    : tr('pacJobSim',{p:P, juntos:pacLista(x.juntos), sobre:x.sobre(x.alvo), v:eur(x.valor)});
+}
+
 /* ============ CÁLCULO ============ */
 /* blocos de trabalho — dá para orçamentar só modelação, só impressão ou só acabamento */
 let BLOCOS={mod:true, imp:true, pos:true};
@@ -3337,6 +3402,12 @@ function calc(){
   const pPrint=pMat+pImp+pBase+pPrep+pMarg;            /* só impressão: sem modelação, portes nem acabamento manual */
   const desc=(pBase+pPrep+pMan+pPol+pPin)*num('j_desc')/100;
   const promo=(pMat+pImp)*num('j_promo')/100;
+  /* o pacote vê os serviços como o cliente os vê no orçamento: as mesmas três linhas.
+     O acabamento só CONTA com trabalho manual — a preparação vem sempre com as mesas */
+  const pac=pacote({mod:pMod>0, imp:nMesas>0, pos:pMan+pPol+pPin>0},
+                   {mod:pMod, imp:nMesas>0?pMat+pImp+pBase+pMarg:0, pos:pAcab});
+  const pPac=pac.valor;
+  lePacote(pac);
 
   /* ---- portes ---- */
   const sel=el('j_portes').value;
@@ -3395,7 +3466,7 @@ function calc(){
         ? `<div style="margin-top:6px;font-size:11px;opacity:.8"><span>Alternativas: ${
             todos.slice(0,3).map(s=>`${s.n} ${eur(s.p)}`).join(' · ')}</span></div>`:'');
 
-  const bruto=pMod+pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg-desc-promo+pPortes;
+  const bruto=pMod+pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg-desc-promo-pPac+pPortes;
   let total=el('j_round').checked?Math.floor(bruto*2)/2:bruto;
   /* com o imposto por cima há dois números para arredondar: o teu preço ou o que o
      cliente paga. Arredondar o segundo obriga a recuar o primeiro pela taxa. */
@@ -3443,6 +3514,7 @@ function calc(){
   if(desc>0)  html+=`<div class="li neg"><span>Desconto ${num('j_desc')}%${
     escalaoDe(num('j_desc'))?` · ${tr('descDesde',{q:escalaoDe(num('j_desc'))})}`:''}</span><b>−${eur(desc)}</b></div>`;
   if(promo>0) html+=`<div class="li neg"><span>Promoção ${num('j_promo')}%</span><b>−${eur(promo)}</b></div>`;
+  if(pPac>0) html+=`<div class="li neg"><span>${tr('pacLinha',{p:pct(pac.p),juntos:pacLista(pac.juntos)})}</span><b>−${eur(pPac)}</b></div>`;
   if(Math.abs(arred)>.004) html+=`<div class="li neg"><span>Arredondamento</span><b>${eur(arred)}</b></div>`;
   if(tax.on){
     if(tax.active){
@@ -3503,7 +3575,7 @@ function calc(){
     : (dias>90 ? `<div class="warn">⚠️ Definições sem revisão há <b>${dias} dias</b>. Confirma o preço do filamento antes de enviar.</div>` : ''));
 
   /* a régua horária é do tempo de máquina: modelação e acabamento saem de fora */
-  LAST={pMat,pImp,pBase,pPrep,pAcab,pMod,pMarg,pPrint,desc,promo,arred,pPortes,total,tax,hTot,pecas,
+  LAST={pMat,pImp,pBase,pPrep,pAcab,pMod,pMarg,pPrint,desc,promo,pPac,arred,pPortes,total,tax,hTot,pecas,
         totalCli:totalCliente,   /* o valor que o cliente paga: e o que vai na etiqueta do separador */
         custo, lucro,            /* o painel dos credores orienta uma fatia do lucro */
         det, fDesp,   /* o detalhe fica à mão: é dele que sai a baixa no Bobina */
@@ -3531,6 +3603,8 @@ function calc(){
     portes:pPortes, desc, promo, arred, total:totalCliente, tax, pecas, gTot, mTot, nMesas,
     /* as percentagens seguem para o orcamento: la o desconto passa a explicar-se */
     descPct:num('j_desc'), promoPct:num('j_promo'),
+    pac:pPac,
+    pacDet: el('s_pac_desc').checked ? tr('pacDet',{juntos:pacLista(pac.juntos), p:pct(pac.p), sobre:pac.sobre(pac.alvo)}) : '',
     /* só se diz ao cliente "a partir de N peças" quando o trabalho chega mesmo lá:
        senão o orçamento anunciava um escalão que estas peças não cumprem */
     descQtd:(pecas>=escalaoDe(num('j_desc')))?escalaoDe(num('j_desc')):0,
@@ -3977,12 +4051,13 @@ function buildPrint(x){
                ].filter(Boolean).join(' · '),
                x.acabamento]);
   if(x.portes>0) rows.push([x.portesTit||'Portes de envio', x.transp, x.portes]);
-  const descTot=x.desc+x.promo+(x.arred<0?-x.arred:0);
+  const descTot=x.desc+x.promo+(x.pac||0)+(x.arred<0?-x.arred:0);
   /* o desconto deixa de ser um numero caido do ceu: diz-se de onde vem, na mesma
      letra pequena das outras linhas -- discreto, mas sem deixar duvidas */
   const descDet=[
     x.desc>0.004 ? (x.descQtd?tr('descQtdEsc',{p:pct(x.descPct),q:x.descQtd}):tr('descQtdSo',{p:pct(x.descPct)})) : '',
     x.promo>0.004 ? tr('descPromoLinha',{p:pct(x.promoPct)}) : '',
+    x.pac>0.004 ? x.pacDet : '',
     x.arred<-0.004 ? tr('descArred') : ''
   ].filter(Boolean).join(' · ');
   const html=rows.map(r=>`<tr><td><b>${r[0]}</b>${r[1]?`<div class="d">${r[1]}</div>`:''}</td><td>${eur(semImposto(r[2],tax))}</td></tr>`).join('')
@@ -4124,6 +4199,8 @@ function collect(){
   o.marca={on:el('b_on').checked, qr:el('q_on').checked, nota_on:el('f_on').checked,
            logo:LOGO, qrs:QRS.map(q=>({...q}))};
   B_TXT.forEach(k=>o.marca[k]=el('b_'+k).value);
+  o.pac={};
+  PAC_CHK.forEach(i=>o.pac[i]=el(i).checked);
   return o;
 }
 function apply(o){
@@ -4154,6 +4231,7 @@ function apply(o){
   if(o.portes){ portes=o.portes; drawPortes(); drawPortesSel(); }
   if(o.mesas){ mesas=o.mesas.map(normMesa); migraPecas(o); drawMesas(); }
   if(o.hist) hist=o.hist;
+  if(o.pac) PAC_CHK.forEach(i=>{ if(o.pac[i]!==undefined) el(i).checked=!!o.pac[i]; });
   if(o.banda) bandaEscolhida=o.banda;
   if(o.printer!==undefined) el('s_printer').value=o.printer;
   if(o.marca){
@@ -4184,6 +4262,7 @@ function resetJob(){
   MODELOS=[]; drawModelos();
   ['j_manual','j_pol','j_pint','j_desc','j_promo','j_km','j_km_tempo'].forEach(i=>el(i).value=0);
   ['r_g','r_t','r_e'].forEach(i=>el(i).value=''); el('r_usar').checked=true;
+  el('j_pacote').checked=true;
   BAIXAS=[]; BAIXA_ADIADA=false;   /* trabalho novo, baixas novas */
   el('j_portes').value='0'; calc(); guardaEstado();
   drawAbas();
@@ -4197,7 +4276,7 @@ function resetJob(){
    separador é mudar de cliente, não de oficina. */
 const J_VAL=['j_cliente','j_projeto','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
              'j_acab_titulo','j_acab_mao','j_km','j_km_tempo','r_g','r_t','r_e'];
-const J_CHK=['j_ajusta','j_round','r_usar','j_mostrar_maq','j_mostrar_mod',
+const J_CHK=['j_pacote','j_ajusta','j_round','r_usar','j_mostrar_maq','j_mostrar_mod',
              'j_acab_tarefas','j_acab_prep','j_acab_min','j_km_volta','j_km_detalhe'];
 let ABAS=[], ABA=0;
 const idAba = () => 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -4282,7 +4361,7 @@ function fechaAba(i,ev){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.19.1';
+const VERSAO='1.20.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -4535,6 +4614,19 @@ const I18N={
     descQtdSo:'{p}% por quantidade',
     descPromoLinha:'promoção de {p}%',
     descArred:'arredondamento a favor do cliente',
+    /* ---- desconto de pacote ---- */
+    pacSrv_mod:'Modelação', pacSrv_imp:'Impressão', pacSrv_pos:'Acabamento',
+    pacTudo:'todos os serviços', pacSobre:'sobre {alvo}',
+    pacLinha:'Desconto de pacote {p}% · {juntos}',
+    pacDet:'pacote {juntos}: {p}% {sobre}',
+    pacLido:'Lê-se: com pelo menos {n} de {lista} no mesmo trabalho, {p}% {sobre}.',
+    pacLidoOff:'Desligado — nenhum orçamento leva desconto de pacote.',
+    pacLidoNunca:'Pedes {n} serviços mas só {k} contam — assim nunca ativa.',
+    pacJobOff:'Desligado nas Definições (💰 Margens de lucro).',
+    pacJobFalta:'Ativa com {n} de {lista} — este trabalho tem {k}.',
+    pacJobDesl:'Este trabalho tinha direito a {p}% ({juntos}) — tirado só deste orçamento.',
+    pacJobNada:'Chega ao pacote, mas não entra neste trabalho nenhum dos serviços onde ele desconta.',
+    pacJobSim:'{p}% por juntar {juntos}, {sobre}: −{v}',
     invalidFile:'Ficheiro inválido',
     foldTitle:'Clica para esconder ou mostrar',
     updateFileMode:'A verificação automática precisa que a página seja servida por http(s). Aberta do disco, o browser bloqueia. Usa <b>Importar</b> com um ficheiro de dados.',
@@ -4788,6 +4880,19 @@ const I18N={
     descQtdSo:'{p}% quantity discount',
     descPromoLinha:'{p}% promotion',
     descArred:'rounded down in your favour',
+    /* ---- bundle discount ---- */
+    pacSrv_mod:'Modelling', pacSrv_imp:'Printing', pacSrv_pos:'Finishing',
+    pacTudo:'all services', pacSobre:'off {alvo}',
+    pacLinha:'Bundle discount {p}% · {juntos}',
+    pacDet:'{juntos} bundle: {p}% {sobre}',
+    pacLido:'Reads: with at least {n} of {lista} in the same job, {p}% {sobre}.',
+    pacLidoOff:'Off — no quote gets a bundle discount.',
+    pacLidoNunca:'You ask for {n} services but only {k} count — it will never kick in.',
+    pacJobOff:'Off in Settings (💰 Profit margins).',
+    pacJobFalta:'Kicks in with {n} of {lista} — this job has {k}.',
+    pacJobDesl:'This job qualified for {p}% ({juntos}) — removed from this quote only.',
+    pacJobNada:'Qualifies for the bundle, but none of the services it discounts is in this job.',
+    pacJobSim:'{p}% for bundling {juntos}, {sobre}: −{v}',
     invalidFile:'Invalid file',
     foldTitle:'Click to hide or show',
     updateFileMode:'Automatic checks need the page to be served over http(s). Opened from disk, the browser blocks them. Use <b>Import</b> with a data file.',
