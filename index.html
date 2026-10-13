@@ -372,6 +372,9 @@ input.lido{opacity:.7;cursor:not-allowed}
 .fchip:hover{border-color:var(--accent2);color:var(--accent2)}
 .fchip.on{background:var(--accent);border-color:var(--accent);color:#1a1206}
 .fchip.on:hover{background:var(--accent2);color:#1a1206}
+.fchip.fimp{color:var(--good);border-color:rgba(62,207,142,.55)}
+.fchip.fimp svg{width:13px;height:13px;vertical-align:-2px}
+.fchip.fimp.on,.fchip.fimp.on:hover{background:var(--good);border-color:var(--good);color:#06180f}
 
 .fpcorpo{padding:14px 18px 18px;overflow:auto}
 .fsec + .fsec{margin-top:18px}
@@ -2361,7 +2364,7 @@ function nomesEmUso(){
 }
 
 /* ---- o seletor ---- */
-let FP={q:'',mat:'',stock:false,veu:false,reflexo:true};
+let FP={q:'',mat:'',stock:false,imp:false,veu:false,reflexo:true};
 const pickerAberto = () => el('filpick') && el('filpick').style.display==='flex';
 function abrePicker(){
   const p=el('filpick'); if(!p) return;
@@ -2374,6 +2377,7 @@ function fechaPicker(){ const p=el('filpick'); if(p) p.style.display='none'; }
 function filtraPicker(){ FP.q=el('fp_q').value.trim().toLowerCase(); drawPicker(); }
 function chipPicker(m){ FP.mat=FP.mat===m?'':m; drawPicker(); }
 function togglaStock(){ FP.stock=!FP.stock; drawPicker(); }
+function togglaImp(){ FP.imp=!FP.imp; drawPicker(); }
 /* Realçar quem tem tudo por abrir é aparência: fica no browser, como o idioma,
    e não no orçamento nem nos presets. */
 function toggleRealce(k){ FP[k]=!FP[k]; store.set('fp_'+k,FP[k]); desenhaRealces(); drawPicker(); }
@@ -2388,6 +2392,7 @@ const semAcentos = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/
 function casaFiltro(f){
   if(FP.mat && semAcentos(f.material||'')!==semAcentos(FP.mat)) return false;
   if(FP.stock && !(f.bobines>0)) return false;
+  if(FP.imp && !contaNaImpressora(f)) return false;
   if(!FP.q) return true;
   return semAcentos([f.n,f.marca,f.material,f.cor,(f.locais||[]).join(' '),f.loja].join(' '))
     .includes(semAcentos(FP.q));
@@ -2442,7 +2447,9 @@ function drawPicker(){
   const escolhido=el('s_fil_nome').value;
   const todos=todosFils();
   const mats=[...new Set(todos.filter(f=>f.bobina&&f.material).map(f=>f.material))].sort();
-  el('fp_chips').innerHTML=mats.map((m,i)=>
+  /* em destaque e à frente: o mais comum é orçar com o que já está montado */
+  el('fp_chips').innerHTML=`<button class="fchip fimp${FP.imp?' on':''}" data-m="imp">${NOZZLE} ${htmlEsc(tr('fpNaImpressora'))}</button>`
+    + mats.map((m,i)=>
       `<button class="fchip${FP.mat===m?' on':''}" data-m="${i}">${htmlEsc(m)}</button>`).join('')
     + `<button class="fchip${FP.stock?' on':''}" data-m="stock">${htmlEsc(tr('fpSoStock'))}</button>`;
   FP.mats=mats;
@@ -2469,11 +2476,15 @@ function ligaPicker(){
   el('fp_realces').addEventListener('click',e=>{
     const b=e.target.closest('.frealce'); if(b) toggleRealce(b.dataset.r);
   });
-  p.addEventListener('click',e=>{ if(e.target===p) fechaPicker(); });
+  /* só fecha se o clique COMEÇOU no fundo: selecionar o texto da pesquisa e
+     largar o rato fora da caixa dava um click no fundo e fechava a janela */
+  let noFundo=false;
+  p.addEventListener('mousedown',e=>{ noFundo=e.target===p; });
+  p.addEventListener('click',e=>{ if(e.target===p&&noFundo) fechaPicker(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&pickerAberto()) fechaPicker(); });
   el('fp_chips').addEventListener('click',e=>{
     const b=e.target.closest('.fchip'); if(!b) return;
-    if(b.dataset.m==='stock') togglaStock(); else chipPicker(FP.mats[+b.dataset.m]);
+    if(b.dataset.m==='stock') togglaStock(); else if(b.dataset.m==='imp') togglaImp(); else chipPicker(FP.mats[+b.dataset.m]);
   });
   el('fp_corpo').addEventListener('click',e=>{
     if(e.target.closest('[data-novo]')) return addFil();
@@ -4702,7 +4713,7 @@ function abreRegisto(on=true){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.23.0';
+const VERSAO='1.23.1';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
