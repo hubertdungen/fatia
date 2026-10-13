@@ -448,6 +448,28 @@ input.lido{opacity:.7;cursor:not-allowed}
 .lictxt ul{margin:6px 0 10px;padding-left:20px} .lictxt li{margin-bottom:4px}
 
 /* ---- memória remota ---- */
+/* ---- registo de impressos: botão verde e gaveta lateral ---- */
+button.feito{width:100%;margin-top:12px;background:var(--good);color:#06150e;border-color:var(--good);font-weight:700}
+button.feito:hover{background:#5fe0a6;color:#06150e}
+#reg_estado{font-size:11.5px;color:var(--dim);text-align:center;margin-top:5px}
+#reg{position:fixed;top:0;right:0;bottom:0;width:min(460px,100vw);background:var(--panel);
+  border-left:1px solid var(--line);z-index:205;transform:translateX(100%);transition:transform .2s;
+  display:flex;flex-direction:column;box-shadow:-12px 0 30px rgba(0,0,0,.4)}
+#reg.on{transform:none}
+#reg .rhd{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+#reg .rhd b{flex:1;font-size:16px}
+#reg .rtabs{display:flex;gap:6px;padding:10px 16px 0}
+#reg .rtabs button.on{border-color:var(--accent);color:var(--accent2)}
+#reg .rcorpo{flex:1;overflow:auto;padding:12px 16px 20px}
+#reg .rsum{font-size:12px;color:var(--dim);margin:8px 0}
+.ritem{border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:8px;background:var(--panel2)}
+.ritem .l1{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}
+.ritem .l2{font-size:11.5px;color:var(--dim);margin-top:2px}
+.ritem .acts{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.ritem .acts button{padding:4px 8px;font-size:11.5px}
+.ritem details{font-size:11.5px;color:var(--dim);margin-top:6px}
+.ritem details div{display:flex;justify-content:space-between}
+.ritem .cli{cursor:pointer;color:var(--accent2)}
 #mem{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:210;
   align-items:center;justify-content:center;padding:20px;overflow:auto}
 .membox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
@@ -649,6 +671,7 @@ footer a{color:var(--blue);text-decoration:none}
     <button class="ghost" id="b_instalar" style="display:none" onclick="instalarApp()" data-i18n="bInstalar">⤓ Instalar app</button>
     <button class="ghost" id="b_dobrar" onclick="dobrarTudo()" title="Fechar ou abrir todas as secções">⌃ Fechar secções</button>
     <button class="ghost" id="b_simples" onclick="toggleSimples()">Modo simples</button>
+    <button class="ghost" onclick="abreRegisto()" data-i18n="bRegisto">📒 Registo</button>
     <button class="ghost" onclick="resetJob()" data-i18n="bNovo">Novo orçamento</button>
     <button class="primary" onclick="preview()" data-i18n="bOrcamento">👁 Orçamento do cliente</button>
   </div>
@@ -741,6 +764,34 @@ footer a{color:var(--blue);text-decoration:none}
   </div>
 </div>
 
+<datalist id="dl_clientes"></datalist>
+<aside id="reg" aria-label="Registo">
+  <div class="rhd"><b data-i18n="regTitulo">📒 Registo de trabalhos</b>
+    <button class="ghost" onclick="abreRegisto(false)">✕</button></div>
+  <div class="rtabs">
+    <button class="ghost on" id="rt_trab" onclick="regTab('trab')" data-i18n="regTabTrab">Trabalhos</button>
+    <button class="ghost" id="rt_cli" onclick="regTab('cli')" data-i18n="regTabCli">Clientes</button>
+  </div>
+  <div class="rcorpo" id="rc_trab">
+    <select id="reg_filtro" onchange="drawRegistos()"></select>
+    <div class="rsum" id="reg_sum"></div>
+    <div id="reg_lista"></div>
+  </div>
+  <div class="rcorpo" id="rc_cli" style="display:none">
+    <input type="hidden" id="cli_id">
+    <div class="row"><label data-i18n="cliNome">Nome</label><input id="cli_nome"></div>
+    <div class="row r2">
+      <div><label data-i18n="cliContacto">Contacto</label><input id="cli_contacto" placeholder="email / telefone"></div>
+      <div><label>NIF</label><input id="cli_nif"></div>
+    </div>
+    <div class="row"><label data-i18n="cliNotas">Notas</label><input id="cli_notas"></div>
+    <div style="display:flex;gap:6px;margin:8px 0 12px">
+      <button class="primary" style="flex:1" onclick="guardaCliente()" data-i18n="cliGuardar">Guardar cliente</button>
+      <button class="ghost" onclick="limpaCliente()" data-i18n="cliNovo">Novo</button>
+    </div>
+    <div id="cli_lista"></div>
+  </div>
+</aside>
 <div id="mem">
   <div class="membox">
     <div class="lichd">
@@ -796,7 +847,7 @@ footer a{color:var(--blue);text-decoration:none}
     <h2><i class="n">1</i>O Trabalho</h2>
 
     <div class="row r3">
-      <div><label>Cliente</label><input id="j_cliente" placeholder="Ex.: João Silva"></div>
+      <div><label>Cliente</label><input id="j_cliente" list="dl_clientes" placeholder="Ex.: João Silva"></div>
       <div><label>Projeto</label><input id="j_projeto" placeholder="Ex.: Miniaturas"></div>
       <div><label>N.º de peças — total</label><input type="number" id="j_pecas" value="2" min="0" step="1" readonly>
         <div class="hint">Somado das mesas. As peças contam-se uma vez: 2 peças em 2 mesas são 2 peças, não 4.</div></div>
@@ -1157,6 +1208,8 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="per" id="o_unit"></div>
       </div>
       <div id="o_linhas"></div>
+      <button class="feito" id="b_impresso" onclick="marcarImpresso()" data-i18n="bImpresso">✅ Marcar como impresso</button>
+      <div id="reg_estado"></div>
     </div>
 
     <div class="kpis">
@@ -1351,10 +1404,13 @@ footer a{color:var(--blue);text-decoration:none}
 <button id="pvclose" onclick="preview(false)">Fechar ✕</button>
 
 <script>
-function preview(on=true){
+function preview(on=true, guardado=false){
   /* antes de mostrar o orçamento, perguntar se aquilo já foi impresso: é o
-     momento em que se sabe, e a pergunta reabre isto conforme a resposta */
-  if(on && perguntaBaixa()) return;
+     momento em que se sabe, e a pergunta reabre isto conforme a resposta.
+     Um orçamento do registo já foi impresso -- não se pergunta nada. */
+  if(on && !guardado && perguntaBaixa()) return;
+  /* ao fechar um orçamento do registo, o de agora volta para o seu lugar */
+  if(!on && el('printable').dataset.guardado){ delete el('printable').dataset.guardado; calc(); }
   el('printable').classList.toggle('show',on);
   document.body.style.overflow=on?'hidden':'';
   if(on && !document.getElementById('pvprint')){
@@ -3581,6 +3637,7 @@ function calc(){
         det, fDesp,   /* o detalhe fica à mão: é dele que sai a baixa no Bobina */
         taxa: hTot>0?pImp/hTot:0};
   desenhaBotaoBaixa();
+  desenhaRegEstado();
   if(typeof renderCredores==='function') renderCredores();
   marketPanel({total,pPrint,pMat,pImp,pAcab,pMod,pPortes,pBase,pPrep,desc,hTot,pecas,det,nMesas,fMatMesa,
     basePeca:num('s_base'), baseMesa:num('s_base_mesa'), margemFinal:num('s_margem')/100,
@@ -4263,6 +4320,7 @@ function resetJob(){
   ['j_manual','j_pol','j_pint','j_desc','j_promo','j_km','j_km_tempo'].forEach(i=>el(i).value=0);
   ['r_g','r_t','r_e'].forEach(i=>el(i).value=''); el('r_usar').checked=true;
   el('j_pacote').checked=true;
+  REG=null;
   BAIXAS=[]; BAIXA_ADIADA=false;   /* trabalho novo, baixas novas */
   el('j_portes').value='0'; calc(); guardaEstado();
   drawAbas();
@@ -4282,7 +4340,7 @@ let ABAS=[], ABA=0;
 const idAba = () => 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function jobSnapshot(){
   const j={mesas:mesas.map(m=>[...m]), modelos:MODELOS.map(m=>({...m})),
-           baixas:BAIXAS, baixa_adiada:BAIXA_ADIADA, blocos:{...BLOCOS},
+           baixas:BAIXAS, baixa_adiada:BAIXA_ADIADA, blocos:{...BLOCOS}, registo:REG,
            portes_bob:{...PORTES_BOB}, bob_usados:BOB_SNAP.map(f=>({...f})),
            /* o total fica gravado só para a etiqueta do separador */
            total:(LAST&&isFinite(LAST.totalCli))?LAST.totalCli:0};
@@ -4300,6 +4358,7 @@ function jobRepor(j){
   MODELOS=Array.isArray(j.modelos)?j.modelos.map(normModelo):[];
   BAIXAS=Array.isArray(j.baixas)?j.baixas:[];
   BAIXA_ADIADA=!!j.baixa_adiada;
+  REG=j.registo||null;
   BLOCOS={mod:true,imp:true,pos:true,...(j.blocos||{})};
   PORTES_BOB=(j.portes_bob&&typeof j.portes_bob==='object')?{...j.portes_bob}:{};
   BOB_SNAP=Array.isArray(j.bob_usados)?j.bob_usados.filter(f=>f&&f.n):[];
@@ -4360,8 +4419,165 @@ function fechaAba(i,ev){
   drawAbas(); guardaEstado();
 }
 
+/* ============ registo de trabalhos impressos ============
+   O botão verde diz "isto foi impresso (ou mandado imprimir)": o trabalho fica
+   na base de dados do servidor com as Definições do momento e o orçamento do
+   cliente tal como saiu. Os clientes nascem aqui sozinhos, pelo nome escrito no
+   painel 1, e voltam a ser escolhidos pela lista desse mesmo campo. */
+let REG=null;                      /* {id, em} do separador à vista, depois de registado */
+let REGS=[], CLIS=[];
+const dataReg = t => new Date(t*1000).toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric'});
+async function apiReg(caminho, corpo){
+  const r=await fetch('/api/'+caminho, corpo?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(corpo)}:{});
+  const d=await r.json().catch(()=>({ok:false,error:'Resposta inválida'}));
+  if(!r.ok||d.ok===false) throw new Error(d.error||('Erro '+r.status));
+  return d;
+}
+/* as Definições que fazem o preço; o histórico, a marca e o próprio trabalho ficam de fora */
+function defsParaRegisto(){
+  const d=collect();
+  ['hist','mesas','modelos','baixas','baixa_adiada','marca'].forEach(k=>delete d[k]);
+  return d;
+}
+function desenhaRegEstado(){
+  const b=el('b_impresso'); if(!b) return;
+  b.textContent=tr(REG?'bImpressoOutra':'bImpresso');
+  el('reg_estado').textContent=REG?tr('regFeito',{id:REG.id, d:dataReg(REG.em)}):'';
+}
+async function marcarImpresso(){
+  const cli=el('j_cliente').value.trim(), proj=el('j_projeto').value.trim();
+  if(REG && !confirm(tr('regJaFoi',{id:REG.id, d:dataReg(REG.em)}))) return;
+  if(!confirm(tr('regConfirma',{cli:cli||tr('regSemCliente'), proj:proj||'—', total:eur(LAST.totalCli)}))) return;
+  const serv=[LAST.pMod>0?tr('pacSrv_mod'):'', LAST.det&&LAST.det.length?tr('pacSrv_imp'):'',
+              LAST.pAcab-LAST.pPrep>0.004?tr('pacSrv_pos'):''].filter(Boolean).join(' + ');
+  try{
+    const r=await apiReg('registos',{
+      cliente:cli, projeto:proj, estado:'impresso',
+      total:LAST.totalCli, custo:LAST.custo, lucro:LAST.lucro, pecas:LAST.pecas,
+      resumo:[serv, LAST.pecas?LAST.pecas+' peça(s)':'', LAST.hTot>0?hm(LAST.hTot*60)+' de impressão':''].filter(Boolean).join(' · '),
+      snapshot:{versao:VERSAO, job:jobSnapshot(), defs:defsParaRegisto()},
+      orcamento_html:el('printable').innerHTML
+    });
+    REG={id:r.id, em:Math.floor(Date.now()/1000)};
+    desenhaRegEstado(); guardaEstado(); carregaRegisto();
+    /* o filamento gastou-se: é a altura de o tirar do Bobina, se houver mesas por lançar */
+    if(mesasPendentes().length && confirm(tr('regBaixa'))){ BX.depois=false; abreBaixa(); }
+  }catch(e){ alert(tr('regErro',{e:e.message})); }
+}
+async function carregaRegisto(){
+  try{
+    const [c,r]=await Promise.all([apiReg('clientes'), apiReg('registos')]);
+    CLIS=c.clientes; REGS=r.registos;
+  }catch(e){ el('reg_sum').textContent=tr('regErro',{e:e.message}); return; }
+  el('dl_clientes').innerHTML=CLIS.map(c=>`<option value="${htmlEsc(c.nome)}">`).join('');
+  const f=el('reg_filtro'), antes=f.value;
+  f.innerHTML=`<option value="">${htmlEsc(tr('regTodos'))}</option>`
+    +`<option value="-">${htmlEsc(tr('regSemCliente'))}</option>`
+    +CLIS.map(c=>`<option value="${c.id}">${htmlEsc(c.nome)} (${c.n})</option>`).join('');
+  f.value=[...f.options].some(o=>o.value===antes)?antes:'';
+  drawRegistos(); drawClientes();
+}
+function drawRegistos(){
+  const f=el('reg_filtro').value;
+  const l=REGS.filter(r=>!f || (f==='-' ? !r.cliente_id : String(r.cliente_id)===f));
+  const soma=k=>l.reduce((a,r)=>a+r[k],0);
+  el('reg_sum').textContent=tr('regSoma',{n:l.length, t:eur(soma('total')), l:eur(soma('lucro'))});
+  el('reg_lista').innerHTML=l.length ? l.map(r=>`<div class="ritem">
+      <div class="l1"><span><b>${htmlEsc(r.projeto||'—')}</b> · <span class="cli" onclick="filtraCliente(${r.cliente_id||'\'-\''})">${htmlEsc(r.cliente_nome||tr('regSemCliente'))}</span></span><b>${eur(r.total)}</b></div>
+      <div class="l2">#${r.id} · ${dataReg(r.criado)} · ${htmlEsc(r.resumo)} · ${tr('regLucro')} ${eur(r.lucro)}</div>
+      <details ontoggle="this.open&&verDefs(${r.id},this)"><summary>${tr('regVerDefs')}</summary><div class="dd">…</div></details>
+      <div class="acts">
+        <button class="ghost" onclick="verOrcGuardado(${r.id})">👁 ${tr('regVerOrc')}</button>
+        <button class="ghost" onclick="abrirRegisto(${r.id})">↺ ${tr('regAbrir')}</button>
+        <button class="ghost" onclick="reporDefs(${r.id})">⚙ ${tr('regReporDefs')}</button>
+        <button class="ghost" onclick="apagaRegisto(${r.id})">🗑</button>
+      </div></div>`).join('')
+    : `<div class="rsum">${tr('regVazio')}</div>`;
+}
+function filtraCliente(id){ regTab('trab'); el('reg_filtro').value=String(id); drawRegistos(); }
+const REG_CACHE={};
+async function registoCompleto(id){
+  return REG_CACHE[id] || (REG_CACHE[id]=(await apiReg('registos/'+id)).registo);
+}
+/* as Definições do dia em que se imprimiu, por palavras: as que fazem o preço */
+async function verDefs(id, det){
+  if(!det.querySelector('.dd')) return;
+  const d=(await registoCompleto(id)).snapshot.defs||{};
+  const linhas=[['€/kWh',d.kwh],['Filamento',d.fil_nome],['€/kg',d.fil_kg],['Mão de obra €/h',d.mao],
+    ['Modelação €/h',d.modh],['Margem final %',d.margem],['Base/peça €',d.base],['Escalões',d.tiers],
+    ['Pacote',d.pac&&d.pac.s_pac_on?pct(+d.pac_pct)+'%':'—'],['Imposto',d.tax_nome+' '+d.tax_rate+'%']];
+  det.querySelector('.dd').outerHTML=linhas.filter(x=>x[1]!==undefined&&x[1]!=='')
+    .map(([k,v])=>`<div><span>${k}</span><b>${htmlEsc(v)}</b></div>`).join('');
+}
+async function verOrcGuardado(id){
+  const r=await registoCompleto(id);
+  if(!r.orcamento_html) return alert(tr('regSemOrc'));
+  abreRegisto(false);
+  el('printable').innerHTML=r.orcamento_html;
+  el('printable').dataset.guardado='1';
+  preview(true,true);
+}
+/* reabrir = um separador novo com o trabalho; as Definições de agora não mudam */
+async function abrirRegisto(id){
+  const r=await registoCompleto(id);
+  if(ABAS[ABA]) ABAS[ABA].job=jobSnapshot();
+  ABAS.push({id:idAba(), job:null}); ABA=ABAS.length-1;
+  jobRepor({...r.snapshot.job, registo:{id:r.id, em:r.criado}});
+  abreRegisto(false); drawAbas(); guardaEstado();
+}
+async function reporDefs(id){
+  if(!confirm(tr('regReporConfirma',{id}))) return;
+  const r=await registoCompleto(id);
+  apply(r.snapshot.defs); calc(); guardaEstado();
+}
+async function apagaRegisto(id){
+  if(!confirm(tr('regApagar',{id}))) return;
+  try{ await apiReg('registos/apagar',{id}); }catch(e){ return alert(tr('regErro',{e:e.message})); }
+  if(REG&&REG.id===id){ REG=null; desenhaRegEstado(); guardaEstado(); }
+  carregaRegisto();
+}
+function drawClientes(){
+  el('cli_lista').innerHTML=CLIS.map(c=>`<div class="ritem">
+      <div class="l1"><span class="cli" onclick="filtraCliente(${c.id})"><b>${htmlEsc(c.nome)}</b></span><b>${eur(c.faturado)}</b></div>
+      <div class="l2">${[tr('regNTrab',{n:c.n}), c.contacto, c.nif?'NIF '+c.nif:'', c.notas].filter(Boolean).map(htmlEsc).join(' · ')}</div>
+      <div class="acts">
+        <button class="ghost" onclick="usaCliente(${c.id})">➜ ${tr('cliUsar')}</button>
+        <button class="ghost" onclick="editaCliente(${c.id})">✏️</button>
+        <button class="ghost" onclick="apagaCliente(${c.id})">🗑</button>
+      </div></div>`).join('') || `<div class="rsum">${tr('cliVazio')}</div>`;
+}
+const CLI_F=['nome','contacto','nif','notas'];
+function limpaCliente(){ el('cli_id').value=''; CLI_F.forEach(k=>el('cli_'+k).value=''); }
+function editaCliente(id){
+  const c=CLIS.find(x=>x.id===id); if(!c) return;
+  el('cli_id').value=c.id; CLI_F.forEach(k=>el('cli_'+k).value=c[k]||''); el('cli_nome').focus();
+}
+async function guardaCliente(){
+  const o={id:el('cli_id').value}; CLI_F.forEach(k=>o[k]=el('cli_'+k).value);
+  try{ await apiReg('clientes',o); }catch(e){ return alert(e.message); }
+  limpaCliente(); carregaRegisto();
+}
+async function apagaCliente(id){
+  const c=CLIS.find(x=>x.id===id);
+  if(!c || !confirm(tr('cliApagar',{nome:c.nome, n:c.n}))) return;
+  try{ await apiReg('clientes/apagar',{id}); }catch(e){ return alert(e.message); }
+  carregaRegisto();
+}
+/* escolher o cliente para o orçamento à vista */
+function usaCliente(id){
+  const c=CLIS.find(x=>x.id===id); if(!c) return;
+  el('j_cliente').value=c.nome; calc(); guardaEstado(); abreRegisto(false);
+}
+function regTab(t){
+  ['trab','cli'].forEach(k=>{ el('rc_'+k).style.display=k===t?'':'none'; el('rt_'+k).classList.toggle('on',k===t); });
+}
+function abreRegisto(on=true){
+  el('reg').classList.toggle('on',on);
+  if(on) carregaRegisto();
+}
+
 /* ============ armazenamento local ============ */
-const VERSAO='1.20.0';
+const VERSAO='1.21.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -4614,6 +4830,25 @@ const I18N={
     descQtdSo:'{p}% por quantidade',
     descPromoLinha:'promoção de {p}%',
     descArred:'arredondamento a favor do cliente',
+    /* ---- registo de impressos ---- */
+    bRegisto:'📒 Registo', bImpresso:'✅ Marcar como impresso', bImpressoOutra:'✅ Registado — registar outra vez',
+    regTitulo:'📒 Registo de trabalhos', regTabTrab:'Trabalhos', regTabCli:'Clientes',
+    regFeito:'No registo como #{id}, impresso a {d}.',
+    regJaFoi:'Este orçamento já está no registo (#{id}, de {d}). Registar outra impressão?',
+    regConfirma:'Marcar como impresso (ou mandado imprimir)?\n\nCliente: {cli}\nProjeto: {proj}\nTotal: {total}\n\nFica no registo com as Definições de hoje e o orçamento do cliente como está.',
+    regSemCliente:'sem cliente', regTodos:'Todos os clientes',
+    regBaixa:'Registado. Dar também baixa do filamento no Bobina?',
+    regErro:'O registo não respondeu: {e}',
+    regSoma:'{n} trabalho(s) · faturado {t} · lucro {l}',
+    regLucro:'lucro', regVerDefs:'Definições usadas', regVerOrc:'orçamento', regAbrir:'reabrir', regReporDefs:'repor definições',
+    regVazio:'Ainda nada registado — o botão verde por baixo do total põe cá o orçamento.',
+    regSemOrc:'Este registo não tem o orçamento guardado.',
+    regReporConfirma:'Repor as Definições do registo #{id}? As de agora são substituídas (os trabalhos abertos ficam).',
+    regApagar:'Apagar o registo #{id}? Não se desfaz.',
+    regNTrab:'{n} trabalho(s)',
+    cliNome:'Nome', cliContacto:'Contacto', cliNotas:'Notas', cliGuardar:'Guardar cliente', cliNovo:'Novo', cliUsar:'usar no orçamento',
+    cliVazio:'Sem clientes. Nascem sozinhos ao registar um trabalho, ou cria-os aqui.',
+    cliApagar:'Apagar o cliente «{nome}»? Os {n} trabalho(s) dele ficam no registo, com o nome.',
     /* ---- desconto de pacote ---- */
     pacSrv_mod:'Modelação', pacSrv_imp:'Impressão', pacSrv_pos:'Acabamento',
     pacTudo:'todos os serviços', pacSobre:'sobre {alvo}',
@@ -4880,6 +5115,25 @@ const I18N={
     descQtdSo:'{p}% quantity discount',
     descPromoLinha:'{p}% promotion',
     descArred:'rounded down in your favour',
+    /* ---- print log ---- */
+    bRegisto:'📒 Log', bImpresso:'✅ Mark as printed', bImpressoOutra:'✅ Logged — log again',
+    regTitulo:'📒 Job log', regTabTrab:'Jobs', regTabCli:'Clients',
+    regFeito:'In the log as #{id}, printed on {d}.',
+    regJaFoi:'This quote is already in the log (#{id}, {d}). Log another print?',
+    regConfirma:'Mark as printed (or sent to print)?\n\nClient: {cli}\nProject: {proj}\nTotal: {total}\n\nIt goes into the log with today\'s Settings and the client quote as it stands.',
+    regSemCliente:'no client', regTodos:'All clients',
+    regBaixa:'Logged. Also deduct the filament in Bobina?',
+    regErro:'The log did not answer: {e}',
+    regSoma:'{n} job(s) · billed {t} · profit {l}',
+    regLucro:'profit', regVerDefs:'Settings used', regVerOrc:'quote', regAbrir:'reopen', regReporDefs:'restore settings',
+    regVazio:'Nothing logged yet — the green button under the total puts the quote here.',
+    regSemOrc:'This entry has no saved quote.',
+    regReporConfirma:'Restore the Settings from entry #{id}? Current ones are replaced (open jobs stay).',
+    regApagar:'Delete entry #{id}? This cannot be undone.',
+    regNTrab:'{n} job(s)',
+    cliNome:'Name', cliContacto:'Contact', cliNotas:'Notes', cliGuardar:'Save client', cliNovo:'New', cliUsar:'use in quote',
+    cliVazio:'No clients. They appear when a job is logged, or create them here.',
+    cliApagar:'Delete client “{nome}”? Their {n} job(s) stay in the log, with the name.',
     /* ---- bundle discount ---- */
     pacSrv_mod:'Modelling', pacSrv_imp:'Printing', pacSrv_pos:'Finishing',
     pacTudo:'all services', pacSobre:'off {alvo}',
@@ -5029,6 +5283,7 @@ function repor(o){
   if(Array.isArray(o.abas) && o.abas.length){
     ABAS=o.abas.map(a=>({id:a.id||idAba(), job:a.job||null}));
     ABA=Math.min(Math.max(0,+o.aba||0),ABAS.length-1);
+    REG=(ABAS[ABA].job||{}).registo||null;
   }
   drawAbas();
 }
@@ -5384,12 +5639,12 @@ el('j_mostrar_mod').addEventListener('change',calc);
 ['s_tax_nome','s_tax_rate'].forEach(i=>el(i).addEventListener('input',marcarTaxCustom));
 /* o :not(#filpick *) tira a caixa de procura do seletor: escrever lá dentro
    não é mexer no orçamento, e a cada tecla corria um calc() inteiro */
-document.querySelectorAll('input:not(#filpick input),select:not(#filpick select)')
+document.querySelectorAll('input:not(#filpick input):not(#reg input),select:not(#filpick select):not(#reg select)')
   .forEach(i=>i.addEventListener('input',calc));
 el('s_auto_kwh').addEventListener('change',toggleAuto);
 ['s_iva','s_kwh_add'].forEach(i=>el(i).addEventListener('input',applySpot));
 /* j_pecas é derivado das mesas: quem mexe no escalão de desconto é mudaPecas() */
-document.querySelectorAll('input:not(#filpick input),select:not(#filpick select)').forEach(i=>{
+document.querySelectorAll('input:not(#filpick input):not(#reg input),select:not(#filpick select):not(#reg select)').forEach(i=>{
   i.addEventListener('input',guardaEstado); i.addEventListener('change',guardaEstado);
 });
 ligaPicker();
@@ -5403,6 +5658,7 @@ ligaInfoPopups();
 mostrarLicenca();
 procurarAtualizacoes(true);
 iniciarMemoriaRemota();
+carregaRegisto();
 </script>
 </body>
 </html>

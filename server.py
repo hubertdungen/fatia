@@ -278,6 +278,69 @@ def init_db(db_path: Path) -> None:
             )
             """
         )
+        # ---- registo de trabalhos impressos e os clientes ----
+        # Um registo guarda o trabalho e as Definições tal como estavam quando se
+        # marcou como impresso: reabrir daqui a um ano dá o mesmo orçamento, e
+        # não o que os preços de hoje dariam. O nome do cliente vai copiado para
+        # o registo -- apagar o cliente não apaga o histórico.
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS clientes (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              nome TEXT NOT NULL UNIQUE COLLATE NOCASE,
+              contacto TEXT NOT NULL DEFAULT '',
+              nif TEXT NOT NULL DEFAULT '',
+              notas TEXT NOT NULL DEFAULT '',
+              criado INTEGER NOT NULL
+            )
+            """
+        )
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS registos (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              cliente_id INTEGER REFERENCES clientes(id) ON DELETE SET NULL,
+              cliente_nome TEXT NOT NULL DEFAULT '',
+              projeto TEXT NOT NULL DEFAULT '',
+              estado TEXT NOT NULL DEFAULT 'impresso',
+              total REAL NOT NULL DEFAULT 0,
+              custo REAL NOT NULL DEFAULT 0,
+              lucro REAL NOT NULL DEFAULT 0,
+              pecas INTEGER NOT NULL DEFAULT 0,
+              resumo TEXT NOT NULL DEFAULT '',
+              snapshot_json TEXT NOT NULL,
+              orcamento_html TEXT NOT NULL DEFAULT '',
+              criado INTEGER NOT NULL
+            )
+            """
+        )
+        db.execute("CREATE INDEX IF NOT EXISTS registos_cliente ON registos(cliente_id, criado)")
+
+
+REG_COLS = "id, cliente_id, cliente_nome, projeto, estado, total, custo, lucro, pecas, resumo, criado"
+
+
+def cliente_id_por_nome(db: sqlite3.Connection, nome: str) -> int | None:
+    """O cliente com este nome, criado na hora se ainda não existir."""
+    nome = nome.strip()[:120]
+    if not nome:
+        return None
+    row = db.execute("SELECT id FROM clientes WHERE nome = ?", (nome,)).fetchone()
+    if row:
+        return row[0]
+    return db.execute("INSERT INTO clientes(nome, criado) VALUES (?, ?)", (nome, now())).lastrowid
+
+
+def texto(d: dict[str, Any], k: str, n: int = 500) -> str:
+    return str(d.get(k) or "").strip()[:n]
+
+
+def numero(d: dict[str, Any], k: str) -> float:
+    try:
+        v = float(d.get(k) or 0)
+    except (TypeError, ValueError):
+        return 0.0
+    return v if v == v and abs(v) < 1e9 else 0.0
 
 
 def hash_password(password: str) -> str:
@@ -454,6 +517,40 @@ class FatiaHandler(SimpleHTTPRequestHandler):
             status, payload = spot_price(zona)
             self.write_json(status, payload)
             return
+        if path in ("/api/clientes", "/api/registos") or path.startswith("/api/registos/"):
+            if not self.de_casa():
+                self.error_json(403, "O registo só se consulta da rede de casa")
+                return
+            with self.db() as db:
+                if path == "/api/clientes":
+                    rows = db.execute(
+                        """
+                        SELECT c.*, COUNT(r.id) AS n, COALESCE(SUM(r.total), 0) AS faturado
+                        FROM clientes c LEFT JOIN registos r ON r.cliente_id = c.id
+                        GROUP BY c.id ORDER BY c.nome
+                        """
+                    ).fetchall()
+                    self.write_json(200, {"ok": True, "clientes": [dict(r) for r in rows]})
+                elif path == "/api/registos":
+                    q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+                    cli = (q.get("cliente") or [""])[0]
+                    if cli.isdigit():
+                        rows = db.execute(f"SELECT {REG_COLS} FROM registos WHERE cliente_id = ? ORDER BY criado DESC",
+                                          (int(cli),)).fetchall()
+                    else:
+                        rows = db.execute(f"SELECT {REG_COLS} FROM registos ORDER BY criado DESC LIMIT 1000").fetchall()
+                    self.write_json(200, {"ok": True, "registos": [dict(r) for r in rows]})
+                else:
+                    rid = path.rsplit("/", 1)[-1]
+                    row = db.execute("SELECT * FROM registos WHERE id = ?",
+                                     (int(rid) if rid.isdigit() else -1,)).fetchone()
+                    if not row:
+                        self.error_json(404, "Registo não encontrado")
+                        return
+                    reg = dict(row)
+                    reg["snapshot"] = json.loads(reg.pop("snapshot_json"))
+                    self.write_json(200, {"ok": True, "registo": reg})
+            return
         if path == "/api/auth/me":
             user = self.current_user()
             with self.db() as db:
@@ -560,7 +657,69 @@ class FatiaHandler(SimpleHTTPRequestHandler):
             status, payload = giro_pagamento(data if isinstance(data, dict) else {})
             self.write_json(status, payload)
             return
+        if path.startswith(("/api/clientes", "/api/registos")):
+            if not self.de_casa():
+                self.error_json(403, "O registo só se escreve da rede de casa")
+                return
+            self.handle_registo(path, data if isinstance(data, dict) else {})
+            return
         self.error_json(404, "API desconhecida")
+
+    # Como as escritas no Bobina e no Giro: a app funciona sem conta, mas a
+    # lista de clientes e o que se faturou não saem para a Internet.
+    def de_casa(self) -> bool:
+        return is_lan_or_mesh(first_forwarded_for(self.headers, self.client_address[0])) \
+            and not marked_public(self.headers)
+
+    def handle_registo(self, path: str, d: dict[str, Any]) -> None:
+        with self.db() as db:
+            if path == "/api/clientes":
+                nome = texto(d, "nome", 120)
+                if not nome:
+                    self.error_json(400, "O cliente precisa de um nome")
+                    return
+                campos = (nome, texto(d, "contacto"), texto(d, "nif", 40), texto(d, "notas", 2000))
+                try:
+                    if str(d.get("id") or "").isdigit():
+                        cid = int(d["id"])
+                        db.execute("UPDATE clientes SET nome=?, contacto=?, nif=?, notas=? WHERE id=?", (*campos, cid))
+                        # o nome copiado para os registos segue a correção
+                        db.execute("UPDATE registos SET cliente_nome=? WHERE cliente_id=?", (nome, cid))
+                    else:
+                        cid = db.execute("INSERT INTO clientes(nome, contacto, nif, notas, criado) VALUES (?,?,?,?,?)",
+                                         (*campos, now())).lastrowid
+                except sqlite3.IntegrityError:
+                    self.error_json(409, f"Já existe um cliente chamado «{nome}»")
+                    return
+                self.write_json(200, {"ok": True, "id": cid})
+            elif path == "/api/clientes/apagar":
+                db.execute("DELETE FROM clientes WHERE id = ?", (int(numero(d, "id")),))
+                self.write_json(200, {"ok": True})
+            elif path == "/api/registos":
+                snap = d.get("snapshot")
+                if not isinstance(snap, dict):
+                    self.error_json(400, "Falta o estado do trabalho")
+                    return
+                nome = texto(d, "cliente", 120)
+                cid = cliente_id_por_nome(db, nome)
+                estado = "enviado" if d.get("estado") == "enviado" else "impresso"
+                rid = db.execute(
+                    """
+                    INSERT INTO registos(cliente_id, cliente_nome, projeto, estado, total, custo, lucro,
+                                         pecas, resumo, snapshot_json, orcamento_html, criado)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (cid, nome, texto(d, "projeto", 200), estado, numero(d, "total"), numero(d, "custo"),
+                     numero(d, "lucro"), int(numero(d, "pecas")), texto(d, "resumo", 1000),
+                     json.dumps(snap, ensure_ascii=False, separators=(",", ":")),
+                     str(d.get("orcamento_html") or "")[:2_000_000], now()),
+                ).lastrowid
+                self.write_json(200, {"ok": True, "id": rid, "cliente_id": cid})
+            elif path == "/api/registos/apagar":
+                db.execute("DELETE FROM registos WHERE id = ?", (int(numero(d, "id")),))
+                self.write_json(200, {"ok": True})
+            else:
+                self.error_json(404, "API desconhecida")
 
     def handle_register(self, data: Any) -> None:
         username = str(data.get("username", "")).strip()
