@@ -985,7 +985,7 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="avancado">
         <label>Promoção</label>
         <div class="suffix"><input type="number" id="j_promo" value="0" min="0" max="100" step="0.5"><i>%</i></div>
-        <div class="hint">Só sobre material + impressão.</div>
+        <div class="hint">Sobre o preço de todos os serviços (modelação, impressão, acabamento), já depois do desconto por quantidade e do pacote. 100% deixa só os portes.</div>
       </div>
     </div>
     <label class="toggle"><input type="checkbox" id="j_pacote" checked> 🎁 Desconto de pacote neste orçamento</label>
@@ -3457,12 +3457,15 @@ function calc(){
   const pMarg=(pMat+pImp+pBase)*num('s_margem')/100;
   const pPrint=pMat+pImp+pBase+pPrep+pMarg;            /* só impressão: sem modelação, portes nem acabamento manual */
   const desc=(pBase+pPrep+pMan+pPol+pPin)*num('j_desc')/100;
-  const promo=(pMat+pImp)*num('j_promo')/100;
   /* o pacote vê os serviços como o cliente os vê no orçamento: as mesmas três linhas.
      O acabamento só CONTA com trabalho manual — a preparação vem sempre com as mesas */
   const pac=pacote({mod:pMod>0, imp:nMesas>0, pos:pMan+pPol+pPin>0},
                    {mod:pMod, imp:nMesas>0?pMat+pImp+pBase+pMarg:0, pos:pAcab});
   const pPac=pac.valor;
+  /* a promoção é a última: leva a percentagem do que o cliente ainda paga pelos
+     serviços depois dos outros descontos. 100% = serviços de graça; os portes ficam */
+  const servicos=pMod+pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg;
+  const promo=Math.max(0,servicos-desc-pPac)*Math.min(num('j_promo'),100)/100;
   lePacote(pac);
 
   /* ---- portes ---- */
@@ -4577,7 +4580,7 @@ function abreRegisto(on=true){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.21.0';
+const VERSAO='1.21.1';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
