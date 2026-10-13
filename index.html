@@ -1462,14 +1462,14 @@ footer a{color:var(--blue);text-decoration:none}
 <script>
 function preview(on=true){
   /* ao fechar um orçamento do registo, o de agora volta para o seu lugar */
-  if(!on && el('printable').dataset.guardado){ delete el('printable').dataset.guardado; calc(); }
+  if(!on && el('printable').dataset.guardado){ delete el('printable').dataset.guardado; delete el('printable').dataset.folha; calc(); }
   el('printable').classList.toggle('show',on);
   document.body.style.overflow=on?'hidden':'';
   if(on && !document.getElementById('pvprint')){
     const b=document.createElement('button');
     b.id='pvprint'; b.textContent='🖨 Imprimir / PDF';
     b.style.cssText='position:fixed;top:16px;right:120px;z-index:100;background:#ff9f2e;color:#1a1206;border:none;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer';
-    b.onclick=()=>window.print();
+    b.onclick=imprimirPDF;
     document.body.appendChild(b);
   }
   const p=document.getElementById('pvprint'); if(p) p.style.display=on?'block':'none';
@@ -4269,7 +4269,7 @@ function buildPrint(x){
     ${empresa}
     <div class="hd">
       <div class="ttl"><div><h1>Orçamento</h1><div class="s">Impressão 3D · fabrico por encomenda</div></div></div>
-      <div class="dt">${new Date().toLocaleDateString('pt-PT',{day:'2-digit',month:'long',year:'numeric'})}</div>
+      <div class="dt">${new Date().toLocaleDateString('pt-PT',{day:'2-digit',month:'long',year:'numeric'})}${FO?`<div class="fo">${tr('foRotulo')} <b>${FO.dia}-${FO.seq}</b></div>`:''}</div>
     </div>
     <div class="cli">Para: <b>${esc(el('j_cliente').value)||'—'}</b>${projeto?` · Projeto: <b>${esc(projeto)}</b>`:''}</div>
     ${spec}
@@ -4375,7 +4375,7 @@ function resetJob(){
   ['j_manual','j_pol','j_pint','j_desc','j_promo','j_km','j_km_tempo'].forEach(i=>el(i).value=0);
   ['r_g','r_t','r_e'].forEach(i=>el(i).value=''); el('r_usar').checked=true;
   el('j_pacote').checked=true;
-  REG=null;
+  REG=null; FO=null;
   BAIXAS=[]; BAIXA_ADIADA=false;   /* trabalho novo, baixas novas */
   el('j_portes').value='0'; calc(); guardaEstado();
   drawAbas();
@@ -4395,7 +4395,7 @@ let ABAS=[], ABA=0;
 const idAba = () => 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function jobSnapshot(){
   const j={mesas:mesas.map(m=>[...m]), modelos:MODELOS.map(m=>({...m})),
-           baixas:BAIXAS, baixa_adiada:BAIXA_ADIADA, blocos:{...BLOCOS}, registo:REG,
+           baixas:BAIXAS, baixa_adiada:BAIXA_ADIADA, blocos:{...BLOCOS}, registo:REG, folha:FO,
            portes_bob:{...PORTES_BOB}, bob_usados:BOB_SNAP.map(f=>({...f})),
            /* o total fica gravado só para a etiqueta do separador */
            total:(LAST&&isFinite(LAST.totalCli))?LAST.totalCli:0};
@@ -4414,6 +4414,7 @@ function jobRepor(j){
   BAIXAS=Array.isArray(j.baixas)?j.baixas:[];
   BAIXA_ADIADA=!!j.baixa_adiada;
   REG=j.registo||null;
+  FO=j.folha||null;
   BLOCOS={mod:true,imp:true,pos:true,...(j.blocos||{})};
   PORTES_BOB=(j.portes_bob&&typeof j.portes_bob==='object')?{...j.portes_bob}:{};
   BOB_SNAP=Array.isArray(j.bob_usados)?j.bob_usados.filter(f=>f&&f.n):[];
@@ -4474,6 +4475,38 @@ function fechaAba(i,ev){
   drawAbas(); guardaEstado();
 }
 
+/* ============ folha de obra ============
+   Cada orçamento que sai em PDF leva um número: FO-fatia_20261013-001, contado
+   por dia. O número é do separador -- reimprimir o mesmo trabalho dá a mesma
+   folha -- e quem o conta é o servidor, para dois aparelhos não darem o mesmo.
+   Sem servidor à vista conta este browser, que é melhor do que nenhum. */
+let FO=null;                           /* {dia:'20261013', seq:'001'} do separador à vista */
+/* "Ana (OLX)" -> "Ana(OLX)", "João & Filhos" -> "Joao-e-Filhos": o nome tem de
+   sobreviver a Windows, email e WhatsApp sem perder a leitura */
+const nomeFicheiro = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/&/g,' e ').replace(/[^A-Za-z0-9()._-]+/g,'-')
+  .replace(/-*([()])-*/g,(m,c)=>c==='('?'(':')-').replace(/-+/g,'-').replace(/^[-.]+|[-.]+$/g,'').slice(0,60);
+const nomeFolha = () => FO ? ['FO-fatia_'+FO.dia+'-'+FO.seq, nomeFicheiro(el('j_cliente').value)].filter(Boolean).join('_') : '';
+async function numeroFolha(){
+  if(FO) return FO;
+  const d=new Date(), dia=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  let seq;
+  try{ seq=(await apiReg('folhas',{dia, cliente:el('j_cliente').value.trim()})).seq; }
+  catch(_){ const c=store.get('folhas',{}); seq=(c[dia]||0)+1; store.set('folhas',{[dia]:seq}); }
+  FO={dia, seq:String(seq).padStart(3,'0')};
+  guardaEstado();
+  return FO;
+}
+async function imprimirPDF(){
+  const pr=el('printable');
+  /* um orçamento do registo já tem folha: imprime-se tal como saiu */
+  if(!pr.dataset.guardado){ await numeroFolha(); calc(); }
+  const antes=document.title;
+  document.title=(pr.dataset.guardado ? pr.dataset.folha : nomeFolha()) || antes;   /* o browser dá ao PDF o nome do título */
+  window.addEventListener('afterprint',()=>{ document.title=antes; },{once:true});
+  window.print();
+}
+
 /* ============ registo de trabalhos impressos ============
    O botão verde diz "isto foi impresso (ou mandado imprimir)": o trabalho fica
    na base de dados do servidor com as Definições do momento e o orçamento do
@@ -4530,7 +4563,7 @@ async function confirmaImpresso(){
       REG={...REG, estado};
     } else {
       const r=await apiReg('registos',{
-        cliente:cli, projeto:proj, estado,
+        cliente:cli, projeto:proj, estado, folha:nomeFolha(),
         total:LAST.totalCli, custo:LAST.custo, lucro:LAST.lucro, pecas:LAST.pecas,
         resumo:[serv, LAST.pecas?LAST.pecas+' peça(s)':'', LAST.hTot>0?hm(LAST.hTot*60)+' de impressão':''].filter(Boolean).join(' · '),
         snapshot:{versao:VERSAO, job:jobSnapshot(), defs:defsParaRegisto()},
@@ -4563,7 +4596,7 @@ function drawRegistos(){
   el('reg_sum').textContent=tr('regSoma',{n:l.length, t:eur(soma('total')), l:eur(soma('lucro'))});
   el('reg_lista').innerHTML=l.length ? l.map(r=>`<div class="ritem">
       <div class="l1"><span><b>${htmlEsc(r.projeto||'—')}</b> · <span class="cli" onclick="filtraCliente(${r.cliente_id||'\'-\''})">${htmlEsc(r.cliente_nome||tr('regSemCliente'))}</span><span class="rest ${r.estado}">${tr(r.estado==='mandado'?'estMandado':'estImpresso')}</span></span><b>${eur(r.total)}</b></div>
-      <div class="l2">#${r.id} · ${dataReg(r.criado)} · ${htmlEsc(r.resumo)} · ${tr('regLucro')} ${eur(r.lucro)}</div>
+      <div class="l2">#${r.id}${r.folha?' · '+htmlEsc(r.folha.split('_')[1]||r.folha):''} · ${dataReg(r.criado)} · ${htmlEsc(r.resumo)} · ${tr('regLucro')} ${eur(r.lucro)}</div>
       <details ontoggle="this.open&&verDefs(${r.id},this)"><summary>${tr('regVerDefs')}</summary><div class="dd">…</div></details>
       <div class="acts">
         ${r.estado==='mandado'?`<button class="ghost" onclick="regImpresso(${r.id})">✅ ${tr('regPassaImp')}</button>`:''}
@@ -4600,6 +4633,7 @@ async function verOrcGuardado(id){
   abreRegisto(false);
   el('printable').innerHTML=r.orcamento_html;
   el('printable').dataset.guardado='1';
+  el('printable').dataset.folha=r.folha||'';
   preview(true);
 }
 /* reabrir = um separador novo com o trabalho; as Definições de agora não mudam */
@@ -4668,7 +4702,7 @@ function abreRegisto(on=true){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.22.0';
+const VERSAO='1.23.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -4918,6 +4952,7 @@ const I18N={
     descPromoLinha:'promoção de {p}%',
     descArred:'arredondamento a favor do cliente',
     /* ---- registo de impressos ---- */
+    foRotulo:'Folha de obra',
     bMenu:'☰ Menu', bRegistoMenu:'📒 Registo e clientes', mTrabalho:'Trabalho', mVista:'Vista', mIdioma:'Idioma',
     mDados:'Dados', mSobre:'Sobre', mLicenca:'Licença',
     bRegisto:'📒 Registo', bImpresso:'🖨 Imprimir / registar', bImpressoOutra:'✅ Impresso — registar outra impressão', bImpressoJa:'✅ Já saiu da impressora',
@@ -5209,6 +5244,7 @@ const I18N={
     descPromoLinha:'{p}% promotion',
     descArred:'rounded down in your favour',
     /* ---- print log ---- */
+    foRotulo:'Work order',
     bMenu:'☰ Menu', bRegistoMenu:'📒 Log and clients', mTrabalho:'Job', mVista:'View', mIdioma:'Language',
     mDados:'Data', mSobre:'About', mLicenca:'Licence',
     bRegisto:'📒 Log', bImpresso:'🖨 Print / log', bImpressoOutra:'✅ Printed — log another print', bImpressoJa:'✅ Off the printer',
@@ -5387,6 +5423,7 @@ function repor(o){
     ABAS=o.abas.map(a=>({id:a.id||idAba(), job:a.job||null}));
     ABA=Math.min(Math.max(0,+o.aba||0),ABAS.length-1);
     REG=(ABAS[ABA].job||{}).registo||null;
+    FO=(ABAS[ABA].job||{}).folha||null;
   }
   drawAbas();
 }

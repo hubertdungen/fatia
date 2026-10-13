@@ -315,9 +315,24 @@ def init_db(db_path: Path) -> None:
             """
         )
         db.execute("CREATE INDEX IF NOT EXISTS registos_cliente ON registos(cliente_id, criado)")
+        if "folha" not in {r[1] for r in db.execute("PRAGMA table_info(registos)")}:
+            db.execute("ALTER TABLE registos ADD COLUMN folha TEXT NOT NULL DEFAULT ''")
+        # as folhas de obra contam-se por dia; o UNIQUE é o que impede dois
+        # aparelhos a imprimir ao mesmo tempo de levarem o mesmo número
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS folhas (
+              dia TEXT NOT NULL,
+              seq INTEGER NOT NULL,
+              cliente TEXT NOT NULL DEFAULT '',
+              criado INTEGER NOT NULL,
+              PRIMARY KEY (dia, seq)
+            )
+            """
+        )
 
 
-REG_COLS = "id, cliente_id, cliente_nome, projeto, estado, total, custo, lucro, pecas, resumo, criado"
+REG_COLS = "id, cliente_id, cliente_nome, projeto, estado, total, custo, lucro, pecas, resumo, folha, criado"
 
 
 def cliente_id_por_nome(db: sqlite3.Connection, nome: str) -> int | None:
@@ -657,7 +672,7 @@ class FatiaHandler(SimpleHTTPRequestHandler):
             status, payload = giro_pagamento(data if isinstance(data, dict) else {})
             self.write_json(status, payload)
             return
-        if path.startswith(("/api/clientes", "/api/registos")):
+        if path.startswith(("/api/clientes", "/api/registos", "/api/folhas")):
             if not self.de_casa():
                 self.error_json(403, "O registo só se escreve da rede de casa")
                 return
@@ -706,15 +721,28 @@ class FatiaHandler(SimpleHTTPRequestHandler):
                 rid = db.execute(
                     """
                     INSERT INTO registos(cliente_id, cliente_nome, projeto, estado, total, custo, lucro,
-                                         pecas, resumo, snapshot_json, orcamento_html, criado)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+                                         pecas, resumo, snapshot_json, orcamento_html, folha, criado)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
                     """,
                     (cid, nome, texto(d, "projeto", 200), estado, numero(d, "total"), numero(d, "custo"),
                      numero(d, "lucro"), int(numero(d, "pecas")), texto(d, "resumo", 1000),
                      json.dumps(snap, ensure_ascii=False, separators=(",", ":")),
-                     str(d.get("orcamento_html") or "")[:2_000_000], now()),
+                     str(d.get("orcamento_html") or "")[:2_000_000], texto(d, "folha", 120), now()),
                 ).lastrowid
                 self.write_json(200, {"ok": True, "id": rid, "cliente_id": cid})
+            elif path == "/api/folhas":
+                dia = texto(d, "dia", 8)
+                if not re.fullmatch(r"\d{8}", dia):
+                    self.error_json(400, "Dia inválido")
+                    return
+                # o INSERT…SELECT é uma instrução só: o MAX e a escrita não se separam
+                rid = db.execute(
+                    "INSERT INTO folhas(dia, seq, cliente, criado) "
+                    "SELECT ?, COALESCE(MAX(seq), 0) + 1, ?, ? FROM folhas WHERE dia = ?",
+                    (dia, texto(d, "cliente", 120), now(), dia),
+                ).lastrowid
+                seq = db.execute("SELECT seq FROM folhas WHERE rowid = ?", (rid,)).fetchone()[0]
+                self.write_json(200, {"ok": True, "seq": seq})
             elif path == "/api/registos/estado":
                 estado = "mandado" if d.get("estado") == "mandado" else "impresso"
                 db.execute("UPDATE registos SET estado = ? WHERE id = ?", (estado, int(numero(d, "id"))))
