@@ -560,7 +560,8 @@ tr.msub td{padding:0 3px 9px;border-bottom:1px solid var(--line)}
 .mchk:hover{color:var(--accent2)}
 /* filamentos de cada mesa: fichas + a lista de onde se acrescenta */
 .msub .mfil{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:5px}
-.msub .mfil select{flex:0 1 auto;min-width:120px;max-width:100%}
+.msub .mfil .mfadd{flex:none;padding:4px 10px;font-size:12px}
+.msub .mfil .mfdef{font-size:12px;color:var(--dim)}
 .chipf{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;line-height:1;
   background:rgba(255,159,46,.13);border:1px solid rgba(255,159,46,.35);color:var(--accent2);
   border-radius:999px;padding:4px 5px 4px 9px;white-space:nowrap}
@@ -747,6 +748,7 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="fphd">
       <div class="fptit">
         <b>🧵 <span data-i18n="fpTitulo">Filamentos</span></b>
+        <div class="fpsub" id="fp_mesa" style="display:none"></div>
         <div class="fptitrow">
           <div id="bob_live" class="fplive"></div>
           <div id="fp_realces" class="fptitrow"></div>
@@ -985,7 +987,9 @@ footer a{color:var(--blue);text-decoration:none}
       Tempo aceita <b>14h58</b>, <b>14:58</b> ou minutos (<b>898</b>).<br>
       Cada mesa pode ter a <b>sua impressora</b>. O custo por hora é o dessa máquina e o total sai da
       média ponderada pelo tempo de cada mesa — se retificares o tempo real, todas as mesas escalam
-      na mesma proporção.
+      na mesma proporção.<br>
+      <b>Multicor</b> — em cada mesa, carrega em <b>＋ Filamento</b> uma vez por cor. Cada filamento leva os
+      seus <b>gramas</b> (o slicer dá-os por cor); os que ficarem em branco repartem o resto do peso da mesa.
     </div>
 
     <label class="toggle" style="margin-top:8px">
@@ -2426,16 +2430,34 @@ function nomesEmUso(){
 }
 
 /* ---- o seletor ---- */
-let FP={q:'',mat:'',stock:false,imp:false,veu:false,reflexo:true};
+let FP={q:'',mat:'',stock:false,imp:false,veu:false,reflexo:true,mesa:-1};
 const pickerAberto = () => el('filpick') && el('filpick').style.display==='flex';
-function abrePicker(){
+/* abrePicker(i) escolhe para a mesa i (junta-lhe o filamento: é assim que se
+   faz uma mesa multicor); sem mesa, escolhe o filamento das Definições */
+function abrePicker(mesa){
   const p=el('filpick'); if(!p) return;
+  FP.mesa=Number.isInteger(mesa)&&mesas[mesa]?mesa:-1;
+  const fm=el('fp_mesa');
+  fm.style.display=FP.mesa>=0?'':'none';
+  if(FP.mesa>=0) fm.textContent=tr('fpParaMesa',{n:FP.mesa+1});
   p.style.display='flex';
+  puxaLexico();
   drawPicker();
   puxaBobina(true);
   setTimeout(()=>{ const q=el('fp_q'); if(q) q.focus(); },40);
 }
-function fechaPicker(){ const p=el('filpick'); if(p) p.style.display='none'; }
+function fechaPicker(){ const p=el('filpick'); if(p) p.style.display='none'; FP.mesa=-1; }
+function escolhePicker(n){
+  const i=FP.mesa, m=mesas[i];
+  if(i>=0 && m){
+    const usados=m[5]||[];
+    if(!usados.includes(n)){
+      m[7]=[...(m[7]||[]).slice(0,usados.length), null];
+      m[5]=[...usados,n]; drawMesas(); calc(); guardaEstado();
+    }
+  } else escolheFil(n);
+  fechaPicker();
+}
 function filtraPicker(){ FP.q=el('fp_q').value.trim().toLowerCase(); drawPicker(); }
 function chipPicker(m){ FP.mat=FP.mat===m?'':m; drawPicker(); }
 function togglaStock(){ FP.stock=!FP.stock; drawPicker(); }
@@ -2451,13 +2473,40 @@ function desenhaRealces(){
 }
 
 const semAcentos = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+/* A pesquisa fala as línguas do Bobina: o léxico dele (pedido uma vez, pelo
+   servidor) faz "amarelo" encontrar "Rapid Yellow" e "preto" o "Matte Black".
+   Sem Bobina fica a pesquisa pelo texto, como sempre. */
+let LEX=null, LEX_PEDIDO=false;
+const LEX_CACHE=new Map();
+async function puxaLexico(){
+  if(LEX_PEDIDO) return; LEX_PEDIDO=true;
+  try{
+    const d=await (await fetch('/api/bobina/lexico')).json();
+    if(d.ok){ LEX=d; LEX_CACHE.clear(); if(pickerAberto()) drawPicker(); } else LEX_PEDIDO=false;
+  }catch(_){ LEX_PEDIDO=false; }
+}
+/* os sinónimos de uma palavra; a meio da palavra ("amarel") vale o princípio das do léxico */
+function sinonimos(t){
+  if(LEX_CACHE.has(t)) return LEX_CACHE.get(t);
+  const out=new Set();
+  if(LEX){
+    const chaves=LEX.index[t] ? [t] : t.length>=4 ? Object.keys(LEX.index).filter(k=>k.startsWith(t)) : [];
+    chaves.forEach(k=>LEX.index[k].forEach(h=>{
+      out.add(semAcentos(h.c)); ((LEX.grupos[h.g]||{})[h.c]||[]).forEach(a=>out.add(a)); }));
+  }
+  const r=[...out].filter(Boolean).map(a=>new RegExp('(?<![a-z0-9])'+a.replace(/[.*+?^${}()|[\]\\-]/g,'\\$&')));
+  LEX_CACHE.set(t,r);
+  return r;
+}
+/* cada palavra tem de casar: pelo texto tal e qual, ou por um sinónimo no início de uma palavra */
+const casaTermo = (hay,t) => hay.includes(t) || sinonimos(t).some(re=>re.test(hay));
 function casaFiltro(f){
   if(FP.mat && semAcentos(f.material||'')!==semAcentos(FP.mat)) return false;
   if(FP.stock && !(f.bobines>0)) return false;
   if(FP.imp && !contaNaImpressora(f)) return false;
   if(!FP.q) return true;
-  return semAcentos([f.n,f.marca,f.material,f.cor,(f.locais||[]).join(' '),f.loja].join(' '))
-    .includes(semAcentos(FP.q));
+  const hay=semAcentos([f.n,f.marca,f.material,f.cor,(f.locais||[]).join(' '),f.loja].join(' '));
+  return semAcentos(FP.q).split(/\s+/).filter(Boolean).every(t=>casaTermo(hay,t));
 }
 
 /* Os cartões falam por índice (data-i) e não pelo nome do filamento: o htmlEsc
@@ -2506,7 +2555,7 @@ function cartaoFil(f,i,escolhido){
 }
 function drawPicker(){
   const cx=el('fp_corpo'); if(!cx) return;
-  const escolhido=el('s_fil_nome').value;
+  const escolhido=FP.mesa>=0?'':el('s_fil_nome').value;
   const todos=todosFils();
   const mats=[...new Set(todos.filter(f=>f.bobina&&f.material).map(f=>f.material))].sort();
   /* em destaque e à frente: o mais comum é orçar com o que já está montado */
@@ -2561,14 +2610,14 @@ function ligaPicker(){
       else if(b.dataset.a==='impressora') alternaImpressoraFil(f);
       return;
     }
-    escolheFil(f.n); fechaPicker();
+    escolhePicker(f.n);
   });
   el('fp_corpo').addEventListener('keydown',e=>{
     if(e.key!=='Enter'&&e.key!==' ') return;
     const cartao=e.target.closest('.fcard[data-i]'); if(!cartao) return;
     e.preventDefault();
     const f=FP.lista[+cartao.dataset.i];
-    if(f){ escolheFil(f.n); fechaPicker(); }
+    if(f) escolhePicker(f.n);
   });
 }
 
@@ -3068,18 +3117,13 @@ function drawMesas(){
         mesas[i][5]=usados.filter(v=>v!==n); drawMesas(); calc(); guardaEstado(); });
       c.appendChild(x); fbox.appendChild(c);
     });
-    const add=document.createElement('select');
-    const livres=todosFils().filter(f=>!usados.includes(f.n));
-    const grupo=l=>l.map(f=>`<option value="${htmlEsc(f.n)}">${htmlEsc(rotuloEscolhaFil(f))}</option>`).join('');
-    const meusL=livres.filter(f=>!f.bobina), bobL=livres.filter(f=>f.bobina);
-    add.title='Filamentos usados nesta mesa';
-    add.innerHTML=`<option value="">${usados.length?'+ outro filamento':'↳ o filamento das Definições'}</option>`
-      + (meusL.length?`<optgroup label="${htmlEsc(tr('fpMeus'))}">${grupo(meusL)}</optgroup>`:'')
-      + (bobL.length?`<optgroup label="Bobina">${grupo(bobL)}</optgroup>`:'');
-    add.addEventListener('change',()=>{
-      if(!add.value) return;
-      mesas[i][7]=[...(mesas[i][7]||[]).slice(0,usados.length), null];
-      mesas[i][5]=[...usados,add.value]; drawMesas(); calc(); guardaEstado(); });
+    if(!usados.length){   /* sem nenhum, a mesa usa o das Definições: diz-se qual */
+      const d=document.createElement('span'); d.className='mfdef';
+      d.textContent=tr('mfDef',{n:el('s_fil_nome').value||'—'}); fbox.appendChild(d);
+    }
+    const add=document.createElement('button'); add.type='button'; add.className='ghost mfadd';
+    add.textContent=tr('mfAdd'); add.title=tr('mfAddT');
+    add.addEventListener('click',()=>abrePicker(i));
     fbox.appendChild(add);
     fbox.appendChild(nota);
     refrescaAuto();
@@ -4826,7 +4870,7 @@ function abreRegisto(on=true){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.24.0';
+const VERSAO='1.25.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -5002,6 +5046,10 @@ const I18N={
     modName:'Modelo',
     modNamePh:'Ex.: Suporte do sensor',
     modHours:'Tempo',
+    mfAdd:'＋ Filamento',
+    mfAddT:'Junta um filamento a esta mesa — uma vez por cor, numa impressão multicor',
+    mfDef:'↳ {n} (o das Definições)',
+    fpParaMesa:'A juntar à mesa {n} — toca num filamento para o acrescentar.',
     modTools:'Custo de ferramentas',
     modAdd:'+ Adicionar modelo',
     modDelTitle:'Remover modelo',
@@ -5312,6 +5360,10 @@ const I18N={
     modName:'Model',
     modNamePh:'e.g. Sensor bracket',
     modHours:'Time',
+    mfAdd:'＋ Filament',
+    mfAddT:'Add a filament to this bed — once per colour, for a multicolour print',
+    mfDef:'↳ {n} (the one in Settings)',
+    fpParaMesa:'Adding to bed {n} — tap a filament to add it.',
     modTools:'Tool cost',
     modAdd:'+ Add model',
     modDelTitle:'Remove model',

@@ -107,6 +107,28 @@ def bobina_filaments() -> tuple[int, dict[str, Any]]:
     return 200, payload
 
 
+_lexico_cache: tuple[float, dict[str, Any]] | None = None
+
+
+def bobina_lexico() -> tuple[int, dict[str, Any]]:
+    """O léxico do Bobina (sinónimos de cor, marca, material em várias línguas).
+
+    É o que faz "amarelo" encontrar "Rapid Yellow": a pesquisa do seletor usa a
+    mesma tabela que a do Bobina, em vez de uma cópia que ia ficar para trás.
+    """
+    global _lexico_cache
+    if _lexico_cache and time.time() - _lexico_cache[0] < 3600:
+        return 200, _lexico_cache[1]
+    try:
+        with urllib.request.urlopen(f"{BOBINA_URL}/api/lexicon", timeout=10) as r:
+            data = json.loads(r.read().decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        return 502, {"ok": False, "error": f"Sem resposta do Bobina: {exc}"}
+    payload = {"ok": True, "grupos": data.get("grupos", {}), "index": data.get("index", {})}
+    _lexico_cache = (time.time(), payload)
+    return 200, payload
+
+
 def bobina_escreve(caminho: str, corpo: dict[str, Any]) -> tuple[int, dict[str, Any]]:
     """Um pedido de escrita ao Bobina, com o segredo da ponte metido aqui.
 
@@ -652,6 +674,10 @@ class FatiaHandler(SimpleHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
         if path == "/api/bobina/filamentos":
             status, payload = bobina_filaments()
+            self.write_json(status, payload)
+            return
+        if path == "/api/bobina/lexico":
+            status, payload = bobina_lexico()
             self.write_json(status, payload)
             return
         if path == "/api/giro/dividas":
