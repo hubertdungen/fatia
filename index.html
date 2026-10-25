@@ -242,7 +242,7 @@ body.simples .hint{display:none}
 .mgnota:empty{display:none}
 
 /* ---- dar baixa no Bobina ---- */
-#baixa,#bxq{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:220;
+#baixa,#bxq,#ccl{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:220;
   align-items:center;justify-content:center;padding:20px;overflow:auto}
 .bxbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
   width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
@@ -282,6 +282,11 @@ body.simples .hint{display:none}
 .bxdif{font-size:11.5px;color:var(--accent2)}
 .bxpe{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
 .bxpe .primary{margin-left:auto}
+.modf{display:flex;gap:4px;align-items:center}
+.modf input{min-width:0}
+.modf button{flex:none;padding:5px 7px;font-size:12px}
+.cclses{display:block;width:100%;text-align:left;margin-bottom:6px;padding:8px 10px}
+.cclses i{font-style:normal;font-size:11px;color:var(--dim);display:block}
 .bxerro{font-size:11.5px;color:var(--bad);flex:1}
 .bxfora{font-size:11.5px;color:var(--dim);margin-top:2px}
 .bxqbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
@@ -777,6 +782,31 @@ footer a{color:var(--blue);text-decoration:none}
   </div>
 </div>
 
+<div id="ccl">
+  <div class="bxbox">
+    <div class="fphd">
+      <div class="fptit">
+        <b>📥 <span data-i18n="cclTitulo">Importar custo de uma sessão</span></b>
+        <div class="fpsub" data-i18n="cclSub">Escolhe uma das sessões recentes ou cola o id. Soma o uso de tokens da sessão e dos sub-agentes, aos preços de cada modelo.</div>
+      </div>
+      <button class="ghost fpx" onclick="fechaCcl()" title="Fechar">×</button>
+    </div>
+    <div class="bxcorpo">
+      <div class="mrow" style="gap:6px;margin-bottom:10px">
+        <input id="ccl_id" placeholder="Id da sessão" style="flex:1">
+        <button class="ghost" style="flex:none" onclick="calculaCcl(el('ccl_id').value)" data-i18n="cclVer">Calcular</button>
+      </div>
+      <div id="ccl_res" class="hint viva"></div>
+      <div id="ccl_lista" style="margin-top:10px"></div>
+    </div>
+    <div class="bxpe">
+      <div class="bxerro" id="ccl_erro"></div>
+      <button class="ghost" id="ccl_somar" onclick="usaCcl(true)" style="display:none" data-i18n="cclSomar">Somar ao atual</button>
+      <button class="primary" id="ccl_ok" onclick="usaCcl(false)" style="display:none" data-i18n="cclSubst">Substituir</button>
+    </div>
+  </div>
+</div>
+
 <!-- o único sítio onde se diz que um trabalho foi para a impressora:
      regista, e dá baixa no Bobina se se quiser, tudo de uma vez -->
 <div id="bxq">
@@ -909,8 +939,9 @@ footer a{color:var(--blue);text-decoration:none}
 
     <h3 style="margin-top:14px" data-bloco="mod"><span data-i18n="modTitle">🧊 Modelação 3D — pré-processamento</span></h3>
     <table id="tbl_mod"><thead><tr>
-      <th style="width:56%" data-i18n="modName">Modelo</th>
-      <th style="width:30%" data-i18n="modHours">Tempo</th>
+      <th style="width:44%" data-i18n="modName">Modelo</th>
+      <th style="width:22%" data-i18n="modHours">Tempo</th>
+      <th style="width:28%" data-i18n="modTools">Custo de ferramentas</th>
       <th></th>
     </tr></thead><tbody></tbody></table>
     <div class="mrow" style="gap:6px;margin-top:6px">
@@ -1177,14 +1208,11 @@ footer a{color:var(--blue);text-decoration:none}
       <b>Acrescentado</b>: o total é o teu preço limpo e o imposto vai por cima — o teu lucro é o mesmo e o cliente é que paga o imposto.</div>
     <div class="hint" data-i18n="taxHint">O total final mantém-se igual: o orçamento separa subtotal antes de imposto e imposto incluído. Usa “Personalizado” para outros países ou regimes.</div>
 
-    <div class="row r4" style="margin-top:10px">
+    <div class="row r3" style="margin-top:10px">
       <div><label>Mão de obra</label><div class="suffix"><input type="number" id="s_mao" step="1"><i>€/h</i></div></div>
       <div><label>Polimento</label><div class="suffix"><input type="number" id="s_polh" step="1"><i>€/h</i></div></div>
       <div><label>Pintura</label><div class="suffix"><input type="number" id="s_pinth" step="1"><i>€/h</i></div></div>
-      <div><label style="color:var(--accent2)" data-i18n="modRate">Modelação 3D</label>
-        <div class="suffix"><input type="number" id="s_modh" step="1" min="0"><i>€/h</i></div></div>
     </div>
-    <div class="hint" style="margin-top:-4px" data-i18n="modRateHint">A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.</div>
     <h3 class="fechada">💰 Margens de lucro</h3>
     <div class="row r3 avancado">
       <div><label>Material</label><div class="suffix"><input type="number" id="s_mmat" step="0.25"><i>%</i></div></div>
@@ -1256,6 +1284,27 @@ footer a{color:var(--blue);text-decoration:none}
     </details>
 
     <div class="derived avancado" id="d_set"></div>
+
+    <h3 class="fechada" data-i18n="modSetTitle">🧊 Modelação 3D</h3>
+    <div class="row r2">
+      <div><label style="color:var(--accent2)" data-i18n="modRate">Modelação 3D</label>
+        <div class="suffix"><input type="number" id="s_modh" step="1" min="0"><i>€/h</i></div></div>
+      <div><label data-i18n="modFmarg">Margem sobre ferramentas</label>
+        <div class="suffix"><input type="number" id="s_mod_fmarg" step="1" min="0"><i>%</i></div></div>
+    </div>
+    <div class="hint" style="margin-top:-4px" data-i18n="modRateHint">A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.</div>
+    <div class="row r3" style="margin-top:10px">
+      <div><label data-i18n="modAssin">Assinatura mensal de ferramentas</label>
+        <div class="suffix"><input type="number" id="s_mod_assin" step="1" min="0"><i>€</i></div></div>
+      <div><label data-i18n="modHmes">Horas de modelação por mês (estimativa)</label>
+        <div class="suffix"><input type="number" id="s_mod_hmes" step="1" min="0"><i>h</i></div></div>
+      <div><label data-i18n="modTaxa">Câmbio do dólar</label>
+        <div class="suffix"><input type="number" id="s_usd_eur" step="0.01" min="0"><i>€/$</i></div></div>
+    </div>
+    <div class="hint viva tierlido" id="s_mod_lido"></div>
+    <div class="hint" data-i18n-html="modFerHint">O <b>custo de ferramentas</b> de cada modelo e a assinatura rateada por hora entram na linha
+      «Modelação 3D» do orçamento, já com a margem acima. O cliente vê só essa linha. Com assinatura a 0 € ou sem horas por mês, não há rateio.
+      O câmbio converte em euros o custo importado das sessões, que vem em dólares.</div>
   </div>
 
   <!-- ===== 3 · RESULTADO ===== -->
@@ -1492,13 +1541,13 @@ const DEF = {
   km:0.40, km_hora:0, km_minimo:0,
   base:1, taxa_maq:0, mao:25, polh:30, pinth:35, tiers:'3:5, 10:10, 15:15',
   mmat:3.50, mimp:0, mmao:0, margem:10, mmin:20, pac_pct:20, pac_min:2,
-  dev_mat:0, dev_t:0,
+  dev_mat:0, dev_t:0, mod_fmarg:30, mod_assin:0, mod_hmes:0, usd_eur:0.87,
   portes:[[250,0],[500,0],[1000,0],[2000,0],[5000,0]]
 };
 const S_NUM = ['data','fil_nome','kwh','kwh_add','iva','tax_rate','fil_kg','fil_portes','desp','mmat',
   'imp_preco','imp_vida','imp_kw','pc_kw','pc_kw2','fer_preco','fer_vida','fer_kw',
   'tinta_l','tinta_ml','emb_peso','emb_custo','km','km_hora','km_minimo','prep_min','base','base_mesa','taxa_maq','mao','polh','pinth','modh','tiers',
-  'mimp','mmao','margem','mmin','pac_pct','pac_min','dev_mat','dev_t'];
+  'mimp','mmao','margem','mmin','pac_pct','pac_min','dev_mat','dev_t','mod_fmarg','mod_assin','mod_hmes','usd_eur'];
 
 const eur = n => (isFinite(n)?n:0).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 const num = id => parseFloat(document.getElementById(id).value)||0;
@@ -1760,11 +1809,18 @@ function qrSVG(texto,px){
 }
 
 /* ============ MODELAÇÃO 3D (pré-processamento) ============
-   Cada modelo é {nome, tempo}. O tempo é uma string como as mesas ("2h30", "2:30", "150"),
-   lida pelo parseT. Lista vazia = trabalho sem modelação, e nada disto aparece no orçamento. */
+   Cada modelo é {nome, tempo, ferramentas}. O tempo é uma string como as mesas ("2h30", "2:30", "150"),
+   lida pelo parseT. f = custo de ferramentas em € (opcional; modelos antigos não o têm e valem 0).
+   Lista vazia = trabalho sem modelação, e nada disto aparece no orçamento. */
 let MODELOS=[];
-const normModelo = m => ({n:String(m&&m.n||''), t:String(m&&m.t||'')});
+const normModelo = m => ({n:String(m&&m.n||''), t:String(m&&m.t||''), f:String(m&&m.f||'')});
 const minutosModelacao = () => MODELOS.reduce((a,m)=>a+parseT(m.t),0);
+const ferModelo = m => Math.max(0,parseFloat(String(m.f||'').replace(',','.'))||0);
+/* rateio da assinatura: € por hora de modelação, para os meses em que se paga por mês e não por uso */
+const rateioMod = () => num('s_mod_hmes')>0 ? num('s_mod_assin')/num('s_mod_hmes') : 0;
+/* o preço de um modelo: horas à tarifa + ferramentas e rateio, com a margem das ferramentas */
+const precoModelo = m => { const h=parseT(m.t)/60;
+  return h*num('s_modh')*(1+num('s_mmao')/100) + (ferModelo(m)+h*rateioMod())*(1+num('s_mod_fmarg')/100); };
 
 function drawModelos(){
   const tb=el('tbl_mod').querySelector('tbody'); tb.innerHTML='';
@@ -1774,19 +1830,25 @@ function drawModelos(){
     inN.addEventListener('input',()=>{ MODELOS[i].n=inN.value; calc(); guardaEstado(); });
     const [tdT,inT]=cell(mo.t,{type:'text',placeholder:'0h00'});
     inT.addEventListener('input',()=>{ MODELOS[i].t=inT.value; calc(); guardaEstado(); });
+    const [tdF,inF]=cell(mo.f||'',{type:'number',min:'0',step:'0.01',placeholder:'0,00 €'});
+    inF.addEventListener('input',()=>{ MODELOS[i].f=inF.value; calc(); guardaEstado(); });
+    const bF=document.createElement('button');
+    bF.className='ghost'; bF.textContent='📥'; bF.title=tr('modImport');
+    bF.addEventListener('click',()=>abreCcl(i));
+    tdF.className='modf'; tdF.appendChild(bF);
     const td=document.createElement('td'), b=document.createElement('button');
     b.className='del'; b.textContent='×'; b.title=tr('modDelTitle');
     b.addEventListener('click',()=>{ MODELOS.splice(i,1); drawModelos(); calc(); guardaEstado(); });
     td.appendChild(b);
-    linha.appendChild(tdN); linha.appendChild(tdT); linha.appendChild(td); tb.appendChild(linha);
+    linha.appendChild(tdN); linha.appendChild(tdT); linha.appendChild(tdF); linha.appendChild(td); tb.appendChild(linha);
   });
   el('tbl_mod').style.display=MODELOS.length?'':'none';
 }
 function addModelo(){
-  MODELOS.push({n:'', t:''});
+  MODELOS.push({n:'', t:'', f:''});
   drawModelos(); calc(); guardaEstado();
   const ins=el('tbl_mod').querySelectorAll('tbody input');
-  if(ins.length) ins[ins.length-2].focus();          /* cai logo no nome do modelo novo */
+  if(ins.length) ins[ins.length-3].focus();          /* cai logo no nome do modelo novo */
 }
 function delModelo(){
   if(!MODELOS.length) return;
@@ -3513,8 +3575,13 @@ function calc(){
   /* modelação 3D: trabalho de uma vez, à tarifa própria e com a margem de mão de obra.
      Fora do desconto por quantidade de propósito — desenha-se uma vez, imprimam-se 1 ou 100. */
   const minMod=bMod?minutosModelacao():0, hMod=minMod/60;
-  const pMod=hMod*num('s_modh')*fMao;
-  const cMod=hMod*num('s_pc_kw2')*kwh;                 /* o custo real é o PC ligado */
+  /* + ferramentas de cada modelo e o rateio da assinatura, com a margem própria.
+     Para o resto do orçamento (pacote, promoção, cliente) continua a ser uma linha só */
+  const ferMod=bMod?MODELOS.reduce((a,m)=>a+ferModelo(m),0):0, ratMod=hMod*rateioMod();
+  const pMaoMod=hMod*num('s_modh')*fMao, fFer=1+num('s_mod_fmarg')/100;
+  const pMod=bMod?MODELOS.reduce((a,m)=>a+precoModelo(m),0):0;
+  const cPcMod=hMod*num('s_pc_kw2')*kwh;
+  const cMod=cPcMod+ferMod+ratMod;                     /* o custo real: PC ligado + ferramentas */
   const pMarg=(pMat+pImp+pBase)*num('s_margem')/100;
   const pPrint=pMat+pImp+pBase+pPrep+pMarg;            /* só impressão: sem modelação, portes nem acabamento manual */
   const desc=(pBase+pPrep+pMan+pPol+pPin)*num('j_desc')/100;
@@ -3619,7 +3686,7 @@ function calc(){
   /* 4.º campo: esconder de vez — a rubrica não pertence a este orçamento */
   const semImp = nMesas===0;
   const L=[
-    [tr('modLine',{n:MODELOS.length})+' — '+hm(minMod), pMod, minMod===0, !bMod],
+    [tr('modLine',{n:MODELOS.length})+' — '+hm(minMod), pMod, pMod<0.005, !bMod],
     ['Material — '+gTot+' g'+(nSlic?'<span class="tag">SLICER</span>':''), pMat, false, semImp],
     ['Impressão — '+hm(mTot)+(taxaMaq>0?' @ '+taxaMaq.toFixed(2).replace('.',',')+' €/h':''), pImp, false, semImp],
     ['Base — '+pecas+' peça(s)'+(num('s_base_mesa')>0?' + '+nMesas+' mesa(s)':''), pBase, false, semImp],
@@ -3668,7 +3735,7 @@ function calc(){
   el('d_custo').innerHTML=
     `<div><span>Filamento</span><b>${eur(cMat)}</b></div>
      <div><span>Eletricidade + amortização</span><b>${eur(cImp)}</b></div>
-     ${minMod>0?`<div><span>${tr('modLine',{n:MODELOS.length})} — ${hm(minMod)}</span><b>${eur(cMod)}</b></div>`:''}
+     ${pMod>0.004?`<div><span>${tr('modLine',{n:MODELOS.length})} — ${hm(minMod)}</span><b>${eur(cMod)}</b></div>`:''}
      <div><span>Preparação + pós-processamento</span><b>${eur(cPrep+cMan+cPol+cPin)}</b></div>
      <div><span>Portes</span><b>${eur(pPortes)}</b></div>
      ${tax.active?`<div><span>${tr('taxIncluded',{name:taxNome,rate:taxRate})}</span><b>${eur(tax.valor)}</b></div>`:''}
@@ -3709,10 +3776,17 @@ function calc(){
     basePeca:num('s_base'), baseMesa:num('s_base_mesa'), margemFinal:num('s_margem')/100,
     pPrepMesa:nMesas?pPrep/nMesas:0, taxaCobrada: taxaMaq>0?taxaMaq:hImpMedia*fImp});
 
-  el('d_mod').innerHTML = minMod>0
+  /* só no painel: a decomposição que o orçamento do cliente nunca mostra */
+  const rat=rateioMod();
+  el('s_mod_lido').textContent = rat>0 ? tr('modRatLido',{v:eur(rat)}) : '';
+  el('d_mod').innerHTML = pMod>0.004
     ? `<div><span>${MODELOS.length} modelo(s) · ${hm(minMod)} de modelação</span><b>${eur(pMod)}</b></div>`
-      + `<div><span>À tarifa de ${eur(num('s_modh'))}/h${num('s_mmao')>0?` + ${num('s_mmao')}% de margem`:''}</span>`
-      + `<b>${eur(pMod/Math.max(hMod,.0001))}/h</b></div>`
+      + `<div><span>Mão de obra — ${hm(minMod)} × ${eur(num('s_modh'))}/h${num('s_mmao')>0?` + ${num('s_mmao')}% de margem`:''}</span><b>${eur(pMaoMod)}</b></div>`
+      + (ferMod>0?`<div><span>Ferramentas dos modelos</span><b>${eur(ferMod)}</b></div>`:'')
+      + (ratMod>0?`<div><span>Assinatura rateada — ${hm(minMod)} × ${eur(rat)}/h</span><b>${eur(ratMod)}</b></div>`:'')
+      + (ferMod+ratMod>0?`<div><span>Margem sobre ferramentas — ${pct(num('s_mod_fmarg'))}%</span><b>${eur((ferMod+ratMod)*(fFer-1))}</b></div>`:'')
+      + `<div><span>Custo real — PC ligado${ferMod+ratMod>0?' + ferramentas':''}</span><b>${eur(cMod)}</b></div>`
+      + `<div class="sep"><span>Lucro real da modelação</span><b>${eur(pMod-cMod)}</b></div>`
     : '';
 
   drawTiers();
@@ -3720,7 +3794,7 @@ function calc(){
     impressao: pMat+pImp+pBase+pMarg,
     modelacao: pMod, nModelos: MODELOS.length, modMin: minMod,
     modDet: el('j_mostrar_mod').checked
-      ? MODELOS.map(m=>({n:(m.n||'').trim(), t:parseT(m.t)})).filter(m=>m.n||m.t>0)
+      ? MODELOS.map(m=>({n:(m.n||'').trim(), v:precoModelo(m)})).filter(m=>m.n||m.v>0.004)
       : [],
     acabamento: pAcab,
     portes:pPortes, desc, promo, arred, total:totalCliente, tax, pecas, gTot, mTot, nMesas,
@@ -4154,10 +4228,14 @@ function buildPrint(x){
   const esc=htmlEsc;
   const tax=x.tax||{on:false,active:false,nome:tr('taxGeneric'),rate:0,base:x.total,valor:0,total:x.total};
   const rows=[];
+  /* cada modelo ao cêntimo, e o último fica com o resto: o detalhe soma sempre a linha */
+  const c2=v=>Math.round(semImposto(v,tax)*100)/100;
+  const vMod=(x.modDet||[]).map(m=>c2(m.v));
+  if(vMod.length) vMod[vMod.length-1]+=c2(x.modelacao)-vMod.reduce((a,v)=>a+v,0);
   if(x.modelacao>0.004)
     rows.push([tr('modLine',{n:x.nModelos}),
                x.modDet && x.modDet.length
-                 ? x.modDet.map(m=>`${esc(m.n||tr('modNamePh'))}${m.t>0?` · ${hm(m.t)}`:''}`).join(' · ')
+                 ? x.modDet.map((m,i)=>`${esc(m.n||tr('modNamePh'))} · ${eur(vMod[i])}`).join(' · ')
                  : `${hm(x.modMin)} ${tr('modWork')}`,
                x.modelacao]);
   /* sem mesas não há impressão nenhuma para faturar — nem linha, nem ficha técnica */
@@ -4587,6 +4665,41 @@ async function confirmaImpresso(){
   desenhaRegEstado(); guardaEstado(); carregaRegisto();
   if(baixa){ BX.depois=false; abreBaixa(); }
 }
+/* ============ custo de uma sessão do Claude Code → ferramentas do modelo ============
+   O servidor lê os .jsonl da sessão e devolve dólares; o câmbio é das Definições. */
+let CCL={i:-1, eur:0};
+async function abreCcl(i){
+  CCL={i, eur:0};
+  el('ccl_res').innerHTML=''; el('ccl_erro').textContent=''; el('ccl_id').value='';
+  el('ccl_ok').style.display=el('ccl_somar').style.display='none';
+  el('ccl_lista').innerHTML=htmlEsc(tr('cclCarrega'));
+  el('ccl').style.display='flex';
+  try{
+    const d=await apiReg('custo-claude');
+    el('ccl_lista').innerHTML=d.sessoes.map(s=>`<button class="ghost cclses" data-id="${htmlEsc(s.id)}">
+      <b>${htmlEsc(s.titulo||s.id)}</b><i>${dataReg(s.mtime)} · ${htmlEsc(s.projeto)}</i></button>`).join('');
+    el('ccl_lista').querySelectorAll('button').forEach(b=>b.onclick=()=>{ el('ccl_id').value=b.dataset.id; calculaCcl(b.dataset.id); });
+  }catch(e){ el('ccl_lista').innerHTML=''; el('ccl_erro').textContent=e.message; }
+}
+function fechaCcl(){ el('ccl').style.display='none'; }
+async function calculaCcl(id){
+  id=String(id||'').trim(); if(!id) return;
+  el('ccl_erro').textContent=''; el('ccl_res').textContent=tr('cclCarrega');
+  try{
+    const d=await apiReg('custo-claude?sessao='+encodeURIComponent(id));
+    CCL.eur=Math.round(d.usd*num('s_usd_eur')*100)/100;
+    el('ccl_res').innerHTML=tr('cclRes',{tok:d.tokens.toLocaleString('pt-PT'), usd:d.usd.toFixed(2).replace('.',','), eur:eur(CCL.eur)})
+      + (d.sem_preco.length?'<br>'+htmlEsc(tr('cclSemPreco',{m:d.sem_preco.join(', ')})):'');
+    el('ccl_ok').style.display='';
+    el('ccl_somar').style.display=ferModelo(MODELOS[CCL.i]||{})>0?'':'none';
+  }catch(e){ el('ccl_res').textContent=''; el('ccl_erro').textContent=e.message; }
+}
+function usaCcl(somar){
+  const m=MODELOS[CCL.i]; if(!m) return fechaCcl();
+  m.f=String(Math.round(((somar?ferModelo(m):0)+CCL.eur)*100)/100);
+  fechaCcl(); drawModelos(); calc(); guardaEstado();
+}
+
 async function carregaRegisto(){
   try{
     const [c,r]=await Promise.all([apiReg('clientes'), apiReg('registos')]);
@@ -4713,7 +4826,7 @@ function abreRegisto(on=true){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.23.1';
+const VERSAO='1.24.0';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -4889,6 +5002,7 @@ const I18N={
     modName:'Modelo',
     modNamePh:'Ex.: Suporte do sensor',
     modHours:'Tempo',
+    modTools:'Custo de ferramentas',
     modAdd:'+ Adicionar modelo',
     modDelTitle:'Remover modelo',
     modShow:'Detalhar os modelos no orçamento do cliente',
@@ -4897,6 +5011,23 @@ const I18N={
     modRateHint:'A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.',
     modLine:'Modelação 3D — {n} modelo(s)',
     modWork:'de trabalho de desenho',
+    modSetTitle:'🧊 Modelação 3D',
+    modFmarg:'Margem sobre ferramentas',
+    modAssin:'Assinatura mensal de ferramentas',
+    modHmes:'Horas de modelação por mês (estimativa)',
+    modTaxa:'Câmbio do dólar',
+    modFerHint:'O <b>custo de ferramentas</b> de cada modelo e a assinatura rateada por hora entram na linha «Modelação 3D» do orçamento, já com a margem acima. O cliente vê só essa linha. Com assinatura a 0 € ou sem horas por mês, não há rateio. O câmbio converte em euros o custo importado das sessões, que vem em dólares.',
+    modRatLido:'Rateio: {v} por hora de modelação, somado a cada modelo.',
+    modImport:'Importar o custo de uma sessão',
+    cclTitulo:'Importar custo de uma sessão',
+    cclSub:'Escolhe uma das sessões recentes ou cola o id. Soma o uso de tokens da sessão e dos sub-agentes, aos preços de cada modelo.',
+    cclId:'Id da sessão',
+    cclVer:'Calcular',
+    cclSubst:'Substituir',
+    cclSomar:'Somar ao atual',
+    cclRes:'{tok} tokens · {usd} $ → <b>{eur}</b>',
+    cclSemPreco:'Sem preço conhecido para: {m} — esses tokens ficaram de fora.',
+    cclCarrega:'A ler…',
     notaOn:'Mostrar a nota de validade no rodapé do orçamento',
     notaHint:'É a primeira linha do rodapé do orçamento. Desligada, o rodapé começa logo no prazo de produção. Sai sempre, tenhas ou não a tua empresa ligada.',
     licSub:'Licença de utilização · versão <span id="lic_v"></span>',
@@ -5181,6 +5312,7 @@ const I18N={
     modName:'Model',
     modNamePh:'e.g. Sensor bracket',
     modHours:'Time',
+    modTools:'Tool cost',
     modAdd:'+ Add model',
     modDelTitle:'Remove model',
     modShow:'List the models on the client quote',
@@ -5189,6 +5321,23 @@ const I18N={
     modRateHint:'<b>3D modelling</b> is the design work before printing — CAD, mesh repair, support prep. It is charged by the hour, separately from printing, and carries the same labour margin.',
     modLine:'3D modelling — {n} model(s)',
     modWork:'of design work',
+    modSetTitle:'🧊 3D modelling',
+    modFmarg:'Margin on tools',
+    modAssin:'Monthly tool subscription',
+    modHmes:'Modelling hours per month (estimate)',
+    modTaxa:'Dollar exchange rate',
+    modFerHint:'Each model\'s <b>tool cost</b> and the subscription spread per hour go into the «3D modelling» line of the quote, with the margin above. The client only sees that line. With the subscription at 0 € or no hours per month, nothing is spread. The exchange rate turns the imported session cost, in dollars, into euros.',
+    modRatLido:'Spread: {v} per modelling hour, added to each model.',
+    modImport:'Import the cost of a session',
+    cclTitulo:'Import session cost',
+    cclSub:'Pick a recent session or paste its id. Adds up token usage of the session and its sub-agents, at each model\'s prices.',
+    cclId:'Session id',
+    cclVer:'Calculate',
+    cclSubst:'Replace',
+    cclSomar:'Add to current',
+    cclRes:'{tok} tokens · {usd} $ → <b>{eur}</b>',
+    cclSemPreco:'No known price for: {m} — those tokens were left out.',
+    cclCarrega:'Reading…',
     notaOn:'Show the validity note in the quote footer',
     notaHint:'It is the first line of the quote footer. Switched off, the footer starts at the production lead time. It prints whether or not your company block is on.',
     licSub:'Usage licence · version <span id="lic_v"></span>',
@@ -5790,12 +5939,12 @@ el('j_mostrar_mod').addEventListener('change',calc);
 ['s_tax_nome','s_tax_rate'].forEach(i=>el(i).addEventListener('input',marcarTaxCustom));
 /* o :not(#filpick *) tira a caixa de procura do seletor: escrever lá dentro
    não é mexer no orçamento, e a cada tecla corria um calc() inteiro */
-document.querySelectorAll('input:not(#filpick input):not(#reg input),select:not(#filpick select):not(#reg select)')
+document.querySelectorAll('input:not(#filpick input):not(#reg input):not(#ccl input),select:not(#filpick select):not(#reg select)')
   .forEach(i=>i.addEventListener('input',calc));
 el('s_auto_kwh').addEventListener('change',toggleAuto);
 ['s_iva','s_kwh_add'].forEach(i=>el(i).addEventListener('input',applySpot));
 /* j_pecas é derivado das mesas: quem mexe no escalão de desconto é mudaPecas() */
-document.querySelectorAll('input:not(#filpick input):not(#reg input),select:not(#filpick select):not(#reg select)').forEach(i=>{
+document.querySelectorAll('input:not(#filpick input):not(#reg input):not(#ccl input),select:not(#filpick select):not(#reg select)').forEach(i=>{
   i.addEventListener('input',guardaEstado); i.addEventListener('change',guardaEstado);
 });
 ligaPicker();

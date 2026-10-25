@@ -245,6 +245,140 @@ def spot_price(zone: str = "PT") -> tuple[int, dict[str, Any]]:
     return 200, payload
 
 
+# ---- custo das sessões do Claude Code (custo de ferramentas da modelação) ----
+CLAUDE_PROJECTS = Path(os.environ.get("FATIA_CLAUDE_PROJECTS", str(Path.home() / ".claude" / "projects")))
+SESSAO_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+# $ por milhão de tokens: input, output, leitura de cache. A escrita de cache é
+# 1,25× o input (5 min) ou 2× (1 h, a que o Claude Code usa). Ganha o prefixo
+# mais comprido: claude-opus-5-5 antes de claude-opus-5.
+CLAUDE_PRECOS: dict[str, tuple[float, float, float]] = {
+    "claude-fable-5-1": (10, 50, 0.25), "claude-mythos-5-1": (10, 50, 0.25),
+    "claude-fable-5": (10, 50, 1.0), "claude-mythos-5": (10, 50, 1.0),
+    "claude-opus-5-5": (4, 20, 0.20), "claude-opus-5": (5, 25, 0.50),
+    "claude-opus-4": (5, 25, 0.50), "claude-opus-4-1": (15, 75, 1.50), "claude-opus-4-2025": (15, 75, 1.50),
+    "claude-sonnet-5-5": (2, 10, 0.20), "claude-sonnet-5": (2, 10, 0.20), "claude-sonnet-4": (3, 15, 0.30),
+    "claude-haiku-5-5": (0.10, 0.50, 0.01), "claude-haiku-4-5": (1, 5, 0.10),
+}
+
+
+def preco_modelo(modelo: str) -> tuple[float, float, float] | None:
+    chaves = [k for k in CLAUDE_PRECOS if modelo.startswith(k)]
+    return CLAUDE_PRECOS[max(chaves, key=len)] if chaves else None
+
+
+def custo_usage(modelo: str, u: dict[str, Any]) -> float | None:
+    """Dólares de uma mensagem do assistente; None se o modelo não tem preço."""
+    pr = preco_modelo(modelo)
+    if not pr:
+        return None
+    pin, pout, pread = pr
+    cc = u.get("cache_creation") or {}
+    w5 = int(cc.get("ephemeral_5m_input_tokens") or 0)
+    w1 = int(cc.get("ephemeral_1h_input_tokens") or 0)
+    wtot = int(u.get("cache_creation_input_tokens") or 0)
+    w1 += max(0, wtot - w5 - w1)          # sem o detalhe, conta como 1 h (o caso do Claude Code)
+    tin, tread = int(u.get("input_tokens") or 0), int(u.get("cache_read_input_tokens") or 0)
+    f = 1.0
+    if modelo.startswith("claude-haiku-5-5") and tin + tread + w5 + w1 > 100_000:
+        f = 5.0                            # o Haiku 5.5 cobra 5× acima de 100K de prompt
+    if u.get("speed") == "fast":
+        f *= 2.0                           # ponytail: modo rápido = 2× (Opus 5/5.5); outros modelos podem diferir
+    usd = (tin * pin + int(u.get("output_tokens") or 0) * pout + tread * pread
+           + w5 * pin * 1.25 + w1 * pin * 2.0) / 1e6
+    return usd * f
+
+
+def ficheiros_sessao(sessao: str) -> list[Path]:
+    """O .jsonl da sessão e os dos sub-agentes dela, em qualquer projeto."""
+    fs: list[Path] = []
+    for principal in CLAUDE_PROJECTS.glob(f"*/{sessao}.jsonl"):
+        fs.append(principal)
+        fs.extend(sorted((principal.parent / sessao / "subagents").glob("*.jsonl")))
+    return fs
+
+
+def custo_claude(sessao: str) -> tuple[int, dict[str, Any]]:
+    if not SESSAO_RE.match(sessao):
+        return 400, {"ok": False, "error": "Id de sessão inválido"}
+    fs = ficheiros_sessao(sessao)
+    if not fs:
+        return 404, {"ok": False, "error": "Sessão não encontrada"}
+    vistos: set[str] = set()
+    usd, tokens, sem_preco = 0.0, 0, set()
+    por_modelo: dict[str, float] = {}
+    for f in fs:
+        with f.open(encoding="utf-8", errors="replace") as fh:
+            for linha in fh:
+                if '"assistant"' not in linha:
+                    continue
+                try:
+                    d = json.loads(linha)
+                except ValueError:
+                    continue
+                m = d.get("message") if d.get("type") == "assistant" else None
+                if not isinstance(m, dict) or not isinstance(m.get("usage"), dict):
+                    continue
+                mid = m.get("id") or ""
+                if mid in vistos:
+                    continue
+                vistos.add(mid)
+                modelo, u = str(m.get("model") or ""), m["usage"]
+                if modelo == "<synthetic>":
+                    continue
+                n = sum(int(u.get(k) or 0) for k in ("input_tokens", "output_tokens",
+                        "cache_read_input_tokens", "cache_creation_input_tokens"))
+                c = custo_usage(modelo, u)
+                if c is None:
+                    if n:
+                        sem_preco.add(modelo or "?")
+                    continue
+                usd += c
+                tokens += n
+                por_modelo[modelo] = por_modelo.get(modelo, 0.0) + c
+    return 200, {"ok": True, "sessao": sessao, "usd": round(usd, 4), "tokens": tokens,
+                 "mensagens": len(vistos), "por_modelo": por_modelo, "sem_preco": sorted(sem_preco)}
+
+
+def titulo_sessao(f: Path) -> str:
+    """O título que o Claude Code mostra: o dado à mão ganha ao gerado."""
+    custom = ai = primeiro = ""
+    with f.open(encoding="utf-8", errors="replace") as fh:
+        for linha in fh:
+            if '"custom-title"' in linha or '"ai-title"' in linha:
+                try:
+                    d = json.loads(linha)
+                except ValueError:
+                    continue
+                custom = d.get("customTitle") or custom
+                ai = d.get("aiTitle") or ai
+            elif not primeiro and '"type":"user"' in linha:
+                try:
+                    c = json.loads(linha).get("message", {}).get("content")
+                except ValueError:
+                    continue
+                if isinstance(c, list):
+                    c = next((b.get("text", "") for b in c if isinstance(b, dict) and b.get("type") == "text"), "")
+                if isinstance(c, str) and not c.startswith("<"):
+                    primeiro = " ".join(c.split())[:80]
+    return custom or ai or primeiro
+
+
+def projeto_legivel(nome: str) -> str:
+    """-home-x-Fatia--claude-worktrees-y → ~/Fatia/.claude/worktrees/y (os - dos nomes viram / também)."""
+    casa = str(Path.home()).replace("/", "-")
+    if nome.startswith(casa):
+        nome = "~" + nome[len(casa):]
+    return nome.replace("--", "/.").replace("-", "/")
+
+
+def sessoes_recentes(n: int = 10) -> list[dict[str, Any]]:
+    fs = [f for f in CLAUDE_PROJECTS.glob("*/*.jsonl") if SESSAO_RE.match(f.stem)]
+    fs.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+    return [{"id": f.stem, "titulo": titulo_sessao(f), "mtime": int(f.stat().st_mtime),
+             "projeto": projeto_legivel(f.parent.name)}
+            for f in fs[:n]]
+
+
 def init_db(db_path: Path) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as db:
@@ -530,6 +664,17 @@ class FatiaHandler(SimpleHTTPRequestHandler):
         if path == "/api/spot":
             zona = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("bzn", ["PT"])[0]
             status, payload = spot_price(zona)
+            self.write_json(status, payload)
+            return
+        if path == "/api/custo-claude":
+            if not self.de_casa():
+                self.error_json(403, "O custo das sessões só se consulta da rede de casa")
+                return
+            sessao = (urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("sessao") or [""])[0].strip()
+            if not sessao:
+                self.write_json(200, {"ok": True, "sessoes": sessoes_recentes()})
+                return
+            status, payload = custo_claude(sessao)
             self.write_json(status, payload)
             return
         if path in ("/api/clientes", "/api/registos") or path.startswith("/api/registos/"):
