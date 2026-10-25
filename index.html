@@ -177,6 +177,12 @@ td input.slic{border-color:rgba(62,207,142,.35)}
 .hintpop.pcima .tipbox{top:auto;bottom:calc(100% + 9px)}
 .hintpop.pcima .tipbox::before{top:auto;bottom:-6px}
 .hintpop .tipbox b{color:var(--accent2)}
+/* o "?" mudado para junto do que explica: na linha do rótulo, sem ocupar uma linha sua */
+.hintpop.tipjunto{margin:0 0 0 6px;min-height:0;vertical-align:middle;font-weight:400;
+  letter-spacing:normal;text-transform:none}
+.hintpop.tipjunto .tipbtn{width:17px;height:17px;font-size:10.5px}
+.hintpop.pesq .tipbox{left:auto;right:0}
+.hintpop.pesq .tipbox::before{left:auto;right:4px}
 @media (prefers-reduced-motion: reduce){.hintpop .tipbox{transition:none}}
 @media(max-width:560px){.hintpop .tipbox{left:-6px;width:calc(100vw - 44px)}}
 .tierbtns{display:flex;gap:6px;margin-top:6px}
@@ -778,8 +784,8 @@ footer a{color:var(--blue);text-decoration:none}
     <div id="bx_corpo" class="bxcorpo"></div>
     <div class="bxpe">
       <div class="bxerro" id="bx_erro"></div>
-      <button class="ghost" onclick="fechaBaixa()" data-i18n="bxCancelar">Cancelar</button>
-      <button class="primary" id="bx_ok" onclick="confirmaBaixa()" data-i18n="bxDar" style="display:none">Dar baixa</button>
+      <button class="ghost" id="bx_cancel" onclick="fechaBaixa()" data-i18n="bxCancelar">Cancelar</button>
+      <button class="primary" id="bx_ok" style="display:none"></button>
     </div>
   </div>
 </div>
@@ -1188,7 +1194,7 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="hint" style="margin-top:-4px"><b>Preparação por mesa</b> é o trabalho fixo de cada impressão — fatiar, preparar e limpar a base, arrancar as peças. Não depende de quantas peças cabem lá dentro, e é por isso que encher a mesa compensa. Cobrada à tua tarifa de mão de obra.</div>
     <div class="hint" style="margin-top:-4px">A <b>0 €/h</b> só repassa o custo de eletricidade e amortização. Qualquer valor acima disso passa a cobrar o tempo da impressora, que é onde os trabalhos longos ganham ou perdem dinheiro.</div>
 
-    <h3 class="fechada" data-i18n="taxTitle">🏛️ Imposto no orçamento</h3>
+    <h3 class="fechada"><span data-i18n="taxTitle">🏛️ Imposto no orçamento</span></h3>
     <label class="toggle"><input type="checkbox" id="s_tax_on" checked> <span data-i18n="taxOn">Mostrar imposto no orçamento do cliente</span></label>
     <div class="row r3">
       <div><label data-i18n="taxPreset">País / regra</label><select id="s_tax_preset"></select></div>
@@ -1289,14 +1295,14 @@ footer a{color:var(--blue);text-decoration:none}
 
     <div class="derived avancado" id="d_set"></div>
 
-    <h3 class="fechada" data-i18n="modSetTitle">🧊 Modelação 3D</h3>
+    <h3 class="fechada"><span data-i18n="modSetTitle">🧊 Modelação 3D</span></h3>
     <div class="row r2">
       <div><label style="color:var(--accent2)" data-i18n="modRate">Modelação 3D</label>
         <div class="suffix"><input type="number" id="s_modh" step="1" min="0"><i>€/h</i></div></div>
       <div><label data-i18n="modFmarg">Margem sobre ferramentas</label>
         <div class="suffix"><input type="number" id="s_mod_fmarg" step="1" min="0"><i>%</i></div></div>
     </div>
-    <div class="hint" style="margin-top:-4px" data-i18n="modRateHint">A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.</div>
+    <div class="hint" style="margin-top:-4px" data-i18n-html="modRateHint">A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.</div>
     <div class="row r3" style="margin-top:10px">
       <div><label data-i18n="modAssin">Assinatura mensal de ferramentas</label>
         <div class="suffix"><input type="number" id="s_mod_assin" step="1" min="0"><i>€</i></div></div>
@@ -2769,14 +2775,14 @@ function bobinesSugeridas(f,g){
   return out;
 }
 
-function preparaBaixaMesa(mesa){
+function preparaBaixaMesa(mesa, desenha=true){
   const M=mesasBobina().find(x=>+x.i===+mesa);
   if(!M || baixaDaMesa(M.i)) return;
   BX.mesa=M.i;
   BX.linhas=M.itens.map(x=>({n:x.n, f:x.f, total:x.g, alocs:bobinesSugeridas(x.f, x.g)}));
   BX.chave=novaChave();
   el('bx_erro').textContent='';
-  drawBaixa();
+  if(desenha) drawBaixa();
 }
 
 function abreBaixa(){
@@ -2821,15 +2827,21 @@ function renderLinhasBaixa(M){
         <span id="bxdif${i}"></span>
       </div></div>`;
   }).join('')
-   + (fora.length?`<div class="bxfora">${htmlEsc(tr('bxFora',{f:fora.join(', ')}))}</div>`:'')
-   + `<div class="bxpe2"><button type="button" class="primary" data-c="dar">
-        ${htmlEsc(tr('bxDarMesa',{m:M.i}))}</button></div>`;
+   + (fora.length?`<div class="bxfora">${htmlEsc(tr('bxFora',{f:fora.join(', ')}))}</div>`:'');
 }
 
 function drawBaixa(){
   const c=el('bx_corpo'); if(!c) return;
   BX.mesas=mesasBobina();
   if(BX.mesa && baixaDaMesa(BX.mesa)){ BX.mesa=null; BX.linhas=[]; BX.chave=''; }
+  /* enquanto houver mesa por dar, uma está aberta: o botão de baixo é o "ok" dela,
+     e no fim passa a OK. Antes ficava só o "Cancelar" à vista */
+  if(!BX.mesa){ const M=BX.mesas.find(x=>!baixaDaMesa(x.i)); if(M) preparaBaixaMesa(M.i,false); }
+  const ok=el('bx_ok'), aberta=!!BX.mesa;
+  ok.style.display='';
+  ok.textContent=aberta?tr('bxDarMesa',{m:BX.mesa}):tr('bxOk');
+  ok.onclick=aberta?()=>confirmaBaixa():fechaBaixa;
+  el('bx_cancel').style.display=aberta?'':'none';
   if(!BX.mesas.length){
     c.innerHTML=`<div class="bxvazio">${htmlEsc(tr('bxSemPendentes'))}</div>`;
     return;
@@ -2880,7 +2892,6 @@ function ligaBaixa(){
     const b=e.target.closest('button[data-c]'); if(!b) return;
     if(b.dataset.c==='abrir') return preparaBaixaMesa(+b.dataset.m);
     if(b.dataset.c==='anular') return anulaBaixa(+b.dataset.m);
-    if(b.dataset.c==='dar') return confirmaBaixa(b);
     const L=BX.linhas[+b.dataset.l]; if(!L) return;
     if(b.dataset.c==='x'){ L.alocs.splice(+b.dataset.a,1); drawBaixa(); }
     else if(b.dataset.c==='+'){
@@ -4870,7 +4881,7 @@ function abreRegisto(on=true){
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.25.0';
+const VERSAO='1.25.1';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -4930,6 +4941,7 @@ const I18N={
     bxDarMesa:'Dar baixa da mesa {m}',
     bxEditarMesa:'editar',
     bxCancelar:'Cancelar',
+    bxOk:'OK',
     bxAEnviar:'A dar baixa…',
     bxTirar:'Tirar esta bobine',
     bxOutra:'+ outra bobine',
@@ -5244,6 +5256,7 @@ const I18N={
     bxDarMesa:'Log plate {m}',
     bxEditarMesa:'edit',
     bxCancelar:'Cancel',
+    bxOk:'OK',
     bxAEnviar:'Logging…',
     bxTirar:'Remove this spool',
     bxOutra:'+ another spool',
@@ -5518,15 +5531,21 @@ function aplicarIdioma(){
   document.documentElement.lang=IDIOMA==='en'?'en':'pt-PT';
   const sel=el('lang_sel'); if(sel) sel.value=IDIOMA;
   const tipDe=n=>n.classList&&n.classList.contains('hintpop') ? n.querySelector('.tipbox') : null;
+  /* um rótulo pode ter um "?" mudado lá para dentro: reescrever o texto não o leva */
+  const poe=(n,v,html)=>{
+    const ficam=[...n.querySelectorAll(':scope > .hintpop, :scope > .chev')];
+    if(html) n.innerHTML=v; else n.textContent=v;
+    ficam.forEach(f=>n.appendChild(f));
+  };
   document.querySelectorAll('[data-i18n]').forEach(n=>{
     const t=tipDe(n);
     if(t) t.textContent=tr(n.dataset.i18n);
-    else n.textContent=tr(n.dataset.i18n);
+    else poe(n,tr(n.dataset.i18n),false);
   });
   document.querySelectorAll('[data-i18n-html]').forEach(n=>{
     const t=tipDe(n);
     if(t) t.innerHTML=tr(n.dataset.i18nHtml);
-    else n.innerHTML=tr(n.dataset.i18nHtml);
+    else poe(n,tr(n.dataset.i18nHtml),true);
   });
   document.querySelectorAll('[data-i18n-title]').forEach(n=>{ n.title=tr(n.dataset.i18nTitle); });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(n=>{ n.placeholder=tr(n.dataset.i18nPlaceholder); });
@@ -5569,22 +5588,59 @@ let INFO_TIP_SEQ=0;
 function ligaInfoPopups(){
   document.querySelectorAll('.hint,.src').forEach(h=>{
     if(h.classList.contains('filaviso')||h.classList.contains('viva')) return;
-    if(h.querySelector('.tipbox')) return;
-    const conteudo=h.innerHTML.trim();
-    if(!conteudo) return;
-    const id='tip_'+(++INFO_TIP_SEQ);
-    h.classList.add('hintpop');
-    h.innerHTML=`<button type="button" class="tipbtn" aria-label="${htmlEsc(tr('infoTipLabel'))}" aria-describedby="${id}">?</button>
-      <span class="tipbox" id="${id}" role="tooltip">${conteudo}</span>`;
+    if(!h.querySelector('.tipbox')){
+      const conteudo=h.innerHTML.trim();
+      if(!conteudo) return;
+      const id='tip_'+(++INFO_TIP_SEQ);
+      h.classList.add('hintpop');
+      h.innerHTML=`<button type="button" class="tipbtn" aria-label="${htmlEsc(tr('infoTipLabel'))}" aria-describedby="${id}">?</button>
+        <span class="tipbox" id="${id}" role="tooltip">${conteudo}</span>`;
+    }
+    /* a mudança de sítio corre também nas passagens seguintes: na primeira as
+       secções ainda não estão montadas e não há título onde pôr o "?" */
+    if(h.dataset.junto) return;
+    const conteudo=h.querySelector('.tipbox').innerHTML;          /* já foi mudado: um redesenho não o volta a mexer */
+    const alvo=sitioDoTip(h);
+    if(!alvo) return;
+    h.dataset.junto='1'; h.classList.add('tipjunto');
+    /* duas dicas soltas na mesma secção: um "?" só, com as duas lá dentro */
+    const ja=!h.id && alvo.tagName==='H3' && [...alvo.children].find(c=>c.classList.contains('tipjunto')&&!c.id);
+    if(ja){ ja.querySelector('.tipbox').insertAdjacentHTML('beforeend','<br><br>'+conteudo); h.remove(); return; }
+    alvo.insertBefore(h, alvo.querySelector(':scope > .chev'));
   });
+}
+/* Onde o "?" fica, em vez de numa linha sua, por esta ordem:
+   - dentro de um campo (<div><label>…</label>…) — no rótulo do campo;
+   - num bloco que começa por um interruptor — no fim do interruptor;
+   - a seguir a uma fila de campos — no rótulo que a dica nomeia a negrito;
+   - solta numa secção — no título da secção.
+   Fora disto (resultados, <details>) fica onde está. */
+function sitioDoTip(h){
+  const par=h.parentElement; if(!par) return null;
+  const solta=par.classList.contains('subsec')||par.classList.contains('card');
+  const prim=par.firstElementChild;
+  if(!solta && prim && prim!==h && prim.tagName==='LABEL') return prim;
+  let ant=h.previousElementSibling;
+  while(ant && (ant.classList.contains('hint')||ant.classList.contains('hintpop'))) ant=ant.previousElementSibling;
+  if(!solta) return null;
+  if(ant && ant.matches('.row,.bigmarg')){
+    const b=semAcentos((h.querySelector('.tipbox b')||{}).textContent||'').trim();
+    const l=b && [...ant.querySelectorAll('label:not(.toggle)')].find(l=>semAcentos(l.textContent).includes(b));
+    if(l) return l;
+  }
+  const h3=par.classList.contains('subsec') ? par.previousElementSibling : null;
+  return h3 && h3.tagName==='H3' ? h3 : null;
 }
 /* Um "?" lá em baixo na página abria o balão para fora do ecrã. Mede-se ao
    passar por cima -- é a única altura em que se sabe onde ele está. */
 function ladoDoPopup(e){
   const p=e.target.closest&&e.target.closest('.hintpop');
   if(!p) return;
-  p.classList.toggle('pcima', p.getBoundingClientRect().bottom>window.innerHeight-230);
+  const r=p.getBoundingClientRect();
+  p.classList.toggle('pcima', r.bottom>window.innerHeight-230);
+  p.classList.toggle('pesq', r.left+370>window.innerWidth);
 }
+document.addEventListener('click',e=>{ if(e.target.closest&&e.target.closest('h3 .tipbtn')) e.stopPropagation(); },true);
 document.addEventListener('mouseover',ladoDoPopup,{passive:true});
 document.addEventListener('focusin',ladoDoPopup,{passive:true});
 function mudarIdioma(lang){
