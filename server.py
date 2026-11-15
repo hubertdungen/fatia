@@ -46,6 +46,18 @@ def now() -> int:
     return int(time.time())
 
 
+PLATAFORMA_TOKEN_FILE = Path(os.environ.get("FATIA_PLATAFORMA_TOKEN", str(Path.home() / ".local/share/fatia/platform.token")))
+
+
+def plataforma_token() -> str:
+    """Segredo da ponte com a DungenLabs Plataforma; criado à primeira vez, só legível pelo dono."""
+    if not PLATAFORMA_TOKEN_FILE.exists():
+        PLATAFORMA_TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+        PLATAFORMA_TOKEN_FILE.write_text(secrets.token_urlsafe(24))
+        PLATAFORMA_TOKEN_FILE.chmod(0o600)
+    return PLATAFORMA_TOKEN_FILE.read_text().strip()
+
+
 # ------------------------------------------------------------------ Bobina --
 # O inventário de filamento vive no Bobina (porta 8100). O pedido é feito daqui,
 # do lado do servidor, e não pelo browser: entre portas diferentes o browser
@@ -686,6 +698,22 @@ class FatiaHandler(SimpleHTTPRequestHandler):
             return
         if path == "/api/health":
             self.write_json(200, {"ok": True, "name": "Fatia", "memory": True})
+            return
+        if path == "/api/plataforma/registos":
+            # ponte para a DungenLabs Plataforma (gestão de projetos): token em ficheiro, só leitura
+            tok = (urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("token") or [""])[0]
+            if not hmac.compare_digest(tok, plataforma_token()):
+                self.error_json(403, "token inválido")
+                return
+            inicio = time.mktime(time.strptime(time.strftime("%Y-%m-01"), "%Y-%m-%d"))
+            with self.db() as db:
+                rs = db.execute("select id, coalesce(cliente_nome,''), coalesce(projeto,''), estado, total, lucro, coalesce(resumo,''), criado "
+                                "from registos order by criado desc limit 40").fetchall()
+                n, tot, luc = db.execute("select count(*), coalesce(sum(total),0), coalesce(sum(lucro),0) from registos "
+                                         "where estado='impresso' and criado >= ?", (inicio,)).fetchone()
+            self.write_json(200, {"registos": [{"id": r[0], "cliente": r[1], "projeto": r[2], "estado": r[3], "total": r[4],
+                                                "lucro": r[5], "resumo": r[6][:80], "criado": r[7]} for r in rs],
+                                  "mes": {"impressos": n, "total": tot, "lucro": luc}})
             return
         if path == "/api/spot":
             zona = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("bzn", ["PT"])[0]
