@@ -164,7 +164,7 @@ td input.slic{border-color:rgba(62,207,142,.35)}
   font-size:12px;font-weight:800;line-height:1;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
 .hintpop .tipbtn:hover,.hintpop .tipbtn:focus-visible{background:var(--accent);border-color:var(--accent);
   color:#1a1206;outline:none}
-.hintpop .tipbox{position:absolute;z-index:190;left:0;top:calc(100% + 9px);
+.hintpop .tipbox{display:none;position:absolute;z-index:190;left:0;top:calc(100% + 9px);
   width:min(360px,calc(100vw - 48px));max-width:calc(100vw - 48px);padding:11px 13px;
   background:linear-gradient(180deg,#222a35,#1a2029);border:1px solid rgba(255,196,107,.32);
   border-radius:8px;color:var(--txt);box-shadow:0 18px 42px rgba(0,0,0,.42);
@@ -173,7 +173,7 @@ td input.slic{border-color:rgba(62,207,142,.35)}
 .hintpop .tipbox::before{content:"";position:absolute;left:7px;top:-6px;width:10px;height:10px;
   background:#222a35;border-left:1px solid rgba(255,196,107,.32);border-top:1px solid rgba(255,196,107,.32);
   transform:rotate(45deg)}
-.hintpop:hover .tipbox,.hintpop:focus-within .tipbox{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.hintpop:hover .tipbox,.hintpop:focus-within .tipbox{display:block;opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
 .hintpop.pcima .tipbox{top:auto;bottom:calc(100% + 9px)}
 .hintpop.pcima .tipbox::before{top:auto;bottom:-6px}
 .hintpop .tipbox b{color:var(--accent2)}
@@ -1373,9 +1373,9 @@ footer a{color:var(--blue);text-decoration:none}
   </div>
 
   <div class="derived" id="d_mesa_eff"></div>
-  <table class="hist" id="tbl_rateio"><thead><tr>
+  <div style="overflow-x:auto"><table class="hist" id="tbl_rateio"><thead><tr>
     <th>Mesa</th><th>Impressora</th><th>Peso</th><th>Tempo</th><th>Material</th><th>Preço</th><th>€/h efetivo</th>
-  </tr></thead><tbody id="rateio"></tbody></table>
+  </tr></thead><tbody id="rateio"></tbody></table></div>
 
   <h3 style="margin-top:18px">🎯 Em que patamar te queres posicionar?</h3>
   <div class="bandsel" id="bands"></div>
@@ -1406,8 +1406,8 @@ footer a{color:var(--blue);text-decoration:none}
       <div><label>&nbsp;</label><button class="ghost" style="width:100%" onclick="registarHist()">+ Registar orçamento</button></div>
       <div><label>&nbsp;</label><button class="ghost" style="width:100%" onclick="limparHist()">Limpar histórico</button></div>
     </div>
-    <table class="hist"><thead><tr><th>Data</th><th>Cliente</th><th>Total</th><th>€/h</th><th>Estado</th><th></th></tr></thead>
-      <tbody id="h_body"></tbody></table>
+    <div style="overflow-x:auto"><table class="hist"><thead><tr><th>Data</th><th>Cliente</th><th>Total</th><th>€/h</th><th>Estado</th><th></th></tr></thead>
+      <tbody id="h_body"></tbody></table></div>
     <div class="derived" id="d_hist"></div>
   </details>
 
