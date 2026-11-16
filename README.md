@@ -43,11 +43,17 @@ Fatia computes both sides in parallel: **what it costs you** and **what you char
 
 **Tax: included or added.** Two ways for tax to enter the price. **Included** — the total is what the client pays and the tax comes out of it, so it lands before your profit. **Added** — the total is your clean price, the tax goes on top and the client pays it, leaving your margin untouched. Either way the quote shows subtotal and tax separately.
 
+**Several quotes at once.** A row of tabs above everything, one per quote in progress. You talk to one person, hit **+ Quote** for the next, and come back to the first with nothing lost — each tab keeps its own client, project, plates, models, finishing, discounts, shipping and pending stock write-offs. The label is the job name and the total it stands at, and tabs travel with remote memory and with Export. Settings, filaments and branding are shared: switching tabs changes client, not workshop.
+
 **Parts are counted per plate.** Each plate states how many parts come off it and the field up top shows the running total — 2 parts across 2 plates is 2 parts, not 4. The quantity discount tier follows that total.
+
+**The discount explains itself.** Tiers are written as `3:5, 10:10` and, right below the field, Fatia reads them back in plain words: "from 3 pieces on, 5% off". On the job it tells you which percentage you are giving and which tier it rests on — or warns that it was typed by hand and matches no tier. And on the client quote the discount line stops being a number out of nowhere: underneath it, in the same small type as every other line, it says where each part comes from — quantity, promotion and rounding.
 
 **Filament manager.** A filament is a name and its prices — price/kg and the supplier's shipping. Add your own, remove them, and they travel with your presets and inside the Export file. Each plate picks which filaments it used, and can use more than one.
 
 **Wired to [Bobina](https://github.com/hubertdungen/bobina), live.** With Bobina running on the same machine, the filament picker shows your real inventory: the spool drawn in its actual colour, the **real cost per kilo** (what you actually paid for the spools still on the shelf), how many grams are left, how many spools and where they are. **There is nothing to import and nothing to refresh** — the figures are the ones from right now and change on their own when you change them in Bobina. And because Fatia now knows what you have at home, it warns you when the job you are quoting **does not fit in stock**. A Bobina filament cannot be edited here (that belongs in Bobina); ⧉ makes an editable copy of your own at today's price. Your hand-typed filaments live on beside them. Filaments whose spools are **all still sealed** can be marked in the picker — a tint, a slow sheen, or both: two switches at the top of the panel, off and on as you like (one open spool and the mark is gone).
+
+**Creditors, wired to [Giro](https://github.com/hubertdungen/giro).** With Giro running on the same machine a **Creditors** panel appears — outside the client quote, which leaves here without a line of it. It opens on the **company's** debts — those held by one of your own entities, such as DungenLabs — because this is the workshop's panel, not your wallet's; the chips above switch to any single holder, or to everything. For each you see who is owed, how much is left, **how many instalments remain** and until when. You pick the share of **this job's profit** to send to creditors and pay a debt down in one click: the payment lands in Giro like any other, and flows on from there to Rumo. The button only arms when there is both profit and a percentage, and it never offers more than the outstanding balance.
 
 **Several filaments on one plate.** When a plate carries more than one filament and has no slicer cost, there is no way to know how many grams are of each: Fatia estimates from the average of that plate's prices — and warns you, because entering the slicer cost for that plate is all it takes to make the figure exact. The client quote lists the filaments used, and breaks them down per plate when there is more than one.
 
@@ -59,7 +65,7 @@ Fatia computes both sides in parallel: **what it costs you** and **what you char
 - **invoice tax** — presets for Portugal IVA 23%, 13% and 6%, Spain IVA 21%, France TVA 20%, Germany MwSt. 19%, Italy IVA 22%, Netherlands btw 21%, UK VAT 20%, or a custom/general rate, either included in the total or added on top. The quote always splits subtotal and tax;
 - **QR codes** — off by default. The QR is generated from whatever address you type, with no network and no third-party service, and any of them can be replaced by your own PNG/JPEG.
 
-**Presets and memory.** Save named configurations, export and import as JSON. Everything goes into the template: per-plate printers, logo, copy and QR codes. It remembers where you left off.
+**Presets and memory.** Save named configurations, export and import as JSON. Everything goes into the template: per-plate printers, logo, copy and QR codes. It remembers where you left off. Updating a preset no longer means retyping its name exactly: **💾** comes pre-filled with the selected preset — Enter and it is updated — and a near-identical name (case, accents or extra spaces) is treated as the same preset, with a confirmation, instead of spawning a twin. **✏️** renames the selected one. Open tabs stay out of presets: a preset is the workshop, not the jobs in progress.
 
 **Simple mode.** Hides everything you aren't using. Click any panel heading to fold it — or any sub-heading to fold just that section. The **⌃ Collapse sections** button does them all at once. Cost settings start folded — you tune them once and forget them — while the job panel starts open. Whatever you leave closed stays closed next time.
 
@@ -118,11 +124,7 @@ Contact **hubertkenobi@gmail.com** before you start. Full terms in [`LICENSE`](L
 
 ---
 
-<p align="center">
-  <i>Fatia — powered by <b>DL X</b></i><br>
-  <sub><i>DL X is the research and product division of <b>DungenLabs</b>, an engineering lab in Lisbon —
-  the half of the lab that builds for itself: experimental prototypes, in-house manufactured products
-  (FDM extrusion, fibre-reinforced filament and resin casting), partnerships, and technology looking
-  for a use.</i></sub><br>
-  <sub><a href="https://dlx.dungenlabs.com">dlx.dungenlabs.com</a> · <a href="https://dungenlabs.com">dungenlabs.com</a></sub>
-</p>
+<p align="center">DL Forge is the software and games division of DungenLabs. Fatia is one of its tools.</p>
+
+
+<p align="center"><a href="https://dlforge.dungenlabs.com"><img src="docs/branding/dlforge-logo.svg" alt="DL Forge" width="120"></a><br><a href="https://dlforge.dungenlabs.com">DL Forge</a></p>

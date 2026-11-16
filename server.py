@@ -46,6 +46,18 @@ def now() -> int:
     return int(time.time())
 
 
+PLATAFORMA_TOKEN_FILE = Path(os.environ.get("FATIA_PLATAFORMA_TOKEN", str(Path.home() / ".local/share/fatia/platform.token")))
+
+
+def plataforma_token() -> str:
+    """Segredo da ponte com a DungenLabs Plataforma; criado à primeira vez, só legível pelo dono."""
+    if not PLATAFORMA_TOKEN_FILE.exists():
+        PLATAFORMA_TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+        PLATAFORMA_TOKEN_FILE.write_text(secrets.token_urlsafe(24))
+        PLATAFORMA_TOKEN_FILE.chmod(0o600)
+    return PLATAFORMA_TOKEN_FILE.read_text().strip()
+
+
 # ------------------------------------------------------------------ Bobina --
 # O inventário de filamento vive no Bobina (porta 8100). O pedido é feito daqui,
 # do lado do servidor, e não pelo browser: entre portas diferentes o browser
@@ -107,6 +119,28 @@ def bobina_filaments() -> tuple[int, dict[str, Any]]:
     return 200, payload
 
 
+_lexico_cache: tuple[float, dict[str, Any]] | None = None
+
+
+def bobina_lexico() -> tuple[int, dict[str, Any]]:
+    """O léxico do Bobina (sinónimos de cor, marca, material em várias línguas).
+
+    É o que faz "amarelo" encontrar "Rapid Yellow": a pesquisa do seletor usa a
+    mesma tabela que a do Bobina, em vez de uma cópia que ia ficar para trás.
+    """
+    global _lexico_cache
+    if _lexico_cache and time.time() - _lexico_cache[0] < 3600:
+        return 200, _lexico_cache[1]
+    try:
+        with urllib.request.urlopen(f"{BOBINA_URL}/api/lexicon", timeout=10) as r:
+            data = json.loads(r.read().decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        return 502, {"ok": False, "error": f"Sem resposta do Bobina: {exc}"}
+    payload = {"ok": True, "grupos": data.get("grupos", {}), "index": data.get("index", {})}
+    _lexico_cache = (time.time(), payload)
+    return 200, payload
+
+
 def bobina_escreve(caminho: str, corpo: dict[str, Any]) -> tuple[int, dict[str, Any]]:
     """Um pedido de escrita ao Bobina, com o segredo da ponte metido aqui.
 
@@ -140,6 +174,73 @@ def bobina_escreve(caminho: str, corpo: dict[str, Any]) -> tuple[int, dict[str, 
     except Exception as exc:  # noqa: BLE001
         return 502, {"ok": False, "error": f"Sem resposta do Bobina: {exc}"}
     _bobina_cache = None
+    return codigo, resposta
+
+
+# -------------------------------------------------------------------- Giro --
+# As dívidas vivem no Giro (porta 8101). Mesma ponte do Bobina, pelas mesmas
+# razões: o pedido é feito daqui, do lado do servidor, com o segredo que o Giro
+# escreve no ficheiro dele. O Fatia mostra-as para se poder orientar uma fatia
+# do lucro de um trabalho aos credores -- nunca no orçamento do cliente.
+GIRO_URL = os.environ.get("FATIA_GIRO_URL", "http://127.0.0.1:8101")
+GIRO_TOKEN_FILE = Path(
+    os.environ.get("FATIA_GIRO_TOKEN",
+                   str(Path.home() / ".local/share/giro/bridge.token")))
+GIRO_TTL = int(os.environ.get("FATIA_GIRO_TTL", "10"))
+_giro_cache: tuple[float, dict[str, Any]] | None = None
+
+
+def _giro_token() -> tuple[str, dict[str, Any] | None]:
+    if not GIRO_TOKEN_FILE.exists():
+        return "", {"ok": False, "error": "O Giro ainda não arrancou nesta máquina."}
+    token = GIRO_TOKEN_FILE.read_text().strip()
+    if not token:
+        return "", {"ok": False, "error": "O Giro ainda não gerou o segredo da ligação."}
+    return token, None
+
+
+def giro_dividas() -> tuple[int, dict[str, Any]]:
+    """As dívidas abertas do Giro, tal como ele as dá."""
+    global _giro_cache
+    if _giro_cache and time.time() - _giro_cache[0] < GIRO_TTL:
+        return 200, _giro_cache[1]
+    token, erro = _giro_token()
+    if erro:
+        return 503, erro
+    url = f"{GIRO_URL}/api/fatia/dividas?token={urllib.parse.quote(token)}"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as r:
+            data = json.loads(r.read().decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        return 502, {"ok": False, "error": f"Sem resposta do Giro: {exc}"}
+    _giro_cache = (time.time(), data)
+    return 200, data
+
+
+def giro_pagamento(corpo: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    """Lançar um pagamento no Giro. A cache é deitada fora a seguir, senão
+    abater dívida e ver o saldo logo a seguir mostrava o número de antes."""
+    global _giro_cache
+    token, erro = _giro_token()
+    if erro:
+        return 503, erro
+    dados = json.dumps({**corpo, "token": token}).encode("utf-8")
+    pedido = urllib.request.Request(
+        f"{GIRO_URL}/api/fatia/pagamento", data=dados, method="POST",
+        headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(pedido, timeout=15) as r:
+            resposta = json.loads(r.read().decode("utf-8") or "{}")
+            codigo = r.status
+    except urllib.error.HTTPError as exc:
+        try:
+            resposta = json.loads(exc.read().decode("utf-8") or "{}")
+        except Exception:  # noqa: BLE001
+            resposta = {"ok": False, "error": f"O Giro recusou: {exc}"}
+        codigo = exc.code
+    except Exception as exc:  # noqa: BLE001
+        return 502, {"ok": False, "error": f"Sem resposta do Giro: {exc}"}
+    _giro_cache = None
     return codigo, resposta
 
 
@@ -178,6 +279,140 @@ def spot_price(zone: str = "PT") -> tuple[int, dict[str, Any]]:
     return 200, payload
 
 
+# ---- custo das sessões do Claude Code (custo de ferramentas da modelação) ----
+CLAUDE_PROJECTS = Path(os.environ.get("FATIA_CLAUDE_PROJECTS", str(Path.home() / ".claude" / "projects")))
+SESSAO_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+# $ por milhão de tokens: input, output, leitura de cache. A escrita de cache é
+# 1,25× o input (5 min) ou 2× (1 h, a que o Claude Code usa). Ganha o prefixo
+# mais comprido: claude-opus-5-5 antes de claude-opus-5.
+CLAUDE_PRECOS: dict[str, tuple[float, float, float]] = {
+    "claude-fable-5-1": (10, 50, 0.25), "claude-mythos-5-1": (10, 50, 0.25),
+    "claude-fable-5": (10, 50, 1.0), "claude-mythos-5": (10, 50, 1.0),
+    "claude-opus-5-5": (4, 20, 0.20), "claude-opus-5": (5, 25, 0.50),
+    "claude-opus-4": (5, 25, 0.50), "claude-opus-4-1": (15, 75, 1.50), "claude-opus-4-2025": (15, 75, 1.50),
+    "claude-sonnet-5-5": (2, 10, 0.20), "claude-sonnet-5": (2, 10, 0.20), "claude-sonnet-4": (3, 15, 0.30),
+    "claude-haiku-5-5": (0.10, 0.50, 0.01), "claude-haiku-4-5": (1, 5, 0.10),
+}
+
+
+def preco_modelo(modelo: str) -> tuple[float, float, float] | None:
+    chaves = [k for k in CLAUDE_PRECOS if modelo.startswith(k)]
+    return CLAUDE_PRECOS[max(chaves, key=len)] if chaves else None
+
+
+def custo_usage(modelo: str, u: dict[str, Any]) -> float | None:
+    """Dólares de uma mensagem do assistente; None se o modelo não tem preço."""
+    pr = preco_modelo(modelo)
+    if not pr:
+        return None
+    pin, pout, pread = pr
+    cc = u.get("cache_creation") or {}
+    w5 = int(cc.get("ephemeral_5m_input_tokens") or 0)
+    w1 = int(cc.get("ephemeral_1h_input_tokens") or 0)
+    wtot = int(u.get("cache_creation_input_tokens") or 0)
+    w1 += max(0, wtot - w5 - w1)          # sem o detalhe, conta como 1 h (o caso do Claude Code)
+    tin, tread = int(u.get("input_tokens") or 0), int(u.get("cache_read_input_tokens") or 0)
+    f = 1.0
+    if modelo.startswith("claude-haiku-5-5") and tin + tread + w5 + w1 > 100_000:
+        f = 5.0                            # o Haiku 5.5 cobra 5× acima de 100K de prompt
+    if u.get("speed") == "fast":
+        f *= 2.0                           # ponytail: modo rápido = 2× (Opus 5/5.5); outros modelos podem diferir
+    usd = (tin * pin + int(u.get("output_tokens") or 0) * pout + tread * pread
+           + w5 * pin * 1.25 + w1 * pin * 2.0) / 1e6
+    return usd * f
+
+
+def ficheiros_sessao(sessao: str) -> list[Path]:
+    """O .jsonl da sessão e os dos sub-agentes dela, em qualquer projeto."""
+    fs: list[Path] = []
+    for principal in CLAUDE_PROJECTS.glob(f"*/{sessao}.jsonl"):
+        fs.append(principal)
+        fs.extend(sorted((principal.parent / sessao / "subagents").glob("*.jsonl")))
+    return fs
+
+
+def custo_claude(sessao: str) -> tuple[int, dict[str, Any]]:
+    if not SESSAO_RE.match(sessao):
+        return 400, {"ok": False, "error": "Id de sessão inválido"}
+    fs = ficheiros_sessao(sessao)
+    if not fs:
+        return 404, {"ok": False, "error": "Sessão não encontrada"}
+    vistos: set[str] = set()
+    usd, tokens, sem_preco = 0.0, 0, set()
+    por_modelo: dict[str, float] = {}
+    for f in fs:
+        with f.open(encoding="utf-8", errors="replace") as fh:
+            for linha in fh:
+                if '"assistant"' not in linha:
+                    continue
+                try:
+                    d = json.loads(linha)
+                except ValueError:
+                    continue
+                m = d.get("message") if d.get("type") == "assistant" else None
+                if not isinstance(m, dict) or not isinstance(m.get("usage"), dict):
+                    continue
+                mid = m.get("id") or ""
+                if mid in vistos:
+                    continue
+                vistos.add(mid)
+                modelo, u = str(m.get("model") or ""), m["usage"]
+                if modelo == "<synthetic>":
+                    continue
+                n = sum(int(u.get(k) or 0) for k in ("input_tokens", "output_tokens",
+                        "cache_read_input_tokens", "cache_creation_input_tokens"))
+                c = custo_usage(modelo, u)
+                if c is None:
+                    if n:
+                        sem_preco.add(modelo or "?")
+                    continue
+                usd += c
+                tokens += n
+                por_modelo[modelo] = por_modelo.get(modelo, 0.0) + c
+    return 200, {"ok": True, "sessao": sessao, "usd": round(usd, 4), "tokens": tokens,
+                 "mensagens": len(vistos), "por_modelo": por_modelo, "sem_preco": sorted(sem_preco)}
+
+
+def titulo_sessao(f: Path) -> str:
+    """O título que o Claude Code mostra: o dado à mão ganha ao gerado."""
+    custom = ai = primeiro = ""
+    with f.open(encoding="utf-8", errors="replace") as fh:
+        for linha in fh:
+            if '"custom-title"' in linha or '"ai-title"' in linha:
+                try:
+                    d = json.loads(linha)
+                except ValueError:
+                    continue
+                custom = d.get("customTitle") or custom
+                ai = d.get("aiTitle") or ai
+            elif not primeiro and '"type":"user"' in linha:
+                try:
+                    c = json.loads(linha).get("message", {}).get("content")
+                except ValueError:
+                    continue
+                if isinstance(c, list):
+                    c = next((b.get("text", "") for b in c if isinstance(b, dict) and b.get("type") == "text"), "")
+                if isinstance(c, str) and not c.startswith("<"):
+                    primeiro = " ".join(c.split())[:80]
+    return custom or ai or primeiro
+
+
+def projeto_legivel(nome: str) -> str:
+    """-home-x-Fatia--claude-worktrees-y → ~/Fatia/.claude/worktrees/y (os - dos nomes viram / também)."""
+    casa = str(Path.home()).replace("/", "-")
+    if nome.startswith(casa):
+        nome = "~" + nome[len(casa):]
+    return nome.replace("--", "/.").replace("-", "/")
+
+
+def sessoes_recentes(n: int = 10) -> list[dict[str, Any]]:
+    fs = [f for f in CLAUDE_PROJECTS.glob("*/*.jsonl") if SESSAO_RE.match(f.stem)]
+    fs.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+    return [{"id": f.stem, "titulo": titulo_sessao(f), "mtime": int(f.stat().st_mtime),
+             "projeto": projeto_legivel(f.parent.name)}
+            for f in fs[:n]]
+
+
 def init_db(db_path: Path) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as db:
@@ -211,6 +446,84 @@ def init_db(db_path: Path) -> None:
             )
             """
         )
+        # ---- registo de trabalhos impressos e os clientes ----
+        # Um registo guarda o trabalho e as Definições tal como estavam quando se
+        # marcou como impresso: reabrir daqui a um ano dá o mesmo orçamento, e
+        # não o que os preços de hoje dariam. O nome do cliente vai copiado para
+        # o registo -- apagar o cliente não apaga o histórico.
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS clientes (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              nome TEXT NOT NULL UNIQUE COLLATE NOCASE,
+              contacto TEXT NOT NULL DEFAULT '',
+              nif TEXT NOT NULL DEFAULT '',
+              notas TEXT NOT NULL DEFAULT '',
+              criado INTEGER NOT NULL
+            )
+            """
+        )
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS registos (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              cliente_id INTEGER REFERENCES clientes(id) ON DELETE SET NULL,
+              cliente_nome TEXT NOT NULL DEFAULT '',
+              projeto TEXT NOT NULL DEFAULT '',
+              estado TEXT NOT NULL DEFAULT 'impresso',
+              total REAL NOT NULL DEFAULT 0,
+              custo REAL NOT NULL DEFAULT 0,
+              lucro REAL NOT NULL DEFAULT 0,
+              pecas INTEGER NOT NULL DEFAULT 0,
+              resumo TEXT NOT NULL DEFAULT '',
+              snapshot_json TEXT NOT NULL,
+              orcamento_html TEXT NOT NULL DEFAULT '',
+              criado INTEGER NOT NULL
+            )
+            """
+        )
+        db.execute("CREATE INDEX IF NOT EXISTS registos_cliente ON registos(cliente_id, criado)")
+        if "folha" not in {r[1] for r in db.execute("PRAGMA table_info(registos)")}:
+            db.execute("ALTER TABLE registos ADD COLUMN folha TEXT NOT NULL DEFAULT ''")
+        # as folhas de obra contam-se por dia; o UNIQUE é o que impede dois
+        # aparelhos a imprimir ao mesmo tempo de levarem o mesmo número
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS folhas (
+              dia TEXT NOT NULL,
+              seq INTEGER NOT NULL,
+              cliente TEXT NOT NULL DEFAULT '',
+              criado INTEGER NOT NULL,
+              PRIMARY KEY (dia, seq)
+            )
+            """
+        )
+
+
+REG_COLS = "id, cliente_id, cliente_nome, projeto, estado, total, custo, lucro, pecas, resumo, folha, criado"
+
+
+def cliente_id_por_nome(db: sqlite3.Connection, nome: str) -> int | None:
+    """O cliente com este nome, criado na hora se ainda não existir."""
+    nome = nome.strip()[:120]
+    if not nome:
+        return None
+    row = db.execute("SELECT id FROM clientes WHERE nome = ?", (nome,)).fetchone()
+    if row:
+        return row[0]
+    return db.execute("INSERT INTO clientes(nome, criado) VALUES (?, ?)", (nome, now())).lastrowid
+
+
+def texto(d: dict[str, Any], k: str, n: int = 500) -> str:
+    return str(d.get(k) or "").strip()[:n]
+
+
+def numero(d: dict[str, Any], k: str) -> float:
+    try:
+        v = float(d.get(k) or 0)
+    except (TypeError, ValueError):
+        return 0.0
+    return v if v == v and abs(v) < 1e9 else 0.0
 
 
 def hash_password(password: str) -> str:
@@ -375,13 +688,82 @@ class FatiaHandler(SimpleHTTPRequestHandler):
             status, payload = bobina_filaments()
             self.write_json(status, payload)
             return
+        if path == "/api/bobina/lexico":
+            status, payload = bobina_lexico()
+            self.write_json(status, payload)
+            return
+        if path == "/api/giro/dividas":
+            status, payload = giro_dividas()
+            self.write_json(status, payload)
+            return
         if path == "/api/health":
             self.write_json(200, {"ok": True, "name": "Fatia", "memory": True})
+            return
+        if path == "/api/plataforma/registos":
+            # ponte para a DungenLabs Plataforma (gestão de projetos): token em ficheiro, só leitura
+            tok = (urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("token") or [""])[0]
+            if not hmac.compare_digest(tok, plataforma_token()):
+                self.error_json(403, "token inválido")
+                return
+            inicio = time.mktime(time.strptime(time.strftime("%Y-%m-01"), "%Y-%m-%d"))
+            with self.db() as db:
+                rs = db.execute("select id, coalesce(cliente_nome,''), coalesce(projeto,''), estado, total, lucro, coalesce(resumo,''), criado "
+                                "from registos order by criado desc limit 40").fetchall()
+                n, tot, luc = db.execute("select count(*), coalesce(sum(total),0), coalesce(sum(lucro),0) from registos "
+                                         "where estado='impresso' and criado >= ?", (inicio,)).fetchone()
+            self.write_json(200, {"registos": [{"id": r[0], "cliente": r[1], "projeto": r[2], "estado": r[3], "total": r[4],
+                                                "lucro": r[5], "resumo": r[6][:80], "criado": r[7]} for r in rs],
+                                  "mes": {"impressos": n, "total": tot, "lucro": luc}})
             return
         if path == "/api/spot":
             zona = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("bzn", ["PT"])[0]
             status, payload = spot_price(zona)
             self.write_json(status, payload)
+            return
+        if path == "/api/custo-claude":
+            if not self.de_casa():
+                self.error_json(403, "O custo das sessões só se consulta da rede de casa")
+                return
+            sessao = (urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("sessao") or [""])[0].strip()
+            if not sessao:
+                self.write_json(200, {"ok": True, "sessoes": sessoes_recentes()})
+                return
+            status, payload = custo_claude(sessao)
+            self.write_json(status, payload)
+            return
+        if path in ("/api/clientes", "/api/registos") or path.startswith("/api/registos/"):
+            if not self.de_casa():
+                self.error_json(403, "O registo só se consulta da rede de casa")
+                return
+            with self.db() as db:
+                if path == "/api/clientes":
+                    rows = db.execute(
+                        """
+                        SELECT c.*, COUNT(r.id) AS n, COALESCE(SUM(r.total), 0) AS faturado
+                        FROM clientes c LEFT JOIN registos r ON r.cliente_id = c.id
+                        GROUP BY c.id ORDER BY c.nome
+                        """
+                    ).fetchall()
+                    self.write_json(200, {"ok": True, "clientes": [dict(r) for r in rows]})
+                elif path == "/api/registos":
+                    q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+                    cli = (q.get("cliente") or [""])[0]
+                    if cli.isdigit():
+                        rows = db.execute(f"SELECT {REG_COLS} FROM registos WHERE cliente_id = ? ORDER BY criado DESC",
+                                          (int(cli),)).fetchall()
+                    else:
+                        rows = db.execute(f"SELECT {REG_COLS} FROM registos ORDER BY criado DESC LIMIT 1000").fetchall()
+                    self.write_json(200, {"ok": True, "registos": [dict(r) for r in rows]})
+                else:
+                    rid = path.rsplit("/", 1)[-1]
+                    row = db.execute("SELECT * FROM registos WHERE id = ?",
+                                     (int(rid) if rid.isdigit() else -1,)).fetchone()
+                    if not row:
+                        self.error_json(404, "Registo não encontrado")
+                        return
+                    reg = dict(row)
+                    reg["snapshot"] = json.loads(reg.pop("snapshot_json"))
+                    self.write_json(200, {"ok": True, "registo": reg})
             return
         if path == "/api/auth/me":
             user = self.current_user()
@@ -479,7 +861,96 @@ class FatiaHandler(SimpleHTTPRequestHandler):
             status, payload = bobina_escreve(caminho, data if isinstance(data, dict) else {})
             self.write_json(status, payload)
             return
+        # abater dívida no Giro com o lucro de um trabalho. A mesma trava das
+        # escritas no Bobina: só da rede de casa.
+        if path == "/api/giro/pagamento":
+            cliente = first_forwarded_for(self.headers, self.client_address[0])
+            if not is_lan_or_mesh(cliente):
+                self.error_json(403, "As escritas no Giro só se fazem da rede de casa")
+                return
+            status, payload = giro_pagamento(data if isinstance(data, dict) else {})
+            self.write_json(status, payload)
+            return
+        if path.startswith(("/api/clientes", "/api/registos", "/api/folhas")):
+            if not self.de_casa():
+                self.error_json(403, "O registo só se escreve da rede de casa")
+                return
+            self.handle_registo(path, data if isinstance(data, dict) else {})
+            return
         self.error_json(404, "API desconhecida")
+
+    # Como as escritas no Bobina e no Giro: a app funciona sem conta, mas a
+    # lista de clientes e o que se faturou não saem para a Internet.
+    def de_casa(self) -> bool:
+        return is_lan_or_mesh(first_forwarded_for(self.headers, self.client_address[0])) \
+            and not marked_public(self.headers)
+
+    def handle_registo(self, path: str, d: dict[str, Any]) -> None:
+        with self.db() as db:
+            if path == "/api/clientes":
+                nome = texto(d, "nome", 120)
+                if not nome:
+                    self.error_json(400, "O cliente precisa de um nome")
+                    return
+                campos = (nome, texto(d, "contacto"), texto(d, "nif", 40), texto(d, "notas", 2000))
+                try:
+                    if str(d.get("id") or "").isdigit():
+                        cid = int(d["id"])
+                        db.execute("UPDATE clientes SET nome=?, contacto=?, nif=?, notas=? WHERE id=?", (*campos, cid))
+                        # o nome copiado para os registos segue a correção
+                        db.execute("UPDATE registos SET cliente_nome=? WHERE cliente_id=?", (nome, cid))
+                    else:
+                        cid = db.execute("INSERT INTO clientes(nome, contacto, nif, notas, criado) VALUES (?,?,?,?,?)",
+                                         (*campos, now())).lastrowid
+                except sqlite3.IntegrityError:
+                    self.error_json(409, f"Já existe um cliente chamado «{nome}»")
+                    return
+                self.write_json(200, {"ok": True, "id": cid})
+            elif path == "/api/clientes/apagar":
+                db.execute("DELETE FROM clientes WHERE id = ?", (int(numero(d, "id")),))
+                self.write_json(200, {"ok": True})
+            elif path == "/api/registos":
+                snap = d.get("snapshot")
+                if not isinstance(snap, dict):
+                    self.error_json(400, "Falta o estado do trabalho")
+                    return
+                nome = texto(d, "cliente", 120)
+                cid = cliente_id_por_nome(db, nome)
+                estado = "mandado" if d.get("estado") == "mandado" else "impresso"
+                rid = db.execute(
+                    """
+                    INSERT INTO registos(cliente_id, cliente_nome, projeto, estado, total, custo, lucro,
+                                         pecas, resumo, snapshot_json, orcamento_html, folha, criado)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (cid, nome, texto(d, "projeto", 200), estado, numero(d, "total"), numero(d, "custo"),
+                     numero(d, "lucro"), int(numero(d, "pecas")), texto(d, "resumo", 1000),
+                     json.dumps(snap, ensure_ascii=False, separators=(",", ":")),
+                     str(d.get("orcamento_html") or "")[:2_000_000], texto(d, "folha", 120), now()),
+                ).lastrowid
+                self.write_json(200, {"ok": True, "id": rid, "cliente_id": cid})
+            elif path == "/api/folhas":
+                dia = texto(d, "dia", 8)
+                if not re.fullmatch(r"\d{8}", dia):
+                    self.error_json(400, "Dia inválido")
+                    return
+                # o INSERT…SELECT é uma instrução só: o MAX e a escrita não se separam
+                rid = db.execute(
+                    "INSERT INTO folhas(dia, seq, cliente, criado) "
+                    "SELECT ?, COALESCE(MAX(seq), 0) + 1, ?, ? FROM folhas WHERE dia = ?",
+                    (dia, texto(d, "cliente", 120), now(), dia),
+                ).lastrowid
+                seq = db.execute("SELECT seq FROM folhas WHERE rowid = ?", (rid,)).fetchone()[0]
+                self.write_json(200, {"ok": True, "seq": seq})
+            elif path == "/api/registos/estado":
+                estado = "mandado" if d.get("estado") == "mandado" else "impresso"
+                db.execute("UPDATE registos SET estado = ? WHERE id = ?", (estado, int(numero(d, "id"))))
+                self.write_json(200, {"ok": True})
+            elif path == "/api/registos/apagar":
+                db.execute("DELETE FROM registos WHERE id = ?", (int(numero(d, "id")),))
+                self.write_json(200, {"ok": True})
+            else:
+                self.error_json(404, "API desconhecida")
 
     def handle_register(self, data: Any) -> None:
         username = str(data.get("username", "")).strip()

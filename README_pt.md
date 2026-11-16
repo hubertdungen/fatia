@@ -41,11 +41,17 @@ O Fatia calcula as duas coisas em paralelo: **o que te custa** e **o que cobras*
 
 **Imposto: incluído ou acrescentado.** Duas maneiras de o imposto entrar no preço. **Incluído** — o total é o que o cliente paga e o imposto sai de lá de dentro, ou seja vem antes do teu lucro. **Acrescentado** — o total é o teu preço limpo, o imposto vai por cima e quem o paga é o cliente, sem te tocar na margem. O orçamento mostra sempre o subtotal e o imposto em separado.
 
+**Vários orçamentos ao mesmo tempo.** Uma fila de separadores por cima de tudo, um por orçamento em curso. Falas com uma pessoa, abres **+ Orçamento** para a seguinte e voltas ao primeiro sem ter perdido nada — cada separador guarda o seu cliente, projeto, mesas, modelos, acabamento, descontos, portes e baixas por lançar. A etiqueta é o nome do trabalho e o total a que ele vai, e os separadores viajam com a memória remota e com o Exportar. As Definições, os filamentos e a marca são os mesmos para todos: mudar de separador é mudar de cliente, não de oficina.
+
 **As peças contam-se por mesa.** Cada mesa diz quantas peças saem dela e o campo lá em cima mostra o total somado — 2 peças em 2 mesas são 2 peças, não 4. O escalão de desconto por quantidade segue esse total.
+
+**O desconto explica-se.** Os escalões escrevem-se como `3:5, 10:10` e, logo por baixo, o Fatia lê-os por palavras: «a partir de 3 peças, 5% de desconto». No trabalho diz-te que percentagem estás a dar e em que escalão ela assenta — ou avisa que foi escrita à mão e não bate com nenhum. E no orçamento do cliente a linha do desconto deixa de ser um número caído do céu: leva por baixo, na mesma letra pequena das outras linhas, de onde vem cada parcela — quantidade, promoção e arredondamento.
 
 **Gestor de filamentos.** Cada filamento é um nome e os seus preços — preço/kg e portes do fornecedor. Acrescentas e removes os teus, e ficam guardados nos presets e dentro do ficheiro do Exportar. Cada mesa escolhe que filamentos usou, e pode levar mais do que um.
 
 **Ligado ao [Bobina](https://github.com/hubertdungen/bobina), em direto.** Se tiveres o Bobina a correr nesta máquina, o seletor de filamentos mostra o teu inventário verdadeiro: a bobine desenhada na cor certa, o **custo real por quilo** (o que foi mesmo pago pelas bobines que ainda tens), quantos gramas te restam, quantas bobines e onde estão. **Não há nada para importar nem para atualizar** — os números são os de agora e mudam sozinhos quando mexes no Bobina. E como o Fatia passa a saber o que tens em casa, avisa-te quando o trabalho que estás a orçamentar **não cabe no stock**. Um filamento do Bobina não se edita aqui (o sítio de o mudar é lá); o ⧉ faz uma cópia tua, editável, com o preço de agora. Os teus filamentos escritos à mão continuam a existir ao lado dos dele.
+
+**Credores, ligado ao [Giro](https://github.com/hubertdungen/giro).** Com o Giro a correr nesta máquina aparece um painel **Credores** — fora do orçamento do cliente, que sai daqui sem uma linha disto. Abre com as dívidas **da empresa** — as que estão em nome de uma entidade tua, como a DungenLabs — porque este é o painel da oficina e não da tua carteira; os chips por cima trocam para um titular à escolha, ou para tudo. De cada uma vês a quem se deve, quanto falta, **quantas prestações faltam** e até quando. Escolhes a percentagem do **lucro deste trabalho** a orientar aos credores e abates a dívida com um clique: o pagamento entra no Giro como qualquer outro, e de lá segue para o Rumo. O botão só liga havendo lucro e percentagem, e nunca oferece mais do que o saldo em aberto.
 
 **Vários filamentos na mesma mesa.** Quando uma mesa leva mais do que um filamento e não tem o custo do slicer, não há como saber quantos gramas são de cada: o Fatia estima pela média dos preços dessa mesa — e avisa-te, porque basta meteres o custo do slicer nessa mesa para o valor ficar exato. O orçamento do cliente mostra os filamentos usados, e discrimina-os por mesa quando há mais do que um.
 
@@ -57,7 +63,7 @@ O Fatia calcula as duas coisas em paralelo: **o que te custa** e **o que cobras*
 - **imposto de faturação** — presets para Portugal IVA 23%, 13% e 6%, Espanha IVA 21%, França TVA 20%, Alemanha MwSt. 19%, Itália IVA 22%, Países Baixos btw 21%, Reino Unido VAT 20%, ou uma taxa personalizada/geral, incluído no total ou acrescentado por cima. O orçamento separa sempre subtotal e imposto;
 - **QR codes** — desligados por omissão. O QR é gerado do endereço que escreveres, sem rede nem serviços externos, e qualquer um pode ser substituído por uma imagem tua (PNG/JPEG).
 
-**Presets e memória.** Guarda configurações com nome, exporta e importa em JSON. Tudo entra no template: impressoras por mesa, logótipo, textos e QR codes. Ele lembra-se de onde ficaste.
+**Presets e memória.** Guarda configurações com nome, exporta e importa em JSON. Tudo entra no template: impressoras por mesa, logótipo, textos e QR codes. Ele lembra-se de onde ficaste. Atualizar um preset não obriga a acertar no nome à letra: o **💾** já vem com o nome do preset escolhido — Enter e está atualizado — e um nome parecido (maiúsculas, acentos ou espaços a mais) é tratado como o mesmo preset, com confirmação, em vez de nascer um gémeo. O **✏️** renomeia o que está escolhido. Os separadores abertos ficam de fora dos presets: um preset é a oficina, não os trabalhos em curso.
 
 **Modo simples.** Esconde tudo o que não estás a usar. Clica nos títulos dos painéis para os dobrar — e nos subtítulos, para dobrar só aquela secção; o botão **⌃ Fechar secções** faz as todas de uma vez. As definições de custo nascem dobradas, porque afinam-se uma vez e depois esquecem-se; o painel do trabalho nasce aberto. O que deixares fechado fica fechado da próxima vez.
 
@@ -112,11 +118,7 @@ Contacta **hubertkenobi@gmail.com** antes de começares. Termos completos em [`L
 
 ---
 
-<p align="center">
-  <i>Fatia — powered by <b>DL X</b></i><br>
-  <sub><i>DL X é a divisão de investigação e produto da <b>DungenLabs</b>, laboratório de engenharia em Lisboa —
-  a metade do laboratório que constrói para si própria: protótipos experimentais, produtos próprios
-  fabricados em casa (extrusão FDM, filamento reforçado com fibra e fundição em resina), parcerias e
-  tecnologia à procura de uso.</i></sub><br>
-  <sub><a href="https://dlx.dungenlabs.com">dlx.dungenlabs.com</a> · <a href="https://dungenlabs.com">dungenlabs.com</a></sub>
-</p>
+<p align="center">DL Forge é a divisão de software e jogos da DungenLabs. O Fatia faz parte das suas ferramentas.</p>
+
+
+<p align="center"><a href="https://dlforge.dungenlabs.com"><img src="docs/branding/dlforge-logo.svg" alt="DL Forge" width="120"></a><br><a href="https://dlforge.dungenlabs.com">DL Forge</a></p>

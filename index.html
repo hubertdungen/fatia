@@ -34,6 +34,24 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:16p
 .memuser{color:var(--good);border-color:rgba(62,207,142,.45)}
 .memstatus{font-size:12px;color:var(--dim);line-height:1.45;margin-top:10px;min-height:18px}
 
+/* separadores: os orcamentos que estao em cima da mesa ao mesmo tempo */
+.abas{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;margin-bottom:14px}
+.abas .aba{display:flex;align-items:stretch;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;overflow:hidden;max-width:280px}
+.abas .aba:hover{border-color:var(--accent)}
+.abas .aba.on{background:var(--panel2);border-color:var(--accent)}
+.abas .aba button{background:none;border:0;border-radius:0;padding:8px 10px;font-size:12.5px;
+  font-weight:600;color:var(--dim);display:flex;align-items:center;gap:8px;min-width:0}
+.abas .aba button:hover{color:var(--accent2)}
+.abas .aba.on button{color:var(--txt)}
+.abas .aba .nome{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abas .aba .val{color:var(--accent2);font-variant-numeric:tabular-nums;font-size:11.5px;font-weight:700;flex:none}
+.abas .aba .x{padding:8px 9px;font-size:11px;color:var(--dim);opacity:.55;flex:none}
+.abas .aba .x:hover{opacity:1;color:var(--bad)}
+.abas .abmais{padding:8px 12px;font-size:12.5px;color:var(--dim)}
+/* a leitura por palavras dos escaloes de desconto */
+.tierlido{color:var(--accent2);opacity:.85}
+
 button{
   background:var(--panel2); color:var(--txt); border:1px solid var(--line);
   padding:9px 14px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; transition:.15s;
@@ -156,10 +174,22 @@ td input.slic{border-color:rgba(62,207,142,.35)}
   background:#222a35;border-left:1px solid rgba(255,196,107,.32);border-top:1px solid rgba(255,196,107,.32);
   transform:rotate(45deg)}
 .hintpop:hover .tipbox,.hintpop:focus-within .tipbox{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.hintpop.pcima .tipbox{top:auto;bottom:calc(100% + 9px)}
+.hintpop.pcima .tipbox::before{top:auto;bottom:-6px}
 .hintpop .tipbox b{color:var(--accent2)}
+/* o "?" mudado para junto do que explica: na linha do rótulo, sem ocupar uma linha sua */
+.hintpop.tipjunto{margin:0 0 0 6px;min-height:0;vertical-align:middle;font-weight:400;
+  letter-spacing:normal;text-transform:none}
+.hintpop.tipjunto .tipbtn{width:17px;height:17px;font-size:10.5px}
+.hintpop.pesq .tipbox{left:auto;right:0}
+.hintpop.pesq .tipbox::before{left:auto;right:4px}
 @media (prefers-reduced-motion: reduce){.hintpop .tipbox{transition:none}}
 @media(max-width:560px){.hintpop .tipbox{left:-6px;width:calc(100vw - 44px)}}
 .tierbtns{display:flex;gap:6px;margin-top:6px}
+.pacchk{display:flex;flex-wrap:wrap;gap:0 12px}
+.promoalvo{display:flex;gap:6px;margin-top:6px}
+.promoalvo .suffix{flex:1}
+.promoalvo button{padding:5px 10px;font-size:12px}
 .tierbtns button{padding:5px 8px;font-size:11px;flex:1}
 .tierbtns button.on{background:var(--accent);color:#1a1206;border-color:var(--accent)}
 details summary{cursor:pointer;list-style:none;color:var(--dim);font-size:12px;padding:6px 0}
@@ -218,7 +248,7 @@ body.simples .hint{display:none}
 .mgnota:empty{display:none}
 
 /* ---- dar baixa no Bobina ---- */
-#baixa,#bxq{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:220;
+#baixa,#bxq,#ccl{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:220;
   align-items:center;justify-content:center;padding:20px;overflow:auto}
 .bxbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
   width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
@@ -258,6 +288,11 @@ body.simples .hint{display:none}
 .bxdif{font-size:11.5px;color:var(--accent2)}
 .bxpe{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
 .bxpe .primary{margin-left:auto}
+.modf{display:flex;gap:4px;align-items:center}
+.modf input{min-width:0}
+.modf button{flex:none;padding:5px 7px;font-size:12px}
+.cclses{display:block;width:100%;text-align:left;margin-bottom:6px;padding:8px 10px}
+.cclses i{font-style:normal;font-size:11px;color:var(--dim);display:block}
 .bxerro{font-size:11.5px;color:var(--bad);flex:1}
 .bxfora{font-size:11.5px;color:var(--dim);margin-top:2px}
 .bxqbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
@@ -266,7 +301,53 @@ body.simples .hint{display:none}
 .bxqtxt{font-size:12.5px;color:var(--dim);line-height:1.6}
 .bxqbt{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
 .bxqbt button{flex:1}
+.impqest{display:flex;gap:8px;margin:14px 0 6px}
+.impqest label{flex:1;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;cursor:pointer;font-size:13.5px;font-weight:600}
+.impqest label:has(input:checked){border-color:var(--good);background:rgba(62,207,142,.1)}
+.impqest input{accent-color:var(--good)}
+.rest{font-size:10.5px;padding:1px 6px;border-radius:5px;margin-left:4px;vertical-align:1px}
+.rest.mandado{background:rgba(90,169,255,.16);color:var(--blue)}
+.rest.impresso{background:rgba(62,207,142,.16);color:var(--good)}
 input.lido{opacity:.7;cursor:not-allowed}
+
+/* ---- credores: as dívidas do Giro, e a fatia do lucro que as abate ---- */
+#cred .crhd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.crlive{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--dim)}
+.crlive s{width:7px;height:7px;border-radius:50%;background:var(--dim);text-decoration:none;flex:none}
+.crlive.on s{background:var(--good);box-shadow:0 0 10px rgba(62,207,142,.55)}
+.crlive.old s{background:var(--accent2)}
+.crlive.off s{background:var(--bad)}
+.crtits{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.crtit{border:1px solid var(--line);background:var(--panel2);border-radius:999px;
+  padding:5px 11px;font-size:11.5px;color:var(--dim);cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.crtit b{color:var(--fg);font-weight:700}
+.crtit.on{border-color:rgba(90,169,255,.45);background:rgba(90,169,255,.12);color:var(--accent)}
+.crfatia{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:11px 13px;margin-bottom:11px}
+.crfatia .cf{display:flex;flex-direction:column;gap:2px;min-width:0}
+.crfatia .cf span{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.09em}
+.crfatia .cf b{font-size:15.5px;font-variant-numeric:tabular-nums}
+.crfatia input[type=range]{flex:1 1 170px;min-width:120px;accent-color:var(--accent)}
+.crfatia .cpct{width:74px;flex:none;text-align:right}
+.crlin{display:flex;align-items:center;gap:11px;flex-wrap:wrap;
+  border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:10px 12px;margin-bottom:8px}
+.crlin.alvo{border-color:rgba(62,207,142,.4)}
+.crnome{display:flex;flex-direction:column;min-width:0;flex:1 1 190px;line-height:1.35}
+.crnome b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crnome i{font-style:normal;font-size:11px;color:var(--dim)}
+.crsaldo{flex:none;text-align:right;font-variant-numeric:tabular-nums}
+.crsaldo b{font-size:14px;display:block}
+.crsaldo i{font-style:normal;font-size:11px;color:var(--dim)}
+.crbar{flex:1 1 100%;height:5px;border-radius:999px;background:var(--line);overflow:hidden}
+.crbar i{display:block;height:100%;background:linear-gradient(90deg,var(--good),var(--accent))}
+.crlin .crgo{flex:none;padding:5px 11px;font-size:11.5px}
+.crde{border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--accent);
+  background:rgba(90,169,255,.1);align-self:flex-start;margin-top:3px}
+.crvazio{font-size:12.5px;color:var(--dim);padding:6px 0}
+.crerro{font-size:11.5px;color:var(--bad);margin-top:6px}
+.crerro:empty{display:none}
+.crnota{font-size:11.5px;color:var(--dim);margin-top:8px;line-height:1.55}
 
 #filpick{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:215;
   align-items:center;justify-content:center;padding:20px;overflow:auto}
@@ -302,6 +383,9 @@ input.lido{opacity:.7;cursor:not-allowed}
 .fchip:hover{border-color:var(--accent2);color:var(--accent2)}
 .fchip.on{background:var(--accent);border-color:var(--accent);color:#1a1206}
 .fchip.on:hover{background:var(--accent2);color:#1a1206}
+.fchip.fimp{color:var(--good);border-color:rgba(62,207,142,.55)}
+.fchip.fimp svg{width:13px;height:13px;vertical-align:-2px}
+.fchip.fimp.on,.fchip.fimp.on:hover{background:var(--good);border-color:var(--good);color:#06180f}
 
 .fpcorpo{padding:14px 18px 18px;overflow:auto}
 .fsec + .fsec{margin-top:18px}
@@ -389,6 +473,46 @@ input.lido{opacity:.7;cursor:not-allowed}
 .lictxt ul{margin:6px 0 10px;padding-left:20px} .lictxt li{margin-bottom:4px}
 
 /* ---- memória remota ---- */
+/* ---- cabeçalho: presets + orçamento + menu ---- */
+.pgrupo{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pgrupo select{width:auto;min-width:150px;font-size:13px;border:0;border-radius:0}
+.pgrupo button{border:0;border-left:1px solid var(--line);border-radius:0;padding:6px 10px}
+#veu{display:none;position:fixed;inset:0;background:rgba(6,9,13,.55);z-index:204}
+#veu.on{display:block}
+#menu{position:fixed;top:0;left:0;bottom:0;width:min(300px,86vw);background:var(--panel);border-right:1px solid var(--line);
+  z-index:206;transform:translateX(-100%);transition:transform .2s;display:flex;flex-direction:column;box-shadow:12px 0 30px rgba(0,0,0,.4)}
+#menu.on{transform:none}
+#menu .rhd{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+#menu .rhd b{flex:1;font-size:16px}
+#menu .mcorpo{overflow:auto;padding:6px 12px 20px;display:flex;flex-direction:column;gap:4px}
+#menu .mcorpo button{text-align:left;border-color:transparent;padding:8px 10px}
+#menu .mcorpo button:hover{border-color:var(--line)}
+.mgrupo{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin:12px 10px 2px}
+.mlang{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 10px;font-size:13.5px}
+.mlang select{width:auto}
+/* ---- registo de impressos: botão verde e gaveta lateral ---- */
+button.feito{width:100%;margin-top:12px;background:var(--good);color:#06150e;border-color:var(--good);font-weight:700}
+button.feito:hover{background:#5fe0a6;color:#06150e}
+#reg_estado{font-size:11.5px;color:var(--dim);text-align:center;margin-top:5px}
+#reg{position:fixed;top:0;right:0;bottom:0;width:min(460px,100vw);background:var(--panel);
+  border-left:1px solid var(--line);z-index:205;transform:translateX(100%);transition:transform .2s;
+  display:flex;flex-direction:column;box-shadow:-12px 0 30px rgba(0,0,0,.4)}
+#reg:not(.on){visibility:hidden}
+#reg.on{transform:none;visibility:visible}
+#reg .rhd{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+#reg .rhd b{flex:1;font-size:16px}
+#reg .rtabs{display:flex;gap:6px;padding:10px 16px 0}
+#reg .rtabs button.on{border-color:var(--accent);color:var(--accent2)}
+#reg .rcorpo{flex:1;overflow:auto;padding:12px 16px 20px}
+#reg .rsum{font-size:12px;color:var(--dim);margin:8px 0}
+.ritem{border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:8px;background:var(--panel2)}
+.ritem .l1{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}
+.ritem .l2{font-size:11.5px;color:var(--dim);margin-top:2px}
+.ritem .acts{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.ritem .acts button{padding:4px 8px;font-size:11.5px}
+.ritem details{font-size:11.5px;color:var(--dim);margin-top:6px}
+.ritem details div{display:flex;justify-content:space-between}
+.ritem .cli{cursor:pointer;color:var(--accent2)}
 #mem{display:none;position:fixed;inset:0;background:rgba(6,9,13,.86);z-index:210;
   align-items:center;justify-content:center;padding:20px;overflow:auto}
 .membox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
@@ -443,7 +567,8 @@ tr.msub td{padding:0 3px 9px;border-bottom:1px solid var(--line)}
 .mchk:hover{color:var(--accent2)}
 /* filamentos de cada mesa: fichas + a lista de onde se acrescenta */
 .msub .mfil{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:5px}
-.msub .mfil select{flex:0 1 auto;min-width:120px;max-width:100%}
+.msub .mfil .mfadd{flex:none;padding:4px 10px;font-size:12px}
+.msub .mfil .mfdef{font-size:12px;color:var(--dim)}
 .chipf{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;line-height:1;
   background:rgba(255,159,46,.13);border:1px solid rgba(255,159,46,.35);color:var(--accent2);
   border-radius:999px;padding:4px 5px 4px 9px;white-space:nowrap}
@@ -475,7 +600,7 @@ body.marca-off #marcaCampos,body.qr-off #qrCampos{opacity:.35;pointer-events:non
 body.nota-off #notaCampos{opacity:.35;pointer-events:none}
 .fnota{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 
-/* ---- assinatura DL X ---- */
+/* ---- assinatura DL Forge ---- */
 .dlxsig{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px}
 .dlxsig .pw{font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;opacity:.55}
 /* a marca já traz as letras — sem wordmark ao lado, ganha corpo */
@@ -576,21 +701,17 @@ footer a{color:var(--blue);text-decoration:none}
       <div class="sub" data-i18n="tagline">Preços de impressão 3D — a partir do teu slicer</div>
     </div>
   </div>
+  <!-- em cima só o que se usa a cada orçamento: os presets e o orçamento do
+       cliente. O resto vive no menu lateral, arrumado por grupos -->
   <div class="hbtns">
-    <select id="lang_sel" onchange="mudarIdioma(this.value)" style="width:auto;font-size:13px"
-      title="Idioma / Language"><option value="pt">PT</option><option value="en">EN</option></select>
-    <select id="p_sel" onchange="carregarPreset()" style="width:auto;min-width:150px;font-size:13px"></select>
-    <button class="ghost" onclick="guardarPreset()" data-i18n-title="tGuardarPreset" title="Guardar o estado atual como preset">💾</button>
-    <button class="ghost" onclick="apagarPreset()" data-i18n-title="tApagarPreset" title="Apagar o preset selecionado">🗑</button>
-    <button class="ghost" onclick="exportSettings()" data-i18n="bExportar">↓ Exportar</button>
-    <button class="ghost" onclick="document.getElementById('imp').click()" data-i18n="bImportar">↑ Importar</button>
-    <input type="file" id="imp" accept=".json" style="display:none" onchange="importSettings(event)">
-    <button class="ghost" id="b_memoria" onclick="mostrarMemoria()" data-i18n="bMemoria">Memória</button>
-    <button class="ghost" id="b_instalar" style="display:none" onclick="instalarApp()" data-i18n="bInstalar">⤓ Instalar app</button>
-    <button class="ghost" id="b_dobrar" onclick="dobrarTudo()" title="Fechar ou abrir todas as secções">⌃ Fechar secções</button>
-    <button class="ghost" id="b_simples" onclick="toggleSimples()">Modo simples</button>
-    <button class="ghost" onclick="resetJob()" data-i18n="bNovo">Novo orçamento</button>
+    <div class="pgrupo">
+      <select id="p_sel" onchange="carregarPreset()"></select>
+      <button class="ghost" onclick="guardarPreset()" data-i18n-title="tGuardarPreset" title="Guardar o estado atual como preset">💾</button>
+      <button class="ghost" onclick="renomearPreset()" data-i18n-title="tRenomearPreset" title="Renomear o preset selecionado">✏️</button>
+      <button class="ghost" onclick="apagarPreset()" data-i18n-title="tApagarPreset" title="Apagar o preset selecionado">🗑</button>
+    </div>
     <button class="primary" onclick="preview()" data-i18n="bOrcamento">👁 Orçamento do cliente</button>
+    <button class="ghost" onclick="abreMenu()" data-i18n="bMenu">☰ Menu</button>
   </div>
 </header>
 
@@ -634,6 +755,7 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="fphd">
       <div class="fptit">
         <b>🧵 <span data-i18n="fpTitulo">Filamentos</span></b>
+        <div class="fpsub" id="fp_mesa" style="display:none"></div>
         <div class="fptitrow">
           <div id="bob_live" class="fplive"></div>
           <div id="fp_realces" class="fptitrow"></div>
@@ -663,24 +785,105 @@ footer a{color:var(--blue);text-decoration:none}
     <div id="bx_corpo" class="bxcorpo"></div>
     <div class="bxpe">
       <div class="bxerro" id="bx_erro"></div>
-      <button class="ghost" onclick="fechaBaixa()" data-i18n="bxCancelar">Cancelar</button>
-      <button class="primary" id="bx_ok" onclick="confirmaBaixa()" data-i18n="bxDar" style="display:none">Dar baixa</button>
+      <button class="ghost" id="bx_cancel" onclick="fechaBaixa()" data-i18n="bxCancelar">Cancelar</button>
+      <button class="primary" id="bx_ok" style="display:none"></button>
     </div>
   </div>
 </div>
 
-<!-- a pergunta que aparece ao abrir o orçamento do cliente -->
+<div id="ccl">
+  <div class="bxbox">
+    <div class="fphd">
+      <div class="fptit">
+        <b>📥 <span data-i18n="cclTitulo">Importar custo de uma sessão</span></b>
+        <div class="fpsub" data-i18n="cclSub">Escolhe uma das sessões recentes ou cola o id. Soma o uso de tokens da sessão e dos sub-agentes, aos preços de cada modelo.</div>
+      </div>
+      <button class="ghost fpx" onclick="fechaCcl()" title="Fechar">×</button>
+    </div>
+    <div class="bxcorpo">
+      <div class="mrow" style="gap:6px;margin-bottom:10px">
+        <input id="ccl_id" placeholder="Id da sessão" style="flex:1">
+        <button class="ghost" style="flex:none" onclick="calculaCcl(el('ccl_id').value)" data-i18n="cclVer">Calcular</button>
+      </div>
+      <div id="ccl_res" class="hint viva"></div>
+      <div id="ccl_lista" style="margin-top:10px"></div>
+    </div>
+    <div class="bxpe">
+      <div class="bxerro" id="ccl_erro"></div>
+      <button class="ghost" id="ccl_somar" onclick="usaCcl(true)" style="display:none" data-i18n="cclSomar">Somar ao atual</button>
+      <button class="primary" id="ccl_ok" onclick="usaCcl(false)" style="display:none" data-i18n="cclSubst">Substituir</button>
+    </div>
+  </div>
+</div>
+
+<!-- o único sítio onde se diz que um trabalho foi para a impressora:
+     regista, e dá baixa no Bobina se se quiser, tudo de uma vez -->
 <div id="bxq">
   <div class="bxqbox">
-    <b data-i18n="bxqTitulo">Este trabalho já foi impresso?</b>
+    <b data-i18n="impqTitulo">Registar este trabalho</b>
     <div class="bxqtxt" id="bxq_txt"></div>
+    <div class="impqest">
+      <label><input type="radio" name="impq_est" value="mandado" onchange="impqEstado()"><span data-i18n="impqMandado">🖨 Mandado imprimir</span></label>
+      <label><input type="radio" name="impq_est" value="impresso" onchange="impqEstado()"><span data-i18n="impqImpresso">✅ Já impresso</span></label>
+    </div>
+    <label class="toggle" id="impq_baixa_l"><input type="checkbox" id="impq_baixa"> <span id="impq_baixa_t"></span></label>
     <div class="bxqbt">
-      <button class="primary" onclick="respondeBaixa(1)" data-i18n="bxqSim">Já foi — dar baixa</button>
-      <button class="ghost" onclick="respondeBaixa(0)" data-i18n="bxqNao">Ainda não</button>
+      <button class="feito" style="margin:0" onclick="confirmaImpresso()" data-i18n="impqOk">Registar</button>
+      <button class="ghost" onclick="el('bxq').style.display='none'" data-i18n="impqCancelar">Cancelar</button>
     </div>
   </div>
 </div>
 
+<div id="veu" onclick="abreMenu(false);abreRegisto(false)"></div>
+<aside id="menu" aria-label="Menu" onclick="if(event.target.closest('button'))abreMenu(false)">
+  <div class="rhd"><b>Fatia</b><button class="ghost" onclick="abreMenu(false)">✕</button></div>
+  <div class="mcorpo">
+    <div class="mgrupo" data-i18n="mTrabalho">Trabalho</div>
+    <button class="ghost" onclick="resetJob()" data-i18n="bNovo">Novo orçamento</button>
+    <button class="ghost" onclick="abreRegisto()" data-i18n="bRegistoMenu">📒 Registo e clientes</button>
+    <div class="mgrupo" data-i18n="mVista">Vista</div>
+    <button class="ghost" id="b_simples" onclick="toggleSimples()">Modo simples</button>
+    <button class="ghost" id="b_dobrar" onclick="dobrarTudo()" title="Fechar ou abrir todas as secções">⌃ Fechar secções</button>
+    <label class="mlang"><span data-i18n="mIdioma">Idioma</span>
+      <select id="lang_sel" onchange="mudarIdioma(this.value)"><option value="pt">Português</option><option value="en">English</option></select></label>
+    <div class="mgrupo" data-i18n="mDados">Dados</div>
+    <button class="ghost" onclick="exportSettings()" data-i18n="bExportar">↓ Exportar</button>
+    <button class="ghost" onclick="document.getElementById('imp').click()" data-i18n="bImportar">↑ Importar</button>
+    <input type="file" id="imp" accept=".json" style="display:none" onchange="importSettings(event)">
+    <button class="ghost" id="b_memoria" onclick="mostrarMemoria()" data-i18n="bMemoria">Memória</button>
+    <button class="ghost" id="b_instalar" style="display:none" onclick="instalarApp()" data-i18n="bInstalar">⤓ Instalar app</button>
+    <div class="mgrupo" data-i18n="mSobre">Sobre</div>
+    <button class="ghost" onclick="mostrarLicenca(1)" data-i18n="mLicenca">Licença</button>
+  </div>
+</aside>
+<datalist id="dl_clientes"></datalist>
+<aside id="reg" aria-label="Registo">
+  <div class="rhd"><b data-i18n="regTitulo">📒 Registo de trabalhos</b>
+    <button class="ghost" onclick="abreRegisto(false)">✕</button></div>
+  <div class="rtabs">
+    <button class="ghost on" id="rt_trab" onclick="regTab('trab')" data-i18n="regTabTrab">Trabalhos</button>
+    <button class="ghost" id="rt_cli" onclick="regTab('cli')" data-i18n="regTabCli">Clientes</button>
+  </div>
+  <div class="rcorpo" id="rc_trab">
+    <select id="reg_filtro" onchange="drawRegistos()"></select>
+    <div class="rsum" id="reg_sum"></div>
+    <div id="reg_lista"></div>
+  </div>
+  <div class="rcorpo" id="rc_cli" style="display:none">
+    <input type="hidden" id="cli_id">
+    <div class="row"><label data-i18n="cliNome">Nome</label><input id="cli_nome"></div>
+    <div class="row r2">
+      <div><label data-i18n="cliContacto">Contacto</label><input id="cli_contacto" placeholder="email / telefone"></div>
+      <div><label>NIF</label><input id="cli_nif"></div>
+    </div>
+    <div class="row"><label data-i18n="cliNotas">Notas</label><input id="cli_notas"></div>
+    <div style="display:flex;gap:6px;margin:8px 0 12px">
+      <button class="primary" style="flex:1" onclick="guardaCliente()" data-i18n="cliGuardar">Guardar cliente</button>
+      <button class="ghost" onclick="limpaCliente()" data-i18n="cliNovo">Novo</button>
+    </div>
+    <div id="cli_lista"></div>
+  </div>
+</aside>
 <div id="mem">
   <div class="membox">
     <div class="lichd">
@@ -716,15 +919,14 @@ footer a{color:var(--blue);text-decoration:none}
     <path d="M32 33 L48.97 16.03 A24 24 0 1 1 25.79 9.82 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
     <path d="M32.67 30.49 L26.46 7.31 A24 24 0 0 1 49.64 13.52 Z" fill="#ff9f2e"/>
   </symbol>
-  <!-- marca DL X reduzida ao essencial: o "D/L" toma a cor do texto, o "X" fica coral da identidade -->
-  <symbol id="dlxmark" viewBox="275 385 742 510">
-    <path fill="#ec826c" d="M1006.26,832.53h-79.87s-40.39-41.13-40.39-41.13l-44.71-45.96-28.35,29.11-66.72,68.41-30.51,30.66-.21-101.85-39.92-.14c-.51-3.83-.69-7.22.03-10.23l44.31-45.3,37.57-38.47c3.49-3.57,6.83-6.55,10.03-10.83l-59.03-60.39-33.32-33.94.07-66.07h87.27s21.41,22.01,21.41,22.01l8.67,9.12,48.62,50.94,18.68-19.82,29.72-31.01,30.09-31.21,86.56-.04-.02,66.51-54.67,56.19-37.06,37.92c4.04,4.73,7.83,8.65,12,12.88l26.85,27.24,48.17,48.95,4.71,5.05.04,71.4Z"/>
-    <path fill="currentColor" d="M426.43,394.71h-140.66v375.51h235.5v-268.41l-94.85-107.11ZM426.43,675.37h-45.81v-185.82h45.81v185.82Z"/>
-    <polygon fill="#ec826c" points="521.28 788.93 521.28 596.66 426.43 489.55 426.43 788.93 426.43 883.78 521.28 883.78 699.36 883.78 699.36 788.93 521.28 788.93"/>
-  </symbol>
+  <!-- marca DL Forge reduzida ao essencial: o "D/L" toma a cor do texto, o "X" fica coral da identidade -->
+
 </svg>
 
 <div id="stale"></div>
+
+<!-- um separador por orcamento em curso: falar com uma pessoa, saltar para outra e voltar -->
+<div class="abas" id="abas"></div>
 
 <div class="grid">
 
@@ -733,7 +935,7 @@ footer a{color:var(--blue);text-decoration:none}
     <h2><i class="n">1</i>O Trabalho</h2>
 
     <div class="row r3">
-      <div><label>Cliente</label><input id="j_cliente" placeholder="Ex.: João Silva"></div>
+      <div><label>Cliente</label><input id="j_cliente" list="dl_clientes" placeholder="Ex.: João Silva"></div>
       <div><label>Projeto</label><input id="j_projeto" placeholder="Ex.: Miniaturas"></div>
       <div><label>N.º de peças — total</label><input type="number" id="j_pecas" value="2" min="0" step="1" readonly>
         <div class="hint">Somado das mesas. As peças contam-se uma vez: 2 peças em 2 mesas são 2 peças, não 4.</div></div>
@@ -742,8 +944,9 @@ footer a{color:var(--blue);text-decoration:none}
 
     <h3 style="margin-top:14px" data-bloco="mod"><span data-i18n="modTitle">🧊 Modelação 3D — pré-processamento</span></h3>
     <table id="tbl_mod"><thead><tr>
-      <th style="width:56%" data-i18n="modName">Modelo</th>
-      <th style="width:30%" data-i18n="modHours">Tempo</th>
+      <th style="width:44%" data-i18n="modName">Modelo</th>
+      <th style="width:22%" data-i18n="modHours">Tempo</th>
+      <th style="width:28%" data-i18n="modTools">Custo de ferramentas</th>
       <th></th>
     </tr></thead><tbody></tbody></table>
     <div class="mrow" style="gap:6px;margin-top:6px">
@@ -773,7 +976,7 @@ footer a{color:var(--blue);text-decoration:none}
          filamento nenhum, e um botão de baixa sem nada para dar baixa é ruído -->
     <div id="baixa_box" style="display:none">
       <button class="ghost" id="b_baixa" style="margin-top:6px;width:100%" onclick="abreBaixa()"></button>
-      <div class="hint" id="baixa_nota"></div>
+      <div class="hint viva" id="baixa_nota"></div>
     </div>
     <label class="toggle" style="margin-top:4px">
       <input type="checkbox" id="j_mostrar_maq">
@@ -787,7 +990,9 @@ footer a{color:var(--blue);text-decoration:none}
       Tempo aceita <b>14h58</b>, <b>14:58</b> ou minutos (<b>898</b>).<br>
       Cada mesa pode ter a <b>sua impressora</b>. O custo por hora é o dessa máquina e o total sai da
       média ponderada pelo tempo de cada mesa — se retificares o tempo real, todas as mesas escalam
-      na mesma proporção.
+      na mesma proporção.<br>
+      <b>Multicor</b> — em cada mesa, carrega em <b>＋ Filamento</b> uma vez por cor. Cada filamento leva os
+      seus <b>gramas</b> (o slicer dá-os por cor); os que ficarem em branco repartem o resto do peso da mesa.
     </div>
 
     <label class="toggle" style="margin-top:8px">
@@ -822,23 +1027,81 @@ footer a{color:var(--blue);text-decoration:none}
       <div><label>Pintura</label><div class="suffix"><input type="number" id="j_pint" value="0" min="0" step="1"><i>min</i></div></div>
     </div>
 
+    <div class="row r2" style="margin-top:8px">
+      <div><label>Título no orçamento</label>
+        <input id="j_acab_titulo" list="dl_acab_titulo" placeholder="Acabamento">
+        <datalist id="dl_acab_titulo">
+          <option value="Acabamento"></option>
+          <option value="Acabamento e montagem"></option>
+          <option value="Acabamento e/ou montagem"></option>
+          <option value="Pós-processamento"></option>
+        </datalist>
+      </div>
+      <div><label>Nome do trabalho manual</label>
+        <input id="j_acab_mao" list="dl_acab_mao" placeholder="acabamento manual">
+        <datalist id="dl_acab_mao">
+          <option value="acabamento manual"></option>
+          <option value="montagem"></option>
+          <option value="limpeza e remoção de suportes"></option>
+          <option value="montagem e afinação"></option>
+        </datalist>
+      </div>
+    </div>
+    <label class="toggle" style="margin-top:4px">
+      <input type="checkbox" id="j_acab_tarefas" checked>
+      Listar as tarefas feitas (trabalho manual, polimento, pintura)
+    </label>
+    <label class="toggle">
+      <input type="checkbox" id="j_acab_prep" checked>
+      Mencionar a preparação e verificação das impressões
+    </label>
+    <label class="toggle">
+      <input type="checkbox" id="j_acab_min" checked>
+      Mostrar os minutos de trabalho manual
+    </label>
+    <div class="hint">O cliente só vê o que estiver ligado aqui — o preço não muda com nada disto.
+      A palavra <b>montagem</b> é a que costuma levantar perguntas em peças que não foram montadas
+      em casa do cliente: só a uses quando montaste mesmo alguma coisa.</div>
+
     <h3>🚚 Descontos e envio</h3>
     <div class="row r2">
       <div>
         <label>Desconto por quantidade</label>
         <div class="suffix"><input type="number" id="j_desc" value="0" min="0" max="100" step="0.5"><i>%</i></div>
         <div class="tierbtns" id="tiers"></div>
-        <div class="hint">Só sobre base + mão de obra.</div>
+        <!-- viva: e uma leitura que muda a cada tecla, nao pode ir para dentro de um "?" -->
+        <div class="hint viva tierlido" id="j_desc_lido"></div>
+        <div class="hint" data-i18n="descHint">Só sobre base + mão de obra.</div>
       </div>
       <div class="avancado">
         <label>Promoção</label>
         <div class="suffix"><input type="number" id="j_promo" value="0" min="0" max="100" step="0.5"><i>%</i></div>
-        <div class="hint">Só sobre material + impressão.</div>
+        <!-- o caminho ao contrário: diz-se o total e a percentagem faz-se sozinha -->
+        <div class="promoalvo">
+          <div class="suffix"><input type="number" id="j_promo_alvo" min="0" step="0.5" placeholder="ou o total final"><i>€</i></div>
+          <button type="button" class="ghost" onclick="promoParaTotal()">Fixar</button>
+        </div>
+        <div class="hint viva tierlido" id="j_promo_lido"></div>
+        <div class="hint">Sobre o preço de todos os serviços (modelação, impressão, acabamento), já depois do desconto por quantidade e do pacote. 100% deixa só os portes.</div>
       </div>
     </div>
+    <label class="toggle"><input type="checkbox" id="j_pacote" checked> 🎁 Desconto de pacote neste orçamento</label>
+    <!-- viva: diz a cada mudança se o trabalho chega ao pacote -->
+    <div class="hint viva" id="j_pacote_lido"></div>
     <div class="row r2">
-      <div><label>Transportadora</label><select id="j_portes"></select></div>
+      <div><label>Transporte / entrega</label><select id="j_portes"></select></div>
       <div><label>Valor manual dos portes</label><div class="suffix"><input type="number" id="j_portes_man" step="0.01" min="0" value="0" disabled><i>€</i></div></div>
+    </div>
+    <!-- só aparece com a entrega por carro escolhida: km e tempo ao volante -->
+    <div id="carro_box" style="display:none">
+      <div class="row r2" style="margin-top:6px">
+        <div><label>Distância até ao cliente</label><div class="suffix"><input type="number" id="j_km" min="0" step="0.5" value="0"><i>km</i></div></div>
+        <div><label>Tempo ao volante</label><div class="suffix"><input type="number" id="j_km_tempo" min="0" step="5" value="0"><i>min</i></div></div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="j_km_volta" checked> Contar ida e volta (o dobro dos km)</label>
+      <label class="toggle"><input type="checkbox" id="j_km_detalhe" checked> Mostrar os km no orçamento do cliente</label>
+      <div class="hint">Distância só de ida — o interruptor é que dobra. O €/km, a hora ao volante e o
+        mínimo da deslocação estão nas Definições, em <b>📦 Embalagem e entrega</b>.</div>
     </div>
     <label class="toggle"><input type="checkbox" id="j_round" checked> Arredondar aos 0,50 €</label>
     <div class="derived" id="d_portes"></div>
@@ -928,7 +1191,7 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="hint" style="margin-top:-4px"><b>Preparação por mesa</b> é o trabalho fixo de cada impressão — fatiar, preparar e limpar a base, arrancar as peças. Não depende de quantas peças cabem lá dentro, e é por isso que encher a mesa compensa. Cobrada à tua tarifa de mão de obra.</div>
     <div class="hint" style="margin-top:-4px">A <b>0 €/h</b> só repassa o custo de eletricidade e amortização. Qualquer valor acima disso passa a cobrar o tempo da impressora, que é onde os trabalhos longos ganham ou perdem dinheiro.</div>
 
-    <h3 class="fechada" data-i18n="taxTitle">🏛️ Imposto no orçamento</h3>
+    <h3 class="fechada"><span data-i18n="taxTitle">🏛️ Imposto no orçamento</span></h3>
     <label class="toggle"><input type="checkbox" id="s_tax_on" checked> <span data-i18n="taxOn">Mostrar imposto no orçamento do cliente</span></label>
     <div class="row r3">
       <div><label data-i18n="taxPreset">País / regra</label><select id="s_tax_preset"></select></div>
@@ -952,14 +1215,11 @@ footer a{color:var(--blue);text-decoration:none}
       <b>Acrescentado</b>: o total é o teu preço limpo e o imposto vai por cima — o teu lucro é o mesmo e o cliente é que paga o imposto.</div>
     <div class="hint" data-i18n="taxHint">O total final mantém-se igual: o orçamento separa subtotal antes de imposto e imposto incluído. Usa “Personalizado” para outros países ou regimes.</div>
 
-    <div class="row r4" style="margin-top:10px">
+    <div class="row r3" style="margin-top:10px">
       <div><label>Mão de obra</label><div class="suffix"><input type="number" id="s_mao" step="1"><i>€/h</i></div></div>
       <div><label>Polimento</label><div class="suffix"><input type="number" id="s_polh" step="1"><i>€/h</i></div></div>
       <div><label>Pintura</label><div class="suffix"><input type="number" id="s_pinth" step="1"><i>€/h</i></div></div>
-      <div><label style="color:var(--accent2)" data-i18n="modRate">Modelação 3D</label>
-        <div class="suffix"><input type="number" id="s_modh" step="1" min="0"><i>€/h</i></div></div>
     </div>
-    <div class="hint" style="margin-top:-4px" data-i18n="modRateHint">A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.</div>
     <h3 class="fechada">💰 Margens de lucro</h3>
     <div class="row r3 avancado">
       <div><label>Material</label><div class="suffix"><input type="number" id="s_mmat" step="0.25"><i>%</i></div></div>
@@ -976,17 +1236,52 @@ footer a{color:var(--blue);text-decoration:none}
     <div class="hint">A margem final aplica-se sobre material + impressão + base, por cima das margens parciais.</div>
     <div class="row r2 avancado" style="margin-top:10px">
       <div><label>Escalões de desconto</label><input id="s_tiers">
-        <div class="hint">peças:% separados por vírgula.</div></div>
+        <div class="hint" data-i18n-html="tiersHint">Escreve <b>peças:%</b> separados por vírgula.
+          <b>3:5</b> lê-se «a partir de 3 peças, 5% de desconto».</div>
+        <div class="hint viva tierlido" id="s_tiers_lido"></div></div>
       <div><label>Margem mínima aceitável</label><div class="suffix"><input type="number" id="s_mmin" step="1"><i>%</i></div>
         <div class="hint">Abaixo disto recebes aviso.</div></div>
     </div>
+    <div class="avancado pacote" style="margin-top:10px">
+      <label class="toggle"><input type="checkbox" id="s_pac_on" checked> 🎁 Desconto de pacote — quando o trabalho junta vários serviços</label>
+      <div class="row r2">
+        <div><label>Desconto</label><div class="suffix"><input type="number" id="s_pac_pct" value="20" min="0" max="100" step="0.5"><i>%</i></div></div>
+        <div><label>Ativa com pelo menos</label><div class="suffix"><input type="number" id="s_pac_min" value="2" min="1" max="3" step="1"><i>serviços</i></div></div>
+      </div>
+      <div class="row r2">
+        <div><label>Contam para ativar</label>
+          <div class="pacchk">
+            <label class="toggle"><input type="checkbox" id="s_pac_c_mod" checked> Modelação</label>
+            <label class="toggle"><input type="checkbox" id="s_pac_c_imp" checked> Impressão</label>
+            <label class="toggle"><input type="checkbox" id="s_pac_c_pos"> Acabamento</label></div></div>
+        <div><label>Desconta sobre</label>
+          <div class="pacchk">
+            <label class="toggle"><input type="checkbox" id="s_pac_a_mod" checked> Modelação</label>
+            <label class="toggle"><input type="checkbox" id="s_pac_a_imp" checked> Impressão</label>
+            <label class="toggle"><input type="checkbox" id="s_pac_a_pos" checked> Acabamento</label></div></div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="s_pac_desc" checked> Explicar o pacote no orçamento do cliente</label>
+      <div class="hint viva tierlido" id="s_pac_lido"></div>
+      <div class="hint">Um serviço conta quando entra mesmo no trabalho: modelação com tempo, impressão com mesas,
+        acabamento com minutos de trabalho manual, polimento ou pintura. Os portes nunca levam desconto.
+        Fica nos presets, como o resto das Definições — e desliga-se por orçamento no painel 1.</div>
+    </div>
 
-    <h3 class="avancado fechada">📦 Embalagem</h3>
+    <h3 class="avancado fechada">📦 Embalagem e entrega</h3>
     <div class="row r2 avancado">
       <div><label>Peso da embalagem</label><div class="suffix"><input type="number" id="s_emb_peso" step="10" min="0"><i>g</i></div>
         <div class="hint">Caixa, plástico-bolha, etiqueta. Soma-se ao peso das peças para o escalão dos portes.</div></div>
       <div><label>Custo da embalagem</label><div class="suffix"><input type="number" id="s_emb_custo" step="0.05" min="0"><i>€</i></div>
         <div class="hint">Acresce ao preço do transporte.</div></div>
+    </div>
+
+    <div class="row r3 avancado" style="margin-top:10px">
+      <div><label>🚗 Custo por km</label><div class="suffix"><input type="number" id="s_km" step="0.01" min="0"><i>€/km</i></div>
+        <div class="hint">Combustível, desgaste e seguro da entrega por carro. 0,40 €/km é a referência das ajudas de custo em viatura própria.</div></div>
+      <div><label>Hora ao volante</label><div class="suffix"><input type="number" id="s_km_hora" step="1" min="0"><i>€/h</i></div>
+        <div class="hint">O teu tempo na estrada. Deixa a 0 para não o cobrar.</div></div>
+      <div><label>Mínimo da deslocação</label><div class="suffix"><input type="number" id="s_km_minimo" step="0.5" min="0"><i>€</i></div>
+        <div class="hint">Piso para entregas ao virar da esquina. 0 = sem mínimo.</div></div>
     </div>
 
     <details class="avancado">
@@ -996,6 +1291,27 @@ footer a{color:var(--blue);text-decoration:none}
     </details>
 
     <div class="derived avancado" id="d_set"></div>
+
+    <h3 class="fechada"><span data-i18n="modSetTitle">🧊 Modelação 3D</span></h3>
+    <div class="row r2">
+      <div><label style="color:var(--accent2)" data-i18n="modRate">Modelação 3D</label>
+        <div class="suffix"><input type="number" id="s_modh" step="1" min="0"><i>€/h</i></div></div>
+      <div><label data-i18n="modFmarg">Margem sobre ferramentas</label>
+        <div class="suffix"><input type="number" id="s_mod_fmarg" step="1" min="0"><i>%</i></div></div>
+    </div>
+    <div class="hint" style="margin-top:-4px" data-i18n-html="modRateHint">A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.</div>
+    <div class="row r3" style="margin-top:10px">
+      <div><label data-i18n="modAssin">Assinatura mensal de ferramentas</label>
+        <div class="suffix"><input type="number" id="s_mod_assin" step="1" min="0"><i>€</i></div></div>
+      <div><label data-i18n="modHmes">Horas de modelação por mês (estimativa)</label>
+        <div class="suffix"><input type="number" id="s_mod_hmes" step="1" min="0"><i>h</i></div></div>
+      <div><label data-i18n="modTaxa">Câmbio do dólar</label>
+        <div class="suffix"><input type="number" id="s_usd_eur" step="0.01" min="0"><i>€/$</i></div></div>
+    </div>
+    <div class="hint viva tierlido" id="s_mod_lido"></div>
+    <div class="hint" data-i18n-html="modFerHint">O <b>custo de ferramentas</b> de cada modelo e a assinatura rateada por hora entram na linha
+      «Modelação 3D» do orçamento, já com a margem acima. O cliente vê só essa linha. Com assinatura a 0 € ou sem horas por mês, não há rateio.
+      O câmbio converte em euros o custo importado das sessões, que vem em dólares.</div>
   </div>
 
   <!-- ===== 3 · RESULTADO ===== -->
@@ -1007,6 +1323,8 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="per" id="o_unit"></div>
       </div>
       <div id="o_linhas"></div>
+      <button class="feito" id="b_impresso" onclick="marcarImpresso()" data-i18n="bImpresso">✅ Marcar como impresso</button>
+      <div id="reg_estado"></div>
     </div>
 
     <div class="kpis">
@@ -1100,6 +1418,31 @@ footer a{color:var(--blue);text-decoration:none}
   </div>
 </div>
 
+<!-- ===== credores: as dívidas do Giro, e a fatia do lucro que as abate =====
+     Fica de fora do orçamento do cliente de propósito: é conta da oficina, não
+     dele. Só aparece havendo Giro a correr nesta máquina. -->
+<div class="card" id="cred" style="display:none">
+  <h2>🧾 <span data-i18n="crTitulo">Credores</span></h2>
+
+  <div class="crhd">
+    <div class="fpsub" data-i18n="crSub">As dívidas abertas do Giro, em direto. Orienta uma fatia do lucro deste trabalho a quem tens a pagar — o pagamento entra logo no Giro.</div>
+    <div class="crlive" id="cr_live"><s></s><span data-i18n="crALer">a ler…</span></div>
+  </div>
+
+  <div class="crtits" id="cr_tits" style="margin:0 0 11px"></div>
+
+  <div class="crfatia">
+    <div class="cf"><span data-i18n="crLucro">Lucro do trabalho</span><b id="cr_lucro">—</b></div>
+    <input type="range" id="cr_pct" min="0" max="100" step="5" value="0" oninput="giroMudaPct('cr_pct')">
+    <input class="cpct" type="number" id="cr_pctn" min="0" max="100" step="1" value="0" oninput="giroMudaPct('cr_pctn')">
+    <div class="cf"><span data-i18n="crOrientar">A orientar</span><b id="cr_val">—</b></div>
+  </div>
+
+  <div id="cr_lista"></div>
+  <div class="crerro" id="cr_erro"></div>
+  <div class="crnota" data-i18n-html="crNota">Nada disto aparece no orçamento do cliente. O valor sai do <b>lucro</b> deste trabalho — o que sobra depois dos custos — e é lançado no Giro como um pagamento normal, que de lá segue para o Rumo.</div>
+</div>
+
 <div class="card" id="cardMarca">
   <h2><i class="n">4</i>A tua marca no orçamento</h2>
 
@@ -1162,13 +1505,10 @@ footer a{color:var(--blue);text-decoration:none}
   <div class="dlxsig">
     <span class="pw">powered by</span>
     <!-- o viewBox do símbolo já enquadra a marca; aqui basta a caixa com a mesma proporção -->
-    <svg class="dlxmark" viewBox="0 0 742 510" role="img" aria-label="DL X"><use href="#dlxmark"/></svg>
+    <a href="https://dlforge.dungenlabs.com" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;color:inherit;text-decoration:none"><svg role="img" aria-label="DL Forge" style="width:76px;height:36px;vertical-align:middle;flex:none"  xmlns="http://www.w3.org/2000/svg" viewBox="149 434 891 423"><defs><style>.cls-1{fill:#e87e6a;}.cls-2{fill:#ec826c;}.cls-3{fill:currentColor;}</style></defs><path class="cls-3" d="M274.03,441.8h-117.07v312.54h196.01v-223.39l-78.94-89.14ZM274.03,675.4h-38.13v-154.66h38.13v154.66Z"/><polygon class="cls-2" points="352.97 769.91 352.97 609.88 274.03 520.74 274.03 769.91 274.03 848.85 352.97 848.85 501.19 848.85 501.19 769.91 352.97 769.91"/><polygon class="cls-1" points="859.32 702.36 830.33 702.27 830.34 662.54 900.57 662.5 900.57 754.23 778.51 754.22 778.53 628.6 796.06 611.14 900.46 611.13 900.55 651.82 819.7 651.84 819.51 713.27 859.37 713.22 859.32 702.36"/><path class="cls-1" d="M724.1,721.8l-18.74-19.04-11.78-.42-.04-39.74,20.18-.19c3.41-3.27,6.67-6.64,9.41-10.44h-39.61s-.04,102.37-.04,102.37l-40.68-.26-.03-142.88,95.46-.1,27.11,24.98.07,35.93-15.2,15.17,15.12,15.18.04,51.91-41.1-.07-.19-32.39Z"/><polygon class="cls-1" points="951.66 713.21 1031.92 713.3 1031.9 754.23 911.23 754.24 911.27 611.16 1031.89 611.13 1031.93 651.8 951.7 651.88 951.66 713.21"/><polygon class="cls-3" points="421.22 651.88 421.19 754.31 380.39 754.09 380.42 611.13 500.6 611.15 500.63 651.78 421.22 651.88"/><rect class="cls-3" x="445.97" y="647.61" width="39.92" height="69.49" transform="translate(-216.53 1148.14) rotate(-89.99)"/><rect class="cls-1" x="961.96" y="662.39" width="70.05" height="39.93"/><path class="cls-1" d="M606.51,754.25h-70.8s-24.79-24.84-24.79-24.84v-93.15s24.91-25.14,24.91-25.14l70.87.04,25.13,25.01v93.27s-25.31,24.8-25.31,24.8ZM551.64,651.79v61.51s39.41,0,39.41,0v-61.51s-39.41,0-39.41,0Z"/></svg><span>DL Forge</span></a>
   </div>
-  <p class="dlxd"><i>DL X é a divisão de investigação e produto da <b>DungenLabs</b>, laboratório de engenharia
-    em Lisboa — a metade do laboratório que constrói para si própria: protótipos experimentais, produtos
-    próprios fabricados em casa (extrusão FDM, filamento reforçado com fibra e fundição em resina),
-    parcerias e tecnologia à procura de uso.</i></p>
-  <div style="margin-top:6px"><a href="https://dlx.dungenlabs.com" target="_blank" rel="noopener">dlx.dungenlabs.com</a>
+  <p class="dlxd" data-i18n="forgeDivision">DL Forge é a divisão de software e jogos da DungenLabs. O Fatia faz parte das suas ferramentas.</p>
+  <div style="margin-top:6px"><a href="https://dlforge.dungenlabs.com" target="_blank" rel="noopener">dlforge.dungenlabs.com</a>
     · <a href="https://dungenlabs.com" target="_blank" rel="noopener">dungenlabs.com</a></div>
 </footer>
 <div id="printable"></div>
@@ -1176,16 +1516,15 @@ footer a{color:var(--blue);text-decoration:none}
 
 <script>
 function preview(on=true){
-  /* antes de mostrar o orçamento, perguntar se aquilo já foi impresso: é o
-     momento em que se sabe, e a pergunta reabre isto conforme a resposta */
-  if(on && perguntaBaixa()) return;
+  /* ao fechar um orçamento do registo, o de agora volta para o seu lugar */
+  if(!on && el('printable').dataset.guardado){ delete el('printable').dataset.guardado; delete el('printable').dataset.folha; calc(); }
   el('printable').classList.toggle('show',on);
   document.body.style.overflow=on?'hidden':'';
   if(on && !document.getElementById('pvprint')){
     const b=document.createElement('button');
     b.id='pvprint'; b.textContent='🖨 Imprimir / PDF';
     b.style.cssText='position:fixed;top:16px;right:120px;z-index:100;background:#ff9f2e;color:#1a1206;border:none;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer';
-    b.onclick=()=>window.print();
+    b.onclick=imprimirPDF;
     document.body.appendChild(b);
   }
   const p=document.getElementById('pvprint'); if(p) p.style.display=on?'block':'none';
@@ -1202,21 +1541,24 @@ const DEF = {
   imp_preco:250, imp_vida:5000, imp_kw:0.12, pc_kw:0.08, pc_kw2:0.15,
   fer_preco:200, fer_vida:7500, fer_kw:0.10, tinta_l:30, tinta_ml:1,
   emb_peso:150, emb_custo:0.50, prep_min:0, base_mesa:0,
+  km:0.40, km_hora:0, km_minimo:0,
   base:1, taxa_maq:0, mao:25, polh:30, pinth:35, tiers:'3:5, 10:10, 15:15',
-  mmat:3.50, mimp:0, mmao:0, margem:10, mmin:20,
-  dev_mat:0, dev_t:0,
+  mmat:3.50, mimp:0, mmao:0, margem:10, mmin:20, pac_pct:20, pac_min:2,
+  dev_mat:0, dev_t:0, mod_fmarg:30, mod_assin:0, mod_hmes:0, usd_eur:0.87,
   portes:[[250,0],[500,0],[1000,0],[2000,0],[5000,0]]
 };
 const S_NUM = ['data','fil_nome','kwh','kwh_add','iva','tax_rate','fil_kg','fil_portes','desp','mmat',
   'imp_preco','imp_vida','imp_kw','pc_kw','pc_kw2','fer_preco','fer_vida','fer_kw',
-  'tinta_l','tinta_ml','emb_peso','emb_custo','prep_min','base','base_mesa','taxa_maq','mao','polh','pinth','modh','tiers',
-  'mimp','mmao','margem','mmin','dev_mat','dev_t'];
+  'tinta_l','tinta_ml','emb_peso','emb_custo','km','km_hora','km_minimo','prep_min','base','base_mesa','taxa_maq','mao','polh','pinth','modh','tiers',
+  'mimp','mmao','margem','mmin','pac_pct','pac_min','dev_mat','dev_t','mod_fmarg','mod_assin','mod_hmes','usd_eur'];
 
 const eur = n => (isFinite(n)?n:0).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 const num = id => parseFloat(document.getElementById(id).value)||0;
 const el  = id => document.getElementById(id);
 const pct = n => (isFinite(n)?n:0).toLocaleString('pt-PT',{maximumFractionDigits:2});
-const htmlEsc = s => String(s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+/* as aspas tambem: isto vai parar a title="..." e value="..." -- um nome de
+   cliente com aspas partia o atributo ao meio */
+const htmlEsc = s => String(s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 const TAX_PRESETS=[
   {id:'PT_23', label:{pt:'Portugal — IVA 23%', en:'Portugal — VAT 23%'}, nome:'IVA', rate:23},
   {id:'PT_13', label:{pt:'Portugal — IVA reduzido 13%', en:'Portugal — reduced VAT 13%'}, nome:'IVA', rate:13},
@@ -1470,11 +1812,18 @@ function qrSVG(texto,px){
 }
 
 /* ============ MODELAÇÃO 3D (pré-processamento) ============
-   Cada modelo é {nome, tempo}. O tempo é uma string como as mesas ("2h30", "2:30", "150"),
-   lida pelo parseT. Lista vazia = trabalho sem modelação, e nada disto aparece no orçamento. */
+   Cada modelo é {nome, tempo, ferramentas}. O tempo é uma string como as mesas ("2h30", "2:30", "150"),
+   lida pelo parseT. f = custo de ferramentas em € (opcional; modelos antigos não o têm e valem 0).
+   Lista vazia = trabalho sem modelação, e nada disto aparece no orçamento. */
 let MODELOS=[];
-const normModelo = m => ({n:String(m&&m.n||''), t:String(m&&m.t||'')});
+const normModelo = m => ({n:String(m&&m.n||''), t:String(m&&m.t||''), f:String(m&&m.f||'')});
 const minutosModelacao = () => MODELOS.reduce((a,m)=>a+parseT(m.t),0);
+const ferModelo = m => Math.max(0,parseFloat(String(m.f||'').replace(',','.'))||0);
+/* rateio da assinatura: € por hora de modelação, para os meses em que se paga por mês e não por uso */
+const rateioMod = () => num('s_mod_hmes')>0 ? num('s_mod_assin')/num('s_mod_hmes') : 0;
+/* o preço de um modelo: horas à tarifa + ferramentas e rateio, com a margem das ferramentas */
+const precoModelo = m => { const h=parseT(m.t)/60;
+  return h*num('s_modh')*(1+num('s_mmao')/100) + (ferModelo(m)+h*rateioMod())*(1+num('s_mod_fmarg')/100); };
 
 function drawModelos(){
   const tb=el('tbl_mod').querySelector('tbody'); tb.innerHTML='';
@@ -1484,19 +1833,25 @@ function drawModelos(){
     inN.addEventListener('input',()=>{ MODELOS[i].n=inN.value; calc(); guardaEstado(); });
     const [tdT,inT]=cell(mo.t,{type:'text',placeholder:'0h00'});
     inT.addEventListener('input',()=>{ MODELOS[i].t=inT.value; calc(); guardaEstado(); });
+    const [tdF,inF]=cell(mo.f||'',{type:'number',min:'0',step:'0.01',placeholder:'0,00 €'});
+    inF.addEventListener('input',()=>{ MODELOS[i].f=inF.value; calc(); guardaEstado(); });
+    const bF=document.createElement('button');
+    bF.className='ghost'; bF.textContent='📥'; bF.title=tr('modImport');
+    bF.addEventListener('click',()=>abreCcl(i));
+    tdF.className='modf'; tdF.appendChild(bF);
     const td=document.createElement('td'), b=document.createElement('button');
     b.className='del'; b.textContent='×'; b.title=tr('modDelTitle');
     b.addEventListener('click',()=>{ MODELOS.splice(i,1); drawModelos(); calc(); guardaEstado(); });
     td.appendChild(b);
-    linha.appendChild(tdN); linha.appendChild(tdT); linha.appendChild(td); tb.appendChild(linha);
+    linha.appendChild(tdN); linha.appendChild(tdT); linha.appendChild(tdF); linha.appendChild(td); tb.appendChild(linha);
   });
   el('tbl_mod').style.display=MODELOS.length?'':'none';
 }
 function addModelo(){
-  MODELOS.push({n:'', t:''});
+  MODELOS.push({n:'', t:'', f:''});
   drawModelos(); calc(); guardaEstado();
   const ins=el('tbl_mod').querySelectorAll('tbody input');
-  if(ins.length) ins[ins.length-2].focus();          /* cai logo no nome do modelo novo */
+  if(ins.length) ins[ins.length-3].focus();          /* cai logo no nome do modelo novo */
 }
 function delModelo(){
   if(!MODELOS.length) return;
@@ -1549,7 +1904,10 @@ function aplicaDataPrecos(guardar=true){
     b.title=tr(DATA_MANUAL?'dtVoltarT':'dtManualT');
   }
   const h=el('data_hint');
-  if(h) h.innerHTML=!tem?'':tr(DATA_MANUAL?'dtManual':'dtAuto',{d:BOB.precos_em});
+  if(h){
+    h.innerHTML=!tem?'':tr(DATA_MANUAL?'dtManual':'dtAuto',{d:BOB.precos_em});
+    ligaInfoPopups();
+  }
 }
 function destravaData(){ DATA_MANUAL=!DATA_MANUAL; aplicaDataPrecos(); guardaEstado(); }
 const BOB_INTERVALO=45000;
@@ -1626,6 +1984,187 @@ function ligaBobina(){
     if(document.visibilityState==='visible') puxaBobina(); });
   window.addEventListener('focus',()=>puxaBobina());
 }
+/* ------------------------------ credores: ligação viva ao Giro ---------------
+   O mesmo desenho da ligação ao Bobina, pelas mesmas razões: o pedido é feito
+   pelo servidor do Fatia, que tem o segredo da ponte, e não pelo browser (entre
+   portas diferentes há CORS e o cookie não passa).
+
+   O painel é da oficina, nunca do cliente: o orçamento sai daqui sem uma linha
+   disto. O que ele faz é responder a uma pergunta que só se faz depois de haver
+   lucro -- "quanto disto vai para quem eu devo?" -- e lançar a resposta no Giro. */
+const GIRO_INTERVALO=60000;
+/* O titular escolhido: '@empresa' (tudo o que nao e' meu -- o que este painel
+   mostra por omissao), '' para ver a carteira toda, ou o nome de um titular. */
+const GIRO_EMPRESA='@empresa';
+const GIRO={dividas:[],titulares:[],resumo:null,em:0,lido:0,ok:false,erro:'',puxando:false,
+            titular:GIRO_EMPRESA, alvo:0, aLancar:false};
+
+async function puxaGiro(forcar=false){
+  if(GIRO.puxando) return;
+  if(!forcar && Date.now()-GIRO.lido < 8000) return;
+  GIRO.puxando=true;
+  try{
+    const r=await fetch('/api/giro/dividas',{credentials:'same-origin'});
+    const d=await r.json();
+    if(!d.ok) throw new Error(d.error||'sem resposta do Giro');
+    GIRO.dividas=d.dividas||[]; GIRO.titulares=d.titulares||[];
+    GIRO.resumo=d.resumo||null; GIRO.em=d.em||0;
+    GIRO.ok=true; GIRO.erro='';
+    store.set('giro',{dividas:GIRO.dividas,titulares:GIRO.titulares,resumo:GIRO.resumo,em:GIRO.em});
+  }catch(e){
+    GIRO.ok=false; GIRO.erro=e.message||String(e);
+  }finally{
+    GIRO.lido=Date.now(); GIRO.puxando=false;
+    renderCredores();
+  }
+}
+
+function ligaGiro(){
+  const c=store.get('giro',null);   /* a última leitura, para o painel abrir já com dados */
+  if(c && Array.isArray(c.dividas)){
+    GIRO.dividas=c.dividas; GIRO.titulares=c.titulares||[]; GIRO.resumo=c.resumo||null; GIRO.em=c.em||0;
+  }
+  /* Quem nunca escolheu fica na empresa: o Fatia e' a oficina, e as dividas
+     pessoais tratam-se no Giro e no Rumo, nao no orcamento de um trabalho. */
+  const guardado=store.get('giro_titular',null);
+  GIRO.titular = (guardado===null||guardado===undefined) ? GIRO_EMPRESA : guardado;
+  const pct=+store.get('giro_pct',0)||0;
+  if(el('cr_pct')) el('cr_pct').value=pct;
+  if(el('cr_pctn')) el('cr_pctn').value=pct;
+  renderCredores();
+  puxaGiro(true);
+  setInterval(()=>{ if(document.visibilityState==='visible') puxaGiro(); }, GIRO_INTERVALO);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') puxaGiro(); });
+}
+
+const lucroDoTrabalho = () => Math.max(0, (LAST && +LAST.lucro) || 0);
+const giroPct = () => Math.min(100, Math.max(0, +((el('cr_pctn')||{}).value) || 0));
+/* Ao cêntimo, e nunca acima do saldo da dívida -- o Giro recusa o que passe, e
+   é melhor o botão já não o oferecer. */
+const giroFatia = saldo => {
+  const v=Math.round(lucroDoTrabalho()*giroPct())/100;
+  return Math.min(Math.round(v*100)/100, saldo===undefined?Infinity:saldo);
+};
+
+function giroMudaPct(origem){
+  const v=Math.min(100,Math.max(0, +el(origem).value||0));
+  el('cr_pct').value=v; el('cr_pctn').value=v;
+  store.set('giro_pct',v);
+  renderCredores();
+}
+
+function giroFiltra(nome){
+  /* Voltar a carregar no chip aceso nao desliga o filtro: cairia na carteira
+     toda sem se ter pedido. Para isso ha' o chip "Todos". */
+  GIRO.titular = nome;
+  store.set('giro_titular',GIRO.titular);
+  renderCredores();
+}
+
+/* As dividas que o filtro deixa passar. */
+function giroLista(){
+  if(GIRO.titular===GIRO_EMPRESA) return GIRO.dividas.filter(d=>!d.titular_meu);
+  if(!GIRO.titular) return GIRO.dividas.slice();
+  return GIRO.dividas.filter(d=>d.titular===GIRO.titular);
+}
+
+const giroSaldoEmpresa = () =>
+  Math.round(GIRO.dividas.filter(d=>!d.titular_meu).reduce((a,d)=>a+(+d.saldo||0),0)*100)/100;
+
+function renderCredores(){
+  const card=el('cred'); if(!card) return;
+  /* Sem Giro nesta máquina e sem nada em cache, o painel nem existe: não vale a
+     pena mostrar uma caixa vazia a quem não usa a app do lado. */
+  const temAlgo = GIRO.ok || GIRO.dividas.length;
+  card.style.display = temAlgo ? '' : 'none';
+  if(!temAlgo) return;
+
+  const live=el('cr_live');
+  live.className='crlive '+(GIRO.ok?'on':(GIRO.dividas.length?'old':'off'));
+  live.innerHTML='<s></s><span>'+htmlEsc(GIRO.ok?tr('crEmDireto')
+    :(GIRO.dividas.length?tr('crUltima')+' · '+haQuanto(GIRO.lido||Date.now()):tr('crSemGiro')))+'</span>';
+
+  /* A barra esta' sempre ca': e' por ela que se ve' que o painel esta' a mostrar
+     so' a empresa, e por onde se vai ver o resto sem ter de adivinhar. */
+  const chip=(chave,rotulo,saldo)=>`
+      <button type="button" class="crtit ${GIRO.titular===chave?'on':''}"
+              onclick="giroFiltra(${JSON.stringify(chave).replace(/"/g,'&quot;')})">
+        <span>${htmlEsc(rotulo)}</span><b>${eur(saldo)}</b></button>`;
+  el('cr_tits').innerHTML =
+      chip(GIRO_EMPRESA, tr('crEmpresa'), giroSaldoEmpresa())
+    + GIRO.titulares.map(t=>chip(t.holder, t.holder, t.balance)).join('')
+    + chip('', tr('crTodos'), (GIRO.resumo&&GIRO.resumo.saldo)||0);
+
+  const lucro=lucroDoTrabalho();
+  el('cr_lucro').textContent=eur(lucro);
+  el('cr_val').textContent=eur(Math.round(lucro*giroPct())/100);
+
+  const lista=giroLista();
+  if(!lista.length){
+    const vazio = GIRO.titular===GIRO_EMPRESA ? 'crVazioEmpresa'
+                : (GIRO.titular ? 'crVazioFiltro' : 'crVazio');
+    el('cr_lista').innerHTML=`<div class="crvazio">${htmlEsc(tr(vazio))}</div>`;
+    return;
+  }
+  const pct=giroPct();
+  el('cr_lista').innerHTML=lista.map(d=>{
+    const fatia=giroFatia(d.saldo);
+    const podeAbater = pct>0 && lucro>0 && fatia>=0.01;
+    const faltam = d.faltam>1
+      ? tr('crFaltam',{n:d.faltam,v:eur(d.prestacao)})
+      : (d.faltam===1 ? tr('crFalta1',{v:eur(d.prestacao)}) : '');
+    const meta=[faltam, d.ultima_em?tr('crAte',{d:dataCurta(d.ultima_em)}):'',
+                d.este_mes>0?tr('crEsteMes',{v:eur(d.este_mes)}):''].filter(Boolean).join(' · ');
+    return `<div class="crlin${podeAbater?' alvo':''}">
+      <div class="crnome">
+        <b>${htmlEsc(d.entidade)}${d.descricao?' — '+htmlEsc(d.descricao):''}</b>
+        <i>${htmlEsc(d.ritmo)}${meta?' · '+htmlEsc(meta):''}</i>
+        ${d.titular_meu?'':`<span class="crde">${htmlEsc(tr('crDe',{quem:d.titular}))}</span>`}
+      </div>
+      <div class="crsaldo"><b>${eur(d.saldo)}</b><i>${eur(d.pago)} / ${eur(d.total)}</i></div>
+      <button class="primary crgo" ${podeAbater?'':'disabled'}
+              onclick="abaterDivida(${d.id})">${htmlEsc(tr('crAbater'))}${podeAbater?' '+eur(fatia):''}</button>
+      <div class="crbar"><i style="width:${Math.round((d.progresso||0)*100)}%"></i></div>
+    </div>`;
+  }).join('');
+}
+
+const dataCurta = iso => {
+  const [a,m,d]=String(iso||'').slice(0,10).split('-');
+  return d? d+'/'+m+'/'+a : '—';
+};
+
+async function abaterDivida(id){
+  if(GIRO.aLancar) return;
+  const d=GIRO.dividas.find(x=>x.id===id); if(!d) return;
+  const erro=el('cr_erro'); erro.textContent='';
+  if(lucroDoTrabalho()<=0){ erro.textContent=tr('crSemLucro'); return; }
+  if(giroPct()<=0){ erro.textContent=tr('crSemPct'); return; }
+  const valor=giroFatia(d.saldo);
+  if(valor<0.01){ erro.textContent=tr('crSemPct'); return; }
+  const nome=d.entidade+(d.descricao?' — '+d.descricao:'');
+  if(!confirm(tr('crConfirma',{v:eur(valor),nome}))) return;
+  GIRO.aLancar=true;
+  try{
+    const trab=[el('j_cliente').value.trim(),el('j_projeto').value.trim()].filter(Boolean).join(' · ');
+    const r=await fetch('/api/giro/pagamento',{
+      method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({divida_id:id, valor,
+        nota:`Fatia · ${giroPct()}% do lucro${trab?' · '+trab:''}`})});
+    const res=await r.json();
+    if(!res.ok) throw new Error(res.error||'o Giro recusou');
+    await puxaGiro(true);
+    erro.textContent='';
+    alert(tr('crFeito',{v:eur(valor),nome,s:eur((res.divida&&res.divida.balance)||0)}));
+  }catch(e){
+    erro.textContent=e.message||String(e);
+  }finally{
+    GIRO.aLancar=false;
+  }
+}
+
 const kgTxt = g => g>=1000 ? (g/1000).toFixed(g%1000?2:0).replace('.',',')+' kg' : Math.round(g)+' g';
 function haQuanto(ms){
   const s=Math.max(0,Math.round((Date.now()-ms)/1000));
@@ -1890,19 +2429,38 @@ function nomesEmUso(){
 }
 
 /* ---- o seletor ---- */
-let FP={q:'',mat:'',stock:false,veu:false,reflexo:true};
+let FP={q:'',mat:'',stock:false,imp:false,veu:false,reflexo:true,mesa:-1};
 const pickerAberto = () => el('filpick') && el('filpick').style.display==='flex';
-function abrePicker(){
+/* abrePicker(i) escolhe para a mesa i (junta-lhe o filamento: é assim que se
+   faz uma mesa multicor); sem mesa, escolhe o filamento das Definições */
+function abrePicker(mesa){
   const p=el('filpick'); if(!p) return;
+  FP.mesa=Number.isInteger(mesa)&&mesas[mesa]?mesa:-1;
+  const fm=el('fp_mesa');
+  fm.style.display=FP.mesa>=0?'':'none';
+  if(FP.mesa>=0) fm.textContent=tr('fpParaMesa',{n:FP.mesa+1});
   p.style.display='flex';
+  puxaLexico();
   drawPicker();
   puxaBobina(true);
   setTimeout(()=>{ const q=el('fp_q'); if(q) q.focus(); },40);
 }
-function fechaPicker(){ const p=el('filpick'); if(p) p.style.display='none'; }
+function fechaPicker(){ const p=el('filpick'); if(p) p.style.display='none'; FP.mesa=-1; }
+function escolhePicker(n){
+  const i=FP.mesa, m=mesas[i];
+  if(i>=0 && m){
+    const usados=m[5]||[];
+    if(!usados.includes(n)){
+      m[7]=[...(m[7]||[]).slice(0,usados.length), null];
+      m[5]=[...usados,n]; drawMesas(); calc(); guardaEstado();
+    }
+  } else escolheFil(n);
+  fechaPicker();
+}
 function filtraPicker(){ FP.q=el('fp_q').value.trim().toLowerCase(); drawPicker(); }
 function chipPicker(m){ FP.mat=FP.mat===m?'':m; drawPicker(); }
 function togglaStock(){ FP.stock=!FP.stock; drawPicker(); }
+function togglaImp(){ FP.imp=!FP.imp; drawPicker(); }
 /* Realçar quem tem tudo por abrir é aparência: fica no browser, como o idioma,
    e não no orçamento nem nos presets. */
 function toggleRealce(k){ FP[k]=!FP[k]; store.set('fp_'+k,FP[k]); desenhaRealces(); drawPicker(); }
@@ -1914,12 +2472,40 @@ function desenhaRealces(){
 }
 
 const semAcentos = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+/* A pesquisa fala as línguas do Bobina: o léxico dele (pedido uma vez, pelo
+   servidor) faz "amarelo" encontrar "Rapid Yellow" e "preto" o "Matte Black".
+   Sem Bobina fica a pesquisa pelo texto, como sempre. */
+let LEX=null, LEX_PEDIDO=false;
+const LEX_CACHE=new Map();
+async function puxaLexico(){
+  if(LEX_PEDIDO) return; LEX_PEDIDO=true;
+  try{
+    const d=await (await fetch('/api/bobina/lexico')).json();
+    if(d.ok){ LEX=d; LEX_CACHE.clear(); if(pickerAberto()) drawPicker(); } else LEX_PEDIDO=false;
+  }catch(_){ LEX_PEDIDO=false; }
+}
+/* os sinónimos de uma palavra; a meio da palavra ("amarel") vale o princípio das do léxico */
+function sinonimos(t){
+  if(LEX_CACHE.has(t)) return LEX_CACHE.get(t);
+  const out=new Set();
+  if(LEX){
+    const chaves=LEX.index[t] ? [t] : t.length>=4 ? Object.keys(LEX.index).filter(k=>k.startsWith(t)) : [];
+    chaves.forEach(k=>LEX.index[k].forEach(h=>{
+      out.add(semAcentos(h.c)); ((LEX.grupos[h.g]||{})[h.c]||[]).forEach(a=>out.add(a)); }));
+  }
+  const r=[...out].filter(Boolean).map(a=>new RegExp('(?<![a-z0-9])'+a.replace(/[.*+?^${}()|[\]\\-]/g,'\\$&')));
+  LEX_CACHE.set(t,r);
+  return r;
+}
+/* cada palavra tem de casar: pelo texto tal e qual, ou por um sinónimo no início de uma palavra */
+const casaTermo = (hay,t) => hay.includes(t) || sinonimos(t).some(re=>re.test(hay));
 function casaFiltro(f){
   if(FP.mat && semAcentos(f.material||'')!==semAcentos(FP.mat)) return false;
   if(FP.stock && !(f.bobines>0)) return false;
+  if(FP.imp && !contaNaImpressora(f)) return false;
   if(!FP.q) return true;
-  return semAcentos([f.n,f.marca,f.material,f.cor,(f.locais||[]).join(' '),f.loja].join(' '))
-    .includes(semAcentos(FP.q));
+  const hay=semAcentos([f.n,f.marca,f.material,f.cor,(f.locais||[]).join(' '),f.loja].join(' '));
+  return semAcentos(FP.q).split(/\s+/).filter(Boolean).every(t=>casaTermo(hay,t));
 }
 
 /* Os cartões falam por índice (data-i) e não pelo nome do filamento: o htmlEsc
@@ -1968,10 +2554,12 @@ function cartaoFil(f,i,escolhido){
 }
 function drawPicker(){
   const cx=el('fp_corpo'); if(!cx) return;
-  const escolhido=el('s_fil_nome').value;
+  const escolhido=FP.mesa>=0?'':el('s_fil_nome').value;
   const todos=todosFils();
   const mats=[...new Set(todos.filter(f=>f.bobina&&f.material).map(f=>f.material))].sort();
-  el('fp_chips').innerHTML=mats.map((m,i)=>
+  /* em destaque e à frente: o mais comum é orçar com o que já está montado */
+  el('fp_chips').innerHTML=`<button class="fchip fimp${FP.imp?' on':''}" data-m="imp">${NOZZLE} ${htmlEsc(tr('fpNaImpressora'))}</button>`
+    + mats.map((m,i)=>
       `<button class="fchip${FP.mat===m?' on':''}" data-m="${i}">${htmlEsc(m)}</button>`).join('')
     + `<button class="fchip${FP.stock?' on':''}" data-m="stock">${htmlEsc(tr('fpSoStock'))}</button>`;
   FP.mats=mats;
@@ -1998,11 +2586,15 @@ function ligaPicker(){
   el('fp_realces').addEventListener('click',e=>{
     const b=e.target.closest('.frealce'); if(b) toggleRealce(b.dataset.r);
   });
-  p.addEventListener('click',e=>{ if(e.target===p) fechaPicker(); });
+  /* só fecha se o clique COMEÇOU no fundo: selecionar o texto da pesquisa e
+     largar o rato fora da caixa dava um click no fundo e fechava a janela */
+  let noFundo=false;
+  p.addEventListener('mousedown',e=>{ noFundo=e.target===p; });
+  p.addEventListener('click',e=>{ if(e.target===p&&noFundo) fechaPicker(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&pickerAberto()) fechaPicker(); });
   el('fp_chips').addEventListener('click',e=>{
     const b=e.target.closest('.fchip'); if(!b) return;
-    if(b.dataset.m==='stock') togglaStock(); else chipPicker(FP.mats[+b.dataset.m]);
+    if(b.dataset.m==='stock') togglaStock(); else if(b.dataset.m==='imp') togglaImp(); else chipPicker(FP.mats[+b.dataset.m]);
   });
   el('fp_corpo').addEventListener('click',e=>{
     if(e.target.closest('[data-novo]')) return addFil();
@@ -2017,14 +2609,14 @@ function ligaPicker(){
       else if(b.dataset.a==='impressora') alternaImpressoraFil(f);
       return;
     }
-    escolheFil(f.n); fechaPicker();
+    escolhePicker(f.n);
   });
   el('fp_corpo').addEventListener('keydown',e=>{
     if(e.key!=='Enter'&&e.key!==' ') return;
     const cartao=e.target.closest('.fcard[data-i]'); if(!cartao) return;
     e.preventDefault();
     const f=FP.lista[+cartao.dataset.i];
-    if(f){ escolheFil(f.n); fechaPicker(); }
+    if(f) escolhePicker(f.n);
   });
 }
 
@@ -2176,14 +2768,14 @@ function bobinesSugeridas(f,g){
   return out;
 }
 
-function preparaBaixaMesa(mesa){
+function preparaBaixaMesa(mesa, desenha=true){
   const M=mesasBobina().find(x=>+x.i===+mesa);
   if(!M || baixaDaMesa(M.i)) return;
   BX.mesa=M.i;
   BX.linhas=M.itens.map(x=>({n:x.n, f:x.f, total:x.g, alocs:bobinesSugeridas(x.f, x.g)}));
   BX.chave=novaChave();
   el('bx_erro').textContent='';
-  drawBaixa();
+  if(desenha) drawBaixa();
 }
 
 function abreBaixa(){
@@ -2196,13 +2788,6 @@ function abreBaixa(){
 }
 function fechaBaixa(){
   el('baixa').style.display='none';
-  if(!BX.depois) return;
-  BX.depois=false;
-  /* veio da pergunta: fechar sem dar baixa vale por "ainda não". Sem isto a
-     pergunta reaparecia aqui mesmo e não havia como chegar ao orçamento sem
-     dar baixa de alguma coisa. */
-  if(mesasPendentes().length){ BAIXA_ADIADA=true; guardaEstado(); }
-  preview(true);
 }
 
 function renderLinhasBaixa(M){
@@ -2235,15 +2820,21 @@ function renderLinhasBaixa(M){
         <span id="bxdif${i}"></span>
       </div></div>`;
   }).join('')
-   + (fora.length?`<div class="bxfora">${htmlEsc(tr('bxFora',{f:fora.join(', ')}))}</div>`:'')
-   + `<div class="bxpe2"><button type="button" class="primary" data-c="dar">
-        ${htmlEsc(tr('bxDarMesa',{m:M.i}))}</button></div>`;
+   + (fora.length?`<div class="bxfora">${htmlEsc(tr('bxFora',{f:fora.join(', ')}))}</div>`:'');
 }
 
 function drawBaixa(){
   const c=el('bx_corpo'); if(!c) return;
   BX.mesas=mesasBobina();
   if(BX.mesa && baixaDaMesa(BX.mesa)){ BX.mesa=null; BX.linhas=[]; BX.chave=''; }
+  /* enquanto houver mesa por dar, uma está aberta: o botão de baixo é o "ok" dela,
+     e no fim passa a OK. Antes ficava só o "Cancelar" à vista */
+  if(!BX.mesa){ const M=BX.mesas.find(x=>!baixaDaMesa(x.i)); if(M) preparaBaixaMesa(M.i,false); }
+  const ok=el('bx_ok'), aberta=!!BX.mesa;
+  ok.style.display='';
+  ok.textContent=aberta?tr('bxDarMesa',{m:BX.mesa}):tr('bxOk');
+  ok.onclick=aberta?()=>confirmaBaixa():fechaBaixa;
+  el('bx_cancel').style.display=aberta?'':'none';
   if(!BX.mesas.length){
     c.innerHTML=`<div class="bxvazio">${htmlEsc(tr('bxSemPendentes'))}</div>`;
     return;
@@ -2294,7 +2885,6 @@ function ligaBaixa(){
     const b=e.target.closest('button[data-c]'); if(!b) return;
     if(b.dataset.c==='abrir') return preparaBaixaMesa(+b.dataset.m);
     if(b.dataset.c==='anular') return anulaBaixa(+b.dataset.m);
-    if(b.dataset.c==='dar') return confirmaBaixa(b);
     const L=BX.linhas[+b.dataset.l]; if(!L) return;
     if(b.dataset.c==='x'){ L.alocs.splice(+b.dataset.a,1); drawBaixa(); }
     else if(b.dataset.c==='+'){
@@ -2377,20 +2967,6 @@ function desenhaBotaoBaixa(){
 /* A pergunta ao abrir o orçamento do cliente. Só aparece havendo mesmo o que dar
    baixa, e só uma vez por trabalho: quem responde "ainda não" não quer isto a
    perguntar de cada vez que espreita o orçamento. */
-function perguntaBaixa(){
-  if(BAIXA_ADIADA) return false;
-  const pend=mesasPendentes();
-  if(!pend.length) return false;
-  el('bxq_txt').textContent=tr('bxqTxt',{
-    g:kgTxt(pend.reduce((a,M)=>a+M.total,0)), n:pend.length});
-  el('bxq').style.display='flex';
-  return true;
-}
-function respondeBaixa(sim){
-  el('bxq').style.display='none';
-  if(sim){ BX.depois=true; abreBaixa(); }
-  else { BAIXA_ADIADA=true; guardaEstado(); preview(true); }
-}
 
 /* ============ mesas: [gramas, tempo, custoSlicer, impressora, mostrarNoOrçamento,
    filamentos[], peças, gramasDeCadaFilamento[]] ============ */
@@ -2545,18 +3121,13 @@ function drawMesas(){
         mesas[i][5]=usados.filter(v=>v!==n); drawMesas(); calc(); guardaEstado(); });
       c.appendChild(x); fbox.appendChild(c);
     });
-    const add=document.createElement('select');
-    const livres=todosFils().filter(f=>!usados.includes(f.n));
-    const grupo=l=>l.map(f=>`<option value="${htmlEsc(f.n)}">${htmlEsc(rotuloEscolhaFil(f))}</option>`).join('');
-    const meusL=livres.filter(f=>!f.bobina), bobL=livres.filter(f=>f.bobina);
-    add.title='Filamentos usados nesta mesa';
-    add.innerHTML=`<option value="">${usados.length?'+ outro filamento':'↳ o filamento das Definições'}</option>`
-      + (meusL.length?`<optgroup label="${htmlEsc(tr('fpMeus'))}">${grupo(meusL)}</optgroup>`:'')
-      + (bobL.length?`<optgroup label="Bobina">${grupo(bobL)}</optgroup>`:'');
-    add.addEventListener('change',()=>{
-      if(!add.value) return;
-      mesas[i][7]=[...(mesas[i][7]||[]).slice(0,usados.length), null];
-      mesas[i][5]=[...usados,add.value]; drawMesas(); calc(); guardaEstado(); });
+    if(!usados.length){   /* sem nenhum, a mesa usa o das Definições: diz-se qual */
+      const d=document.createElement('span'); d.className='mfdef';
+      d.textContent=tr('mfDef',{n:el('s_fil_nome').value||'—'}); fbox.appendChild(d);
+    }
+    const add=document.createElement('button'); add.type='button'; add.className='ghost mfadd';
+    add.textContent=tr('mfAdd'); add.title=tr('mfAddT');
+    add.addEventListener('click',()=>abrePicker(i));
     fbox.appendChild(add);
     fbox.appendChild(nota);
     refrescaAuto();
@@ -2750,6 +3321,7 @@ function drawPortesSel(){
   const s=el('j_portes'), keep=s.value;
   s.innerHTML='<option value="0">Sem portes / entrega em mão</option>'
     +'<option value="auto">Mais barato disponível</option>'
+    +'<optgroup label="Entrega própria"><option value="carro">Entrega por carro (viatura própria)</option></optgroup>'
     + TRANSP.grupos.map(g=>`<optgroup label="${g.g}">`
         + g.s.map(x=>`<option value="${x.id}">${x.n}</option>`).join('')+'</optgroup>').join('')
     +'<optgroup label="Outro"><option value="custom">Tabela personalizada</option>'
@@ -2765,16 +3337,40 @@ function getTiers(){
   }).filter(Boolean).sort((a,b)=>a[0]-b[0]);
 }
 function drawTiers(){
-  const cur=num('j_desc'), box=el('tiers'); box.innerHTML='';
-  [[0,0],...getTiers()].forEach(([q,p])=>{
+  const cur=num('j_desc'), tiers=getTiers(), box=el('tiers'); box.innerHTML='';
+  [[0,0],...tiers].forEach(([q,p])=>{
     const b=document.createElement('button');
     b.textContent=q?q+'u='+p+'%':'0%';
+    b.title=q?tierFrase(q,p):tr('tierLidoZero');   /* o botao e curto; o balao explica-o */
     if(Math.abs(cur-p)<.01) b.className='on';
-    b.addEventListener('click',()=>{ el('j_desc').value=p; calc(); });
+    b.addEventListener('click',()=>{ el('j_desc').value=p; calc(); guardaEstado(); });
     box.appendChild(b);
   });
+  const lido=el('s_tiers_lido');
+  if(lido) lido.innerHTML=tiers.length
+    ? tr('tierLido')+' '+tiers.map(([q,p])=>tierFrase(q,p)).join(' · ')+'.'
+    : tr('tierLidoNenhum');
+  /* e o que esta a ser dado neste orcamento, com o escalao em que assenta */
+  const dl=el('j_desc_lido');
+  if(dl){
+    const q=escalaoDe(cur), n=totalPecas();
+    dl.innerHTML = cur<=0 ? ''
+      : !q ? tr('descLidoSolto',{p:pct(cur)})
+      : n>=q ? tr('descLido',{p:pct(cur),q})
+      /* o escalão está a ser dado antes de o trabalho lá chegar: é uma decisão
+         legítima, mas tem de estar à vista de quem a toma */
+      : tr('descLidoCedo',{p:pct(cur),q,n});
+  }
 }
 function autoTier(n){ let d=0; getTiers().forEach(([q,p])=>{ if(n>=q) d=p; }); return d; }
+/* "3:5" nao diz nada a ninguem de fora: isto traduz cada escalao por palavras */
+const tierFrase = (q,p) => tr('tierLidoItem',{q,p:pct(p)});
+/* que escalao e que esta percentagem esta a cumprir -- o menor nº de pecas que a da.
+   Devolve 0 quando o desconto foi escrito a mao e nao bate com escalao nenhum. */
+function escalaoDe(perc){
+  const t=getTiers().find(([q,p])=>Math.abs(p-perc)<.01);
+  return t?t[0]:0;
+}
 
 /* ============ eletricidade automática (OMIE / mercado PT) ============ */
 let spot=null;
@@ -2833,6 +3429,62 @@ function toggleAuto(){
   el('s_kwh').disabled=on; el('s_kwh_add').disabled=!on; el('s_iva').disabled=!on;
   if(on) fetchSpot();
   else { el('live').innerHTML='<span class="st">Modo manual — liga o automático se tiveres tarifa indexada.</span>'; calc(); }
+}
+
+/* ============ DESCONTO DE PACOTE ============
+   Quem pede mais do que um serviço (modelação + impressão, por exemplo) leva um
+   desconto por isso. Quais contam, quantos são precisos e sobre que serviços
+   desconta é das Definições — e por isso anda nos presets; o painel 1 só o
+   tira de um orçamento em particular. */
+const PAC_K=['mod','imp','pos'];
+const PAC_CHK=['s_pac_on','s_pac_desc',...PAC_K.map(k=>'s_pac_c_'+k),...PAC_K.map(k=>'s_pac_a_'+k)];
+const pacLista = ks => ks.map(k=>tr('pacSrv_'+k)).join(' + ');
+/* ativos: os serviços que entram mesmo no trabalho; val: quanto vale cada um ao cliente */
+function pacote(ativos, val){
+  const conta=PAC_K.filter(k=>el('s_pac_c_'+k).checked);
+  const juntos=conta.filter(k=>ativos[k]);
+  const min=Math.max(1,Math.round(num('s_pac_min')));
+  const marcados=PAC_K.filter(k=>el('s_pac_a_'+k).checked);
+  const alvo=marcados.filter(k=>val[k]>0);
+  const p=Math.min(Math.max(num('s_pac_pct'),0),100);
+  const ligado=el('s_pac_on').checked && p>0;
+  const chega=ligado && juntos.length>=min;
+  const aplica=chega && el('j_pacote').checked;
+  /* "todos os serviços" só quando não fica nenhum com valor de fora */
+  const sobre=ks=>tr('pacSobre',{alvo: PAC_K.every(k=>ks.includes(k)||!(val[k]>0)) ? tr('pacTudo') : pacLista(ks)});
+  return {p, conta, juntos, min, marcados, alvo, ligado, chega, aplica, sobre,
+          valor: aplica ? alvo.reduce((a,k)=>a+val[k],0)*p/100 : 0};
+}
+function lePacote(x){
+  const P=pct(x.p);
+  el('s_pac_lido').textContent = !el('s_pac_on').checked ? tr('pacLidoOff')
+    : x.conta.length<x.min ? tr('pacLidoNunca',{n:x.min, k:x.conta.length})
+    : tr('pacLido',{n:x.min, lista:pacLista(x.conta), p:P,
+        sobre:tr('pacSobre',{alvo: x.marcados.length===PAC_K.length ? tr('pacTudo') : (pacLista(x.marcados)||'—')})});
+  el('j_pacote_lido').textContent = !x.ligado ? tr('pacJobOff')
+    : !x.chega ? tr('pacJobFalta',{n:x.min, lista:pacLista(x.conta)||'—', k:x.juntos.length})
+    : !x.aplica ? tr('pacJobDesl',{p:P, juntos:pacLista(x.juntos)})
+    : x.valor<=0 ? tr('pacJobNada')
+    : tr('pacJobSim',{p:P, juntos:pacLista(x.juntos), sobre:x.sobre(x.alvo), v:eur(x.valor)});
+}
+
+/* ---- promoção pelo total ----
+   "Quero que fique em 12 €": procura a percentagem que lá chega. Por bissecção e
+   com o calc() a sério, porque entre a promoção e o total ainda há imposto e
+   arredondamento -- uma fórmula fechada enganava-se nos cêntimos. */
+let PROMO_LIDO='';
+function promoParaTotal(){
+  const alvo=num('j_promo_alvo'), p=el('j_promo');
+  if(!(alvo>0)) return el('j_promo_alvo').focus();
+  const total=x=>{ p.value=x; calc(); return LAST.totalCli; };
+  if(total(0)<=alvo+0.004){ el('j_promo_alvo').value=''; guardaEstado(); return alert(tr('promoAcima',{t:eur(LAST.totalCli)})); }
+  if(total(100)>alvo+0.004){ guardaEstado(); return alert(tr('promoAbaixo',{t:eur(LAST.totalCli)})); }
+  let lo=0, hi=100;
+  for(let i=0;i<40;i++){ const m=(lo+hi)/2; total(m)<=alvo+0.004 ? hi=m : lo=m; }
+  /* a percentagem mais pequena que lá chega, arredondada PARA CIMA ao centésimo */
+  total(Math.min(100,Math.ceil(hi*100)/100));
+  el('j_promo_alvo').value='';
+  guardaEstado();
 }
 
 /* ============ CÁLCULO ============ */
@@ -2971,28 +3623,60 @@ function calc(){
   /* modelação 3D: trabalho de uma vez, à tarifa própria e com a margem de mão de obra.
      Fora do desconto por quantidade de propósito — desenha-se uma vez, imprimam-se 1 ou 100. */
   const minMod=bMod?minutosModelacao():0, hMod=minMod/60;
-  const pMod=hMod*num('s_modh')*fMao;
-  const cMod=hMod*num('s_pc_kw2')*kwh;                 /* o custo real é o PC ligado */
+  /* + ferramentas de cada modelo e o rateio da assinatura, com a margem própria.
+     Para o resto do orçamento (pacote, promoção, cliente) continua a ser uma linha só */
+  const ferMod=bMod?MODELOS.reduce((a,m)=>a+ferModelo(m),0):0, ratMod=hMod*rateioMod();
+  const pMaoMod=hMod*num('s_modh')*fMao, fFer=1+num('s_mod_fmarg')/100;
+  const pMod=bMod?MODELOS.reduce((a,m)=>a+precoModelo(m),0):0;
+  const cPcMod=hMod*num('s_pc_kw2')*kwh;
+  const cMod=cPcMod+ferMod+ratMod;                     /* o custo real: PC ligado + ferramentas */
   const pMarg=(pMat+pImp+pBase)*num('s_margem')/100;
   const pPrint=pMat+pImp+pBase+pPrep+pMarg;            /* só impressão: sem modelação, portes nem acabamento manual */
   const desc=(pBase+pPrep+pMan+pPol+pPin)*num('j_desc')/100;
-  const promo=(pMat+pImp)*num('j_promo')/100;
+  /* o pacote vê os serviços como o cliente os vê no orçamento: as mesmas três linhas.
+     O acabamento só CONTA com trabalho manual — a preparação vem sempre com as mesas */
+  const pac=pacote({mod:pMod>0, imp:nMesas>0, pos:pMan+pPol+pPin>0},
+                   {mod:pMod, imp:nMesas>0?pMat+pImp+pBase+pMarg:0, pos:pAcab});
+  const pPac=pac.valor;
+  /* a promoção é a última: leva a percentagem do que o cliente ainda paga pelos
+     serviços depois dos outros descontos. 100% = serviços de graça; os portes ficam */
+  const servicos=pMod+pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg;
+  const promo=Math.max(0,servicos-desc-pPac)*Math.min(num('j_promo'),100)/100;
+  PROMO_LIDO = promo>0.004 ? tr('promoLido',{v:eur(promo)}) : '';
+  lePacote(pac);
 
   /* ---- portes ---- */
   const sel=el('j_portes').value;
   /* só se expede o que se imprimiu: sem mesas não há peso nem embalagem para cobrar.
      O valor manual continua disponível, para quem devolve peças de um trabalho de acabamento. */
-  const temFisico = nMesas>0 || sel==='man';
+  const temFisico = nMesas>0 || sel==='man' || sel==='carro';
   const gEnvio=gTot+(temFisico?num('s_emb_peso'):0);   // peças + embalagem
   const custoEmb=temFisico?num('s_emb_custo'):0;
   el('j_portes_man').disabled = sel!=='man';
-  let pPortes=0, notaPortes='';
+  el('carro_box').style.display = sel==='carro' ? '' : 'none';
+  let pPortes=0, notaPortes='', carroTxt='';
 
   const todos=TRANSP.grupos.flatMap(g=>g.s.map(s=>({...s, grupo:g.g, p:precoServico(s,gEnvio)})))
                            .filter(s=>s.p!==null).sort((a,b)=>a.p-b.p);
   if(!temFisico){ notaPortes='Sem peças impressas — nada a expedir. Escolhe <b>Valor manual</b> se mesmo assim houver envio.'; }
   else if(sel==='0'){ notaPortes='Entrega em mão — sem custo de transporte.'; }
   else if(sel==='man'){ pPortes=num('j_portes_man')+custoEmb; notaPortes='Valor introduzido à mão.'; }
+  else if(sel==='carro'){
+    /* a distância que se escreve é só de ida — a volta é que dobra os km */
+    const kmIda=num('j_km'), volta=el('j_km_volta').checked, kmT=kmIda*(volta?2:1);
+    const minT=num('j_km_tempo');
+    const cKm=kmT*num('s_km'), cH=minT/60*num('s_km_hora'), minimo=num('s_km_minimo');
+    const viagemBase=cKm+cH;
+    /* sem km nem tempo não há viagem: o mínimo não pode cobrar uma deslocação que não existe */
+    const viagem=(kmIda>0||minT>0)?Math.max(viagemBase,minimo):0;
+    pPortes=viagem+custoEmb;
+    carroTxt=[kmIda>0?`${pct(kmT)} km${volta?' (ida e volta)':' (só ida)'}`:'',
+              minT>0?`${minT>=60?hm(minT):minT+' min'} de deslocação`:''].filter(Boolean).join(' · ');
+    notaPortes = kmIda>0||minT>0
+      ? `Entrega por carro${carroTxt?' · '+carroTxt:''}`
+        + (viagem>viagemBase+0.004?` · mínimo de ${eur(minimo)} aplicado`:'')
+      : 'Entrega por carro — mete a distância até ao cliente.';
+  }
   else if(sel==='custom'){
     const t=portes.filter(p=>gEnvio<=p[0]).sort((a,b)=>a[0]-b[0])[0];
     pPortes=(t?t[1]:(portes.length?portes[portes.length-1][1]:0))+custoEmb;
@@ -3014,11 +3698,11 @@ function calc(){
     `<div><span>Peso a expedir (peças + embalagem)</span><b>${Math.round(gEnvio).toLocaleString('pt-PT')} g</b></div>`
     + (custoEmb>0&&pPortes>0?`<div><span>Transporte + embalagem</span><b>${eur(pPortes-custoEmb)} + ${eur(custoEmb)}</b></div>`:'')
     + (notaPortes?`<div class="sep"><span>${notaPortes}</span><b>${eur(pPortes)}</b></div>`:'')
-    + (todos.length&&sel!=='0'&&sel!=='man'
+    + (todos.length&&sel!=='0'&&sel!=='man'&&sel!=='carro'
         ? `<div style="margin-top:6px;font-size:11px;opacity:.8"><span>Alternativas: ${
             todos.slice(0,3).map(s=>`${s.n} ${eur(s.p)}`).join(' · ')}</span></div>`:'');
 
-  const bruto=pMod+pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg-desc-promo+pPortes;
+  const bruto=pMod+pMat+pImp+pBase+pPrep+pMan+pPol+pPin+pMarg-desc-promo-pPac+pPortes;
   let total=el('j_round').checked?Math.floor(bruto*2)/2:bruto;
   /* com o imposto por cima há dois números para arredondar: o teu preço ou o que o
      cliente paga. Arredondar o segundo obriga a recuar o primeiro pela taxa. */
@@ -3050,7 +3734,7 @@ function calc(){
   /* 4.º campo: esconder de vez — a rubrica não pertence a este orçamento */
   const semImp = nMesas===0;
   const L=[
-    [tr('modLine',{n:MODELOS.length})+' — '+hm(minMod), pMod, minMod===0, !bMod],
+    [tr('modLine',{n:MODELOS.length})+' — '+hm(minMod), pMod, pMod<0.005, !bMod],
     ['Material — '+gTot+' g'+(nSlic?'<span class="tag">SLICER</span>':''), pMat, false, semImp],
     ['Impressão — '+hm(mTot)+(taxaMaq>0?' @ '+taxaMaq.toFixed(2).replace('.',',')+' €/h':''), pImp, false, semImp],
     ['Base — '+pecas+' peça(s)'+(num('s_base_mesa')>0?' + '+nMesas+' mesa(s)':''), pBase, false, semImp],
@@ -3063,8 +3747,10 @@ function calc(){
   ];
   let html=L.filter(r=>!r[3])
             .map(([t,v,mu])=>`<div class="li${mu?' muted':''}"><span>${t}</span><b>${eur(v)}</b></div>`).join('');
-  if(desc>0)  html+=`<div class="li neg"><span>Desconto ${num('j_desc')}%</span><b>−${eur(desc)}</b></div>`;
+  if(desc>0)  html+=`<div class="li neg"><span>Desconto ${num('j_desc')}%${
+    escalaoDe(num('j_desc'))?` · ${tr('descDesde',{q:escalaoDe(num('j_desc'))})}`:''}</span><b>−${eur(desc)}</b></div>`;
   if(promo>0) html+=`<div class="li neg"><span>Promoção ${num('j_promo')}%</span><b>−${eur(promo)}</b></div>`;
+  if(pPac>0) html+=`<div class="li neg"><span>${tr('pacLinha',{p:pct(pac.p),juntos:pacLista(pac.juntos)})}</span><b>−${eur(pPac)}</b></div>`;
   if(Math.abs(arred)>.004) html+=`<div class="li neg"><span>Arredondamento</span><b>${eur(arred)}</b></div>`;
   if(tax.on){
     if(tax.active){
@@ -3097,7 +3783,7 @@ function calc(){
   el('d_custo').innerHTML=
     `<div><span>Filamento</span><b>${eur(cMat)}</b></div>
      <div><span>Eletricidade + amortização</span><b>${eur(cImp)}</b></div>
-     ${minMod>0?`<div><span>${tr('modLine',{n:MODELOS.length})} — ${hm(minMod)}</span><b>${eur(cMod)}</b></div>`:''}
+     ${pMod>0.004?`<div><span>${tr('modLine',{n:MODELOS.length})} — ${hm(minMod)}</span><b>${eur(cMod)}</b></div>`:''}
      <div><span>Preparação + pós-processamento</span><b>${eur(cPrep+cMan+cPol+cPin)}</b></div>
      <div><span>Portes</span><b>${eur(pPortes)}</b></div>
      ${tax.active?`<div><span>${tr('taxIncluded',{name:taxNome,rate:taxRate})}</span><b>${eur(tax.valor)}</b></div>`:''}
@@ -3125,18 +3811,30 @@ function calc(){
     : (dias>90 ? `<div class="warn">⚠️ Definições sem revisão há <b>${dias} dias</b>. Confirma o preço do filamento antes de enviar.</div>` : ''));
 
   /* a régua horária é do tempo de máquina: modelação e acabamento saem de fora */
-  LAST={pMat,pImp,pBase,pPrep,pAcab,pMod,pMarg,pPrint,desc,promo,arred,pPortes,total,tax,hTot,pecas,
+  LAST={pMat,pImp,pBase,pPrep,pAcab,pMod,pMarg,pPrint,desc,promo,pPac,arred,pPortes,total,tax,hTot,pecas,
+        totalCli:totalCliente,   /* o valor que o cliente paga: e o que vai na etiqueta do separador */
+        custo, lucro,            /* o painel dos credores orienta uma fatia do lucro */
         det, fDesp,   /* o detalhe fica à mão: é dele que sai a baixa no Bobina */
         taxa: hTot>0?pImp/hTot:0};
   desenhaBotaoBaixa();
+  desenhaRegEstado();
+  el('j_promo_lido').textContent = PROMO_LIDO && tr('promoLidoTot',{l:PROMO_LIDO, t:eur(totalCliente)});
+  if(typeof renderCredores==='function') renderCredores();
   marketPanel({total,pPrint,pMat,pImp,pAcab,pMod,pPortes,pBase,pPrep,desc,hTot,pecas,det,nMesas,fMatMesa,
     basePeca:num('s_base'), baseMesa:num('s_base_mesa'), margemFinal:num('s_margem')/100,
     pPrepMesa:nMesas?pPrep/nMesas:0, taxaCobrada: taxaMaq>0?taxaMaq:hImpMedia*fImp});
 
-  el('d_mod').innerHTML = minMod>0
+  /* só no painel: a decomposição que o orçamento do cliente nunca mostra */
+  const rat=rateioMod();
+  el('s_mod_lido').textContent = rat>0 ? tr('modRatLido',{v:eur(rat)}) : '';
+  el('d_mod').innerHTML = pMod>0.004
     ? `<div><span>${MODELOS.length} modelo(s) · ${hm(minMod)} de modelação</span><b>${eur(pMod)}</b></div>`
-      + `<div><span>À tarifa de ${eur(num('s_modh'))}/h${num('s_mmao')>0?` + ${num('s_mmao')}% de margem`:''}</span>`
-      + `<b>${eur(pMod/Math.max(hMod,.0001))}/h</b></div>`
+      + `<div><span>Mão de obra — ${hm(minMod)} × ${eur(num('s_modh'))}/h${num('s_mmao')>0?` + ${num('s_mmao')}% de margem`:''}</span><b>${eur(pMaoMod)}</b></div>`
+      + (ferMod>0?`<div><span>Ferramentas dos modelos</span><b>${eur(ferMod)}</b></div>`:'')
+      + (ratMod>0?`<div><span>Assinatura rateada — ${hm(minMod)} × ${eur(rat)}/h</span><b>${eur(ratMod)}</b></div>`:'')
+      + (ferMod+ratMod>0?`<div><span>Margem sobre ferramentas — ${pct(num('s_mod_fmarg'))}%</span><b>${eur((ferMod+ratMod)*(fFer-1))}</b></div>`:'')
+      + `<div><span>Custo real — PC ligado${ferMod+ratMod>0?' + ferramentas':''}</span><b>${eur(cMod)}</b></div>`
+      + `<div class="sep"><span>Lucro real da modelação</span><b>${eur(pMod-cMod)}</b></div>`
     : '';
 
   drawTiers();
@@ -3144,10 +3842,17 @@ function calc(){
     impressao: pMat+pImp+pBase+pMarg,
     modelacao: pMod, nModelos: MODELOS.length, modMin: minMod,
     modDet: el('j_mostrar_mod').checked
-      ? MODELOS.map(m=>({n:(m.n||'').trim(), t:parseT(m.t)})).filter(m=>m.n||m.t>0)
+      ? MODELOS.map(m=>({n:(m.n||'').trim(), v:precoModelo(m)})).filter(m=>m.n||m.v>0.004)
       : [],
     acabamento: pAcab,
     portes:pPortes, desc, promo, arred, total:totalCliente, tax, pecas, gTot, mTot, nMesas,
+    /* as percentagens seguem para o orcamento: la o desconto passa a explicar-se */
+    descPct:num('j_desc'), promoPct:num('j_promo'),
+    pac:pPac,
+    pacDet: el('s_pac_desc').checked ? tr('pacDet',{juntos:pacLista(pac.juntos), p:pct(pac.p), sobre:pac.sobre(pac.alvo)}) : '',
+    /* só se diz ao cliente "a partir de N peças" quando o trabalho chega mesmo lá:
+       senão o orçamento anunciava um escalão que estas peças não cumprem */
+    descQtd:(pecas>=escalaoDe(num('j_desc')))?escalaoDe(num('j_desc')):0,
     temImp: nMesas>0, temAcab: pAcab>0,
     /* só as mesas com o visto entram — uma máquina que também fez mesas escondidas
        não pode levar o tempo dessas para o orçamento */
@@ -3156,10 +3861,23 @@ function calc(){
     /* detalhe por mesa só quando há mais do que um filamento — senão é ruído */
     filPorMesa: filsEmUso.length>1 ? det.filter(m=>m.mostrar).map(m=>({i:m.i, f:m.fils})) : [],
     minutosAcab: minM+minP+minT, prepMin,
-    detAcab: [minM>0?'montagem':'',minP>0?'polimento':'',minT>0?'pintura':'']
-             .filter(Boolean).join(', '),
-    transp: (()=>{ const s=servicoPorId(el('j_portes').value); return s?s.n+' · '+s.d:''; })()
+    /* o cliente escolhe o que vê: título, nome do trabalho manual e que detalhes mostrar */
+    acabTitulo: el('j_acab_titulo').value.trim() || 'Acabamento',
+    detAcab: el('j_acab_tarefas').checked
+      ? [minM>0?(el('j_acab_mao').value.trim()||'acabamento manual'):'',
+         minP>0?'polimento':'', minT>0?'pintura':''].filter(Boolean).join(', ')
+      : '',
+    acabPrep: el('j_acab_prep').checked,
+    acabMin: el('j_acab_min').checked,
+    portesTit: sel==='carro' ? 'Entrega por carro' : 'Portes de envio',
+    portesCarro: sel==='carro',
+    transp: sel==='carro'
+      ? (el('j_km_detalhe').checked ? carroTxt : 'Entrega em mão, em viatura própria')
+      : (()=>{ const s=servicoPorId(el('j_portes').value); return s?s.n+' · '+s.d:''; })()
   });
+  /* no FIM: o marketPanel acabou de reescrever o rodapé das fontes, e antes
+     disto ficava lá o texto cru até ao calc() seguinte */
+  ligaInfoPopups();
 }
 
 /* ============ BENCHMARK DE MERCADO ============
@@ -3305,9 +4023,12 @@ function marketPanel(x){
     `<div><span>${x.nMesas} mesa(s) · ${pecasPorMesa.toFixed(1)} peça(s) por mesa</span><b>${eur(porMesa)} por mesa</b></div>
      <div><span>Preço por mesa conta só impressão</span><b>sem modelação nem portes</b></div>
      <div><span>Preparação fixa diluída em cada peça</span><b>${eur(prepPorPeca)}</b></div>
-     ${x.pPrepMesa<=0?'<div class="sep"><span style="color:var(--accent2)">Não estás a cobrar preparação por mesa. Define os minutos em Definições → O que cobras: é o trabalho fixo de cada impressão, independente de quantas peças lá caibam.</span><b></b></div>':''}
+     ${x.pPrepMesa<=0?'<div class="sep"><span style="color:var(--accent2)">Não cobras preparação por mesa'
+        +'<span class="hint">Define os minutos em <b>Definições → O que cobras</b>: é o trabalho fixo de cada'
+        +' impressão, independente de quantas peças lá caibam.</span></span><b></b></div>':''}
      <div class="sep"><span>${pecasPorMesa<2
-        ? 'Mesas pouco cheias — a preparação fixa está a ser paga por poucas peças. Juntar encomendas na mesma mesa baixa o custo por peça sem baixar o teu ganho.'
+        ? 'Mesas pouco cheias<span class="hint">A preparação fixa está a ser paga por poucas peças.'
+          +' Juntar encomendas na mesma mesa baixa o custo por peça sem baixar o teu ganho.</span>'
         : `Se duplicasses as peças por mesa, a preparação por peça caía para ${eur(prepPorPeca/2)}.`}</span><b></b></div>`;
 
   /* escolha de patamar + alvo */
@@ -3468,7 +4189,7 @@ function aprenderDesvio(){
 /* ============ marca da empresa + QR codes ============ */
 const B_TXT=['nome','slogan','nif','contacto','morada','site','msg','nota'];
 let LOGO='';                                  /* dataURI do logótipo, já reduzido */
-let QRS=[{t:'DL X', u:'https://dlx.dungenlabs.com', img:''},
+let QRS=[{t:'DL Forge', u:'https://dlforge.dungenlabs.com', img:''},
          {t:'DungenLabs', u:'https://dungenlabs.com', img:''}];
 
 /* reduz a imagem antes de a guardar — um dataURI grande enche o localStorage e mata os presets */
@@ -3555,10 +4276,14 @@ function buildPrint(x){
   const esc=htmlEsc;
   const tax=x.tax||{on:false,active:false,nome:tr('taxGeneric'),rate:0,base:x.total,valor:0,total:x.total};
   const rows=[];
+  /* cada modelo ao cêntimo, e o último fica com o resto: o detalhe soma sempre a linha */
+  const c2=v=>Math.round(semImposto(v,tax)*100)/100;
+  const vMod=(x.modDet||[]).map(m=>c2(m.v));
+  if(vMod.length) vMod[vMod.length-1]+=c2(x.modelacao)-vMod.reduce((a,v)=>a+v,0);
   if(x.modelacao>0.004)
     rows.push([tr('modLine',{n:x.nModelos}),
                x.modDet && x.modDet.length
-                 ? x.modDet.map(m=>`${esc(m.n||tr('modNamePh'))}${m.t>0?` · ${hm(m.t)}`:''}`).join(' · ')
+                 ? x.modDet.map((m,i)=>`${esc(m.n||tr('modNamePh'))} · ${eur(vMod[i])}`).join(' · ')
                  : `${hm(x.modMin)} ${tr('modWork')}`,
                x.modelacao]);
   /* sem mesas não há impressão nenhuma para faturar — nem linha, nem ficha técnica */
@@ -3568,16 +4293,24 @@ function buildPrint(x){
                + (x.nMesas>1?` · ${x.nMesas} ciclos de máquina`:''),
                x.impressao]);
   if(x.temAcab)
-    rows.push(['Acabamento e montagem',
+    rows.push([x.acabTitulo||'Acabamento',
                [x.detAcab?x.detAcab.charAt(0).toUpperCase()+x.detAcab.slice(1):'',
-                x.temImp?`preparação e verificação de ${x.nMesas} impressão(ões)`:'',
-                x.minutosAcab>0?`${x.minutosAcab} min de trabalho manual`:''
+                (x.acabPrep!==false&&x.temImp)?`preparação e verificação de ${x.nMesas} impressão(ões)`:'',
+                (x.acabMin!==false&&x.minutosAcab>0)?`${x.minutosAcab} min de trabalho manual`:''
                ].filter(Boolean).join(' · '),
                x.acabamento]);
-  if(x.portes>0) rows.push(['Portes de envio', x.transp, x.portes]);
-  const descTot=x.desc+x.promo+(x.arred<0?-x.arred:0);
+  if(x.portes>0) rows.push([x.portesTit||'Portes de envio', x.transp, x.portes]);
+  const descTot=x.desc+x.promo+(x.pac||0)+(x.arred<0?-x.arred:0);
+  /* o desconto deixa de ser um numero caido do ceu: diz-se de onde vem, na mesma
+     letra pequena das outras linhas -- discreto, mas sem deixar duvidas */
+  const descDet=[
+    x.desc>0.004 ? (x.descQtd?tr('descQtdEsc',{p:pct(x.descPct),q:x.descQtd}):tr('descQtdSo',{p:pct(x.descPct)})) : '',
+    x.promo>0.004 ? tr('descPromoLinha',{p:pct(x.promoPct)}) : '',
+    x.pac>0.004 ? x.pacDet : '',
+    x.arred<-0.004 ? tr('descArred') : ''
+  ].filter(Boolean).join(' · ');
   const html=rows.map(r=>`<tr><td><b>${r[0]}</b>${r[1]?`<div class="d">${r[1]}</div>`:''}</td><td>${eur(semImposto(r[2],tax))}</td></tr>`).join('')
-    +(descTot>0.004?`<tr class="disc"><td><b>Desconto</b></td><td>−${eur(semImposto(descTot,tax))}</td></tr>`:'')
+    +(descTot>0.004?`<tr class="disc"><td><b>${tr('descLabel')}</b>${descDet?`<div class="d">${descDet}</div>`:''}</td><td>−${eur(semImposto(descTot,tax))}</td></tr>`:'')
     +(x.arred>0.004?`<tr><td><b>Ajuste</b></td><td>${eur(semImposto(x.arred,tax))}</td></tr>`:'');
   const taxName=esc(tax.nome), taxRate=pct(tax.rate);
   const taxHtml=tax.on
@@ -3650,11 +4383,7 @@ function buildPrint(x){
       <circle cx="32" cy="33" r="2.9" fill="#111"/>
     </svg>`;
 
-  const dlx=`<svg viewBox="275 385 742 510" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DL X">
-      <path fill="#ec826c" d="M1006.26,832.53h-79.87s-40.39-41.13-40.39-41.13l-44.71-45.96-28.35,29.11-66.72,68.41-30.51,30.66-.21-101.85-39.92-.14c-.51-3.83-.69-7.22.03-10.23l44.31-45.3,37.57-38.47c3.49-3.57,6.83-6.55,10.03-10.83l-59.03-60.39-33.32-33.94.07-66.07h87.27s21.41,22.01,21.41,22.01l8.67,9.12,48.62,50.94,18.68-19.82,29.72-31.01,30.09-31.21,86.56-.04-.02,66.51-54.67,56.19-37.06,37.92c4.04,4.73,7.83,8.65,12,12.88l26.85,27.24,48.17,48.95,4.71,5.05.04,71.4Z"/>
-      <path fill="currentColor" d="M426.43,394.71h-140.66v375.51h235.5v-268.41l-94.85-107.11ZM426.43,675.37h-45.81v-185.82h45.81v185.82Z"/>
-      <polygon fill="#ec826c" points="521.28 788.93 521.28 596.66 426.43 489.55 426.43 788.93 426.43 883.78 521.28 883.78 699.36 883.78 699.36 788.93 521.28 788.93"/>
-    </svg>`;
+  const forgeBrand=`<a href="https://dlforge.dungenlabs.com" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;color:inherit;text-decoration:none"><svg role="img" aria-label="DL Forge" style="width:76px;height:36px;vertical-align:middle;flex:none"  xmlns="http://www.w3.org/2000/svg" viewBox="149 434 891 423"><defs><style>.cls-1{fill:#e87e6a;}.cls-2{fill:#ec826c;}.cls-3{fill:currentColor;}</style></defs><path class="cls-3" d="M274.03,441.8h-117.07v312.54h196.01v-223.39l-78.94-89.14ZM274.03,675.4h-38.13v-154.66h38.13v154.66Z"/><polygon class="cls-2" points="352.97 769.91 352.97 609.88 274.03 520.74 274.03 769.91 274.03 848.85 352.97 848.85 501.19 848.85 501.19 769.91 352.97 769.91"/><polygon class="cls-1" points="859.32 702.36 830.33 702.27 830.34 662.54 900.57 662.5 900.57 754.23 778.51 754.22 778.53 628.6 796.06 611.14 900.46 611.13 900.55 651.82 819.7 651.84 819.51 713.27 859.37 713.22 859.32 702.36"/><path class="cls-1" d="M724.1,721.8l-18.74-19.04-11.78-.42-.04-39.74,20.18-.19c3.41-3.27,6.67-6.64,9.41-10.44h-39.61s-.04,102.37-.04,102.37l-40.68-.26-.03-142.88,95.46-.1,27.11,24.98.07,35.93-15.2,15.17,15.12,15.18.04,51.91-41.1-.07-.19-32.39Z"/><polygon class="cls-1" points="951.66 713.21 1031.92 713.3 1031.9 754.23 911.23 754.24 911.27 611.16 1031.89 611.13 1031.93 651.8 951.7 651.88 951.66 713.21"/><polygon class="cls-3" points="421.22 651.88 421.19 754.31 380.39 754.09 380.42 611.13 500.6 611.15 500.63 651.78 421.22 651.88"/><rect class="cls-3" x="445.97" y="647.61" width="39.92" height="69.49" transform="translate(-216.53 1148.14) rotate(-89.99)"/><rect class="cls-1" x="961.96" y="662.39" width="70.05" height="39.93"/><path class="cls-1" d="M606.51,754.25h-70.8s-24.79-24.84-24.79-24.84v-93.15s24.91-25.14,24.91-25.14l70.87.04,25.13,25.01v93.27s-25.31,24.8-25.31,24.8ZM551.64,651.79v61.51s39.41,0,39.41,0v-61.51s-39.41,0-39.41,0Z"/></svg><span>DL Forge</span></a>`;
 
   const projeto=(el('j_projeto').value||'').trim();
   const spec = x.temImp
@@ -3666,14 +4395,14 @@ function buildPrint(x){
     </div>` : '';
   /* o prazo sai do tempo de máquina: sem impressão não há prazo de produção a citar */
   const prazo = x.temImp
-    ? `Prazo de produção estimado: ${Math.max(1,Math.ceil(x.mTot/60/8))} dia(s) útil(eis) de impressão${x.portes>0?', mais o tempo de transporte':''}.<br>
+    ? `Prazo de produção estimado: ${Math.max(1,Math.ceil(x.mTot/60/8))} dia(s) útil(eis) de impressão${x.portes>0?(x.portesCarro?', mais a entrega a combinar':', mais o tempo de transporte'):''}.<br>
     Peso e tempo indicados são estimativas do fatiamento e podem variar ligeiramente na produção.`
-    : (x.portes>0?'Prazo de entrega conforme o serviço de transporte escolhido.':'');
+    : (x.portes>0?(x.portesCarro?'Entrega em viatura própria, em data a combinar.':'Prazo de entrega conforme o serviço de transporte escolhido.'):'');
   el('printable').innerHTML=`<div class="pq">
     ${empresa}
     <div class="hd">
       <div class="ttl"><div><h1>Orçamento</h1><div class="s">Impressão 3D · fabrico por encomenda</div></div></div>
-      <div class="dt">${new Date().toLocaleDateString('pt-PT',{day:'2-digit',month:'long',year:'numeric'})}</div>
+      <div class="dt">${new Date().toLocaleDateString('pt-PT',{day:'2-digit',month:'long',year:'numeric'})}${FO?`<div class="fo">${tr('foRotulo')} <b>${FO.dia}-${FO.seq}</b></div>`:''}</div>
     </div>
     <div class="cli">Para: <b>${esc(el('j_cliente').value)||'—'}</b>${projeto?` · Projeto: <b>${esc(projeto)}</b>`:''}</div>
     ${spec}
@@ -3685,9 +4414,8 @@ function buildPrint(x){
     ${nota||prazo?`<div class="foot">${nota}${prazo}</div>`:''}
     <div class="sig">
       <div class="st">
-        <div class="pw">Orçamento gerado com ${fmini} <b style="letter-spacing:0">Fatia</b> · powered by ${dlx}</div>
-        <i>DL X é a divisão de investigação e produto da DungenLabs — protótipos experimentais,
-        produtos próprios e fabrico aditivo por encomenda. dlx.dungenlabs.com</i>
+        <div class="pw">Orçamento gerado com ${fmini} <b style="letter-spacing:0">Fatia</b> · powered by ${forgeBrand}</div>
+        <i>${tr("forgeDivision")} <a href="https://dlforge.dungenlabs.com">dlforge.dungenlabs.com</a></i>
       </div>
       ${qrs}
     </div>
@@ -3714,6 +4442,8 @@ function collect(){
   o.marca={on:el('b_on').checked, qr:el('q_on').checked, nota_on:el('f_on').checked,
            logo:LOGO, qrs:QRS.map(q=>({...q}))};
   B_TXT.forEach(k=>o.marca[k]=el('b_'+k).value);
+  o.pac={};
+  PAC_CHK.forEach(i=>o.pac[i]=el(i).checked);
   return o;
 }
 function apply(o){
@@ -3744,6 +4474,7 @@ function apply(o){
   if(o.portes){ portes=o.portes; drawPortes(); drawPortesSel(); }
   if(o.mesas){ mesas=o.mesas.map(normMesa); migraPecas(o); drawMesas(); }
   if(o.hist) hist=o.hist;
+  if(o.pac) PAC_CHK.forEach(i=>{ if(o.pac[i]!==undefined) el(i).checked=!!o.pac[i]; });
   if(o.banda) bandaEscolhida=o.banda;
   if(o.printer!==undefined) el('s_printer').value=o.printer;
   if(o.marca){
@@ -3772,14 +4503,372 @@ function resetJob(){
   BLOCOS={mod:true, imp:true, pos:true}; aplicaBlocos();
   mesas=[[0,'','',el('s_printer').value||'',true,[],1,[]]]; drawMesas();
   MODELOS=[]; drawModelos();
-  ['j_manual','j_pol','j_pint','j_desc','j_promo'].forEach(i=>el(i).value=0);
+  ['j_manual','j_pol','j_pint','j_desc','j_promo','j_km','j_km_tempo'].forEach(i=>el(i).value=0);
   ['r_g','r_t','r_e'].forEach(i=>el(i).value=''); el('r_usar').checked=true;
+  el('j_pacote').checked=true;
+  REG=null; FO=null;
   BAIXAS=[]; BAIXA_ADIADA=false;   /* trabalho novo, baixas novas */
   el('j_portes').value='0'; calc(); guardaEstado();
+  drawAbas();
+}
+
+/* ============ separadores — os orçamentos em curso ============
+   Falar com uma pessoa, saltar para outra e voltar ao primeiro sem o perder.
+   Cada separador guarda só a parte do TRABALHO: cliente, projeto, mesas,
+   modelos, acabamento, descontos, portes e as baixas por lançar. As Definições,
+   os filamentos, a marca e os presets são os mesmos para todos — trocar de
+   separador é mudar de cliente, não de oficina. */
+const J_VAL=['j_cliente','j_projeto','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
+             'j_acab_titulo','j_acab_mao','j_km','j_km_tempo','r_g','r_t','r_e'];
+const J_CHK=['j_pacote','j_ajusta','j_round','r_usar','j_mostrar_maq','j_mostrar_mod',
+             'j_acab_tarefas','j_acab_prep','j_acab_min','j_km_volta','j_km_detalhe'];
+let ABAS=[], ABA=0;
+const idAba = () => 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function jobSnapshot(){
+  const j={mesas:mesas.map(m=>[...m]), modelos:MODELOS.map(m=>({...m})),
+           baixas:BAIXAS, baixa_adiada:BAIXA_ADIADA, blocos:{...BLOCOS}, registo:REG, folha:FO,
+           portes_bob:{...PORTES_BOB}, bob_usados:BOB_SNAP.map(f=>({...f})),
+           /* o total fica gravado só para a etiqueta do separador */
+           total:(LAST&&isFinite(LAST.totalCli))?LAST.totalCli:0};
+  J_VAL.forEach(i=>j[i]=el(i).value);
+  J_CHK.forEach(i=>j[i]=el(i).checked);
+  return j;
+}
+function jobRepor(j){
+  if(!j) return;
+  J_VAL.forEach(i=>{ if(j[i]!==undefined) el(i).value=j[i]; });
+  J_CHK.forEach(i=>{ if(j[i]!==undefined) el(i).checked=j[i]; });
+  mesas=(Array.isArray(j.mesas)&&j.mesas.length)
+    ? j.mesas.map(normMesa)
+    : [[0,'','',el('s_printer').value||'',true,[],1,[]]];
+  MODELOS=Array.isArray(j.modelos)?j.modelos.map(normModelo):[];
+  BAIXAS=Array.isArray(j.baixas)?j.baixas:[];
+  BAIXA_ADIADA=!!j.baixa_adiada;
+  REG=j.registo||null;
+  FO=j.folha||null;
+  BLOCOS={mod:true,imp:true,pos:true,...(j.blocos||{})};
+  PORTES_BOB=(j.portes_bob&&typeof j.portes_bob==='object')?{...j.portes_bob}:{};
+  BOB_SNAP=Array.isArray(j.bob_usados)?j.bob_usados.filter(f=>f&&f.n):[];
+  drawMesas(); drawModelos(); aplicaBlocos(); drawPortesSel();
+  desenhaBotaoBaixa(); drawBaixa();
+  calc();
+}
+/* a etiqueta do separador é o nome do trabalho — sai dos mesmos campos que o orçamento */
+function nomeAba(j){
+  const c=((j&&j.j_cliente)||'').trim(), pr=((j&&j.j_projeto)||'').trim();
+  return c&&pr ? pr+' — '+c : (c||pr||'');
+}
+function drawAbas(){
+  const box=el('abas'); if(!box) return;
+  if(!ABAS.length) ABAS=[{id:idAba(), job:null}];
+  if(ABA>=ABAS.length) ABA=ABAS.length-1;
+  /* o separador aberto vale pelo que está nos campos, não pelo que foi gravado */
+  const vivo=jobSnapshot();
+  if(ABAS[ABA]) ABAS[ABA].job=vivo;
+  box.innerHTML=ABAS.map((a,i)=>{
+    const j=(i===ABA?vivo:a.job)||{};
+    const nome=nomeAba(j)||tr('abaSemNome',{n:i+1});
+    const t=+j.total||0;
+    return `<div class="aba${i===ABA?' on':''}">`
+      +`<button onclick="mudaAba(${i})" title="${htmlEsc(nome)}">`
+      +`<span class="nome">${htmlEsc(nome)}</span>${t>0.004?`<span class="val">${eur(t)}</span>`:''}</button>`
+      +`<button class="x" onclick="fechaAba(${i},event)" title="${htmlEsc(tr('abaFecharT'))}"
+         aria-label="${htmlEsc(tr('abaFecharT'))}">✕</button></div>`;
+  }).join('')
+    +`<button class="ghost abmais" onclick="novaAba()" title="${htmlEsc(tr('abaNovaT'))}">+ ${htmlEsc(tr('abaNova'))}</button>`;
+}
+function mudaAba(i){
+  if(i===ABA || !ABAS[i]) return;
+  ABAS[ABA].job=jobSnapshot();     /* o que está nos campos é do separador que se deixa */
+  ABA=i;
+  jobRepor(ABAS[i].job);
+  drawAbas(); guardaEstado();
+}
+function novaAba(){
+  if(ABAS[ABA]) ABAS[ABA].job=jobSnapshot();
+  ABAS.push({id:idAba(), job:null});
+  ABA=ABAS.length-1;
+  resetJob();                      /* trabalho novo, e é ele que fica no separador novo */
+  el('j_cliente').focus();
+}
+function fechaAba(i,ev){
+  if(ev) ev.stopPropagation();
+  const a=ABAS[i]; if(!a) return;
+  const j=(i===ABA?jobSnapshot():a.job)||{};
+  const nome=nomeAba(j);
+  /* só se pergunta quando há mesmo alguma coisa para perder */
+  const cheio = nome || (+j.total||0)>0.004 || (Array.isArray(j.modelos)&&j.modelos.length);
+  if(cheio && !confirm(tr('abaFechar',{nome:nome||tr('abaSemNome',{n:i+1})}))) return;
+  ABAS.splice(i,1);
+  if(!ABAS.length){ ABAS=[{id:idAba(), job:null}]; ABA=0; resetJob(); return; }
+  if(i<ABA) ABA--;
+  else if(i===ABA){ ABA=Math.min(ABA,ABAS.length-1); jobRepor(ABAS[ABA].job); }
+  drawAbas(); guardaEstado();
+}
+
+/* ============ folha de obra ============
+   Cada orçamento que sai em PDF leva um número: FO-fatia_20261013-001, contado
+   por dia. O número é do separador -- reimprimir o mesmo trabalho dá a mesma
+   folha -- e quem o conta é o servidor, para dois aparelhos não darem o mesmo.
+   Sem servidor à vista conta este browser, que é melhor do que nenhum. */
+let FO=null;                           /* {dia:'20261013', seq:'001'} do separador à vista */
+/* "Ana (OLX)" -> "Ana(OLX)", "João & Filhos" -> "Joao-e-Filhos": o nome tem de
+   sobreviver a Windows, email e WhatsApp sem perder a leitura */
+const nomeFicheiro = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/&/g,' e ').replace(/[^A-Za-z0-9()._-]+/g,'-')
+  .replace(/-*([()])-*/g,(m,c)=>c==='('?'(':')-').replace(/-+/g,'-').replace(/^[-.]+|[-.]+$/g,'').slice(0,60);
+const nomeFolha = () => FO ? ['FO-fatia_'+FO.dia+'-'+FO.seq, nomeFicheiro(el('j_cliente').value)].filter(Boolean).join('_') : '';
+async function numeroFolha(){
+  if(FO) return FO;
+  const d=new Date(), dia=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  let seq;
+  try{ seq=(await apiReg('folhas',{dia, cliente:el('j_cliente').value.trim()})).seq; }
+  catch(_){ const c=store.get('folhas',{}); seq=(c[dia]||0)+1; store.set('folhas',{[dia]:seq}); }
+  FO={dia, seq:String(seq).padStart(3,'0')};
+  guardaEstado();
+  return FO;
+}
+async function imprimirPDF(){
+  const pr=el('printable');
+  /* um orçamento do registo já tem folha: imprime-se tal como saiu */
+  if(!pr.dataset.guardado){ await numeroFolha(); calc(); }
+  const antes=document.title;
+  document.title=(pr.dataset.guardado ? pr.dataset.folha : nomeFolha()) || antes;   /* o browser dá ao PDF o nome do título */
+  window.addEventListener('afterprint',()=>{ document.title=antes; },{once:true});
+  window.print();
+}
+
+/* ============ registo de trabalhos impressos ============
+   O botão verde diz "isto foi impresso (ou mandado imprimir)": o trabalho fica
+   na base de dados do servidor com as Definições do momento e o orçamento do
+   cliente tal como saiu. Os clientes nascem aqui sozinhos, pelo nome escrito no
+   painel 1, e voltam a ser escolhidos pela lista desse mesmo campo. */
+let REG=null;                      /* {id, em} do separador à vista, depois de registado */
+let REGS=[], CLIS=[];
+const dataReg = t => new Date(t*1000).toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric'});
+async function apiReg(caminho, corpo){
+  const r=await fetch('/api/'+caminho, corpo?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(corpo)}:{});
+  const d=await r.json().catch(()=>({ok:false,error:'Resposta inválida'}));
+  if(!r.ok||d.ok===false) throw new Error(d.error||('Erro '+r.status));
+  return d;
+}
+/* as Definições que fazem o preço; o histórico, a marca e o próprio trabalho ficam de fora */
+function defsParaRegisto(){
+  const d=collect();
+  ['hist','mesas','modelos','baixas','baixa_adiada','marca'].forEach(k=>delete d[k]);
+  return d;
+}
+function desenhaRegEstado(){
+  const b=el('b_impresso'); if(!b) return;
+  const mandado=REG&&REG.estado==='mandado';
+  b.textContent=tr(!REG?'bImpresso':mandado?'bImpressoJa':'bImpressoOutra');
+  el('reg_estado').textContent=REG?tr(mandado?'regFeitoMandado':'regFeito',{id:REG.id, d:dataReg(REG.em)}):'';
+}
+function marcarImpresso(){
+  const cli=el('j_cliente').value.trim(), proj=el('j_projeto').value.trim();
+  /* o passo seguinte: o que foi mandado imprimir passa a impresso no mesmo registo */
+  const passo = REG && REG.estado==='mandado';
+  el('bxq_txt').innerHTML=tr('impqResumo',{cli:htmlEsc(cli||tr('regSemCliente')), proj:htmlEsc(proj||'—'), total:eur(LAST.totalCli)})
+    + (passo ? '<br>'+tr('impqPasso',{id:REG.id}) : REG ? '<br><b style="color:var(--accent2);font-size:12.5px;display:inline">'+tr('regJaFoi',{id:REG.id, d:dataReg(REG.em)})+'</b>' : '');
+  document.querySelector(`input[name=impq_est][value=${REG&&REG.estado!=='mandado'||passo?'impresso':'mandado'}]`).checked=true;
+  document.querySelectorAll('input[name=impq_est]').forEach(r=>r.disabled=passo);
+  impqEstado();
+  el('bxq').style.display='flex';
+}
+/* a baixa só se oferece com filamento do Bobina por lançar, e vem marcada quando já se imprimiu */
+function impqEstado(){
+  const pend=mesasPendentes(), imp=document.querySelector('input[name=impq_est]:checked').value==='impresso';
+  el('impq_baixa_l').style.display=pend.length?'':'none';
+  el('impq_baixa').checked=imp;
+  el('impq_baixa_t').textContent=tr('impqBaixa',{g:pend.length?kgTxt(pend.reduce((a,M)=>a+M.total,0)):'', n:pend.length});
+}
+async function confirmaImpresso(){
+  const estado=document.querySelector('input[name=impq_est]:checked').value;
+  const baixa=el('impq_baixa').checked && mesasPendentes().length;
+  const cli=el('j_cliente').value.trim(), proj=el('j_projeto').value.trim();
+  const serv=[LAST.pMod>0?tr('pacSrv_mod'):'', LAST.det&&LAST.det.length?tr('pacSrv_imp'):'',
+              LAST.pAcab-LAST.pPrep>0.004?tr('pacSrv_pos'):''].filter(Boolean).join(' + ');
+  try{
+    if(REG && REG.estado==='mandado'){
+      await apiReg('registos/estado',{id:REG.id, estado});
+      REG={...REG, estado};
+    } else {
+      const r=await apiReg('registos',{
+        cliente:cli, projeto:proj, estado, folha:nomeFolha(),
+        total:LAST.totalCli, custo:LAST.custo, lucro:LAST.lucro, pecas:LAST.pecas,
+        resumo:[serv, LAST.pecas?LAST.pecas+' peça(s)':'', LAST.hTot>0?hm(LAST.hTot*60)+' de impressão':''].filter(Boolean).join(' · '),
+        snapshot:{versao:VERSAO, job:jobSnapshot(), defs:defsParaRegisto()},
+        orcamento_html:el('printable').innerHTML
+      });
+      REG={id:r.id, em:Math.floor(Date.now()/1000), estado};
+    }
+  }catch(e){ return alert(tr('regErro',{e:e.message})); }
+  el('bxq').style.display='none';
+  desenhaRegEstado(); guardaEstado(); carregaRegisto();
+  if(baixa){ BX.depois=false; abreBaixa(); }
+}
+/* ============ custo de uma sessão do Claude Code → ferramentas do modelo ============
+   O servidor lê os .jsonl da sessão e devolve dólares; o câmbio é das Definições. */
+let CCL={i:-1, eur:0};
+async function abreCcl(i){
+  CCL={i, eur:0};
+  el('ccl_res').innerHTML=''; el('ccl_erro').textContent=''; el('ccl_id').value='';
+  el('ccl_ok').style.display=el('ccl_somar').style.display='none';
+  el('ccl_lista').innerHTML=htmlEsc(tr('cclCarrega'));
+  el('ccl').style.display='flex';
+  try{
+    const d=await apiReg('custo-claude');
+    el('ccl_lista').innerHTML=d.sessoes.map(s=>`<button class="ghost cclses" data-id="${htmlEsc(s.id)}">
+      <b>${htmlEsc(s.titulo||s.id)}</b><i>${dataReg(s.mtime)} · ${htmlEsc(s.projeto)}</i></button>`).join('');
+    el('ccl_lista').querySelectorAll('button').forEach(b=>b.onclick=()=>{ el('ccl_id').value=b.dataset.id; calculaCcl(b.dataset.id); });
+  }catch(e){ el('ccl_lista').innerHTML=''; el('ccl_erro').textContent=e.message; }
+}
+function fechaCcl(){ el('ccl').style.display='none'; }
+async function calculaCcl(id){
+  id=String(id||'').trim(); if(!id) return;
+  el('ccl_erro').textContent=''; el('ccl_res').textContent=tr('cclCarrega');
+  try{
+    const d=await apiReg('custo-claude?sessao='+encodeURIComponent(id));
+    CCL.eur=Math.round(d.usd*num('s_usd_eur')*100)/100;
+    el('ccl_res').innerHTML=tr('cclRes',{tok:d.tokens.toLocaleString('pt-PT'), usd:d.usd.toFixed(2).replace('.',','), eur:eur(CCL.eur)})
+      + (d.sem_preco.length?'<br>'+htmlEsc(tr('cclSemPreco',{m:d.sem_preco.join(', ')})):'');
+    el('ccl_ok').style.display='';
+    el('ccl_somar').style.display=ferModelo(MODELOS[CCL.i]||{})>0?'':'none';
+  }catch(e){ el('ccl_res').textContent=''; el('ccl_erro').textContent=e.message; }
+}
+function usaCcl(somar){
+  const m=MODELOS[CCL.i]; if(!m) return fechaCcl();
+  m.f=String(Math.round(((somar?ferModelo(m):0)+CCL.eur)*100)/100);
+  fechaCcl(); drawModelos(); calc(); guardaEstado();
+}
+
+async function carregaRegisto(){
+  try{
+    const [c,r]=await Promise.all([apiReg('clientes'), apiReg('registos')]);
+    CLIS=c.clientes; REGS=r.registos;
+  }catch(e){ el('reg_sum').textContent=tr('regErro',{e:e.message}); return; }
+  el('dl_clientes').innerHTML=CLIS.map(c=>`<option value="${htmlEsc(c.nome)}">`).join('');
+  const f=el('reg_filtro'), antes=f.value;
+  f.innerHTML=`<option value="">${htmlEsc(tr('regTodos'))}</option>`
+    +`<option value="-">${htmlEsc(tr('regSemCliente'))}</option>`
+    +CLIS.map(c=>`<option value="${c.id}">${htmlEsc(c.nome)} (${c.n})</option>`).join('');
+  f.value=[...f.options].some(o=>o.value===antes)?antes:'';
+  drawRegistos(); drawClientes();
+}
+function drawRegistos(){
+  const f=el('reg_filtro').value;
+  const l=REGS.filter(r=>!f || (f==='-' ? !r.cliente_id : String(r.cliente_id)===f));
+  const soma=k=>l.reduce((a,r)=>a+r[k],0);
+  el('reg_sum').textContent=tr('regSoma',{n:l.length, t:eur(soma('total')), l:eur(soma('lucro'))});
+  el('reg_lista').innerHTML=l.length ? l.map(r=>`<div class="ritem">
+      <div class="l1"><span><b>${htmlEsc(r.projeto||'—')}</b> · <span class="cli" onclick="filtraCliente(${r.cliente_id||'\'-\''})">${htmlEsc(r.cliente_nome||tr('regSemCliente'))}</span><span class="rest ${r.estado}">${tr(r.estado==='mandado'?'estMandado':'estImpresso')}</span></span><b>${eur(r.total)}</b></div>
+      <div class="l2">#${r.id}${r.folha?' · '+htmlEsc(r.folha.split('_')[1]||r.folha):''} · ${dataReg(r.criado)} · ${htmlEsc(r.resumo)} · ${tr('regLucro')} ${eur(r.lucro)}</div>
+      <details ontoggle="this.open&&verDefs(${r.id},this)"><summary>${tr('regVerDefs')}</summary><div class="dd">…</div></details>
+      <div class="acts">
+        ${r.estado==='mandado'?`<button class="ghost" onclick="regImpresso(${r.id})">✅ ${tr('regPassaImp')}</button>`:''}
+        <button class="ghost" onclick="verOrcGuardado(${r.id})">👁 ${tr('regVerOrc')}</button>
+        <button class="ghost" onclick="abrirRegisto(${r.id})">↺ ${tr('regAbrir')}</button>
+        <button class="ghost" onclick="reporDefs(${r.id})">⚙ ${tr('regReporDefs')}</button>
+        <button class="ghost" onclick="apagaRegisto(${r.id})">🗑</button>
+      </div></div>`).join('')
+    : `<div class="rsum">${tr('regVazio')}</div>`;
+}
+async function regImpresso(id){
+  try{ await apiReg('registos/estado',{id, estado:'impresso'}); }catch(e){ return alert(tr('regErro',{e:e.message})); }
+  if(REG&&REG.id===id){ REG={...REG, estado:'impresso'}; desenhaRegEstado(); guardaEstado(); }
+  carregaRegisto();
+}
+function filtraCliente(id){ regTab('trab'); el('reg_filtro').value=String(id); drawRegistos(); }
+const REG_CACHE={};
+async function registoCompleto(id){
+  return REG_CACHE[id] || (REG_CACHE[id]=(await apiReg('registos/'+id)).registo);
+}
+/* as Definições do dia em que se imprimiu, por palavras: as que fazem o preço */
+async function verDefs(id, det){
+  if(!det.querySelector('.dd')) return;
+  const d=(await registoCompleto(id)).snapshot.defs||{};
+  const linhas=[['€/kWh',d.kwh],['Filamento',d.fil_nome],['€/kg',d.fil_kg],['Mão de obra €/h',d.mao],
+    ['Modelação €/h',d.modh],['Margem final %',d.margem],['Base/peça €',d.base],['Escalões',d.tiers],
+    ['Pacote',d.pac&&d.pac.s_pac_on?pct(+d.pac_pct)+'%':'—'],['Imposto',d.tax_nome+' '+d.tax_rate+'%']];
+  det.querySelector('.dd').outerHTML=linhas.filter(x=>x[1]!==undefined&&x[1]!=='')
+    .map(([k,v])=>`<div><span>${k}</span><b>${htmlEsc(v)}</b></div>`).join('');
+}
+async function verOrcGuardado(id){
+  const r=await registoCompleto(id);
+  if(!r.orcamento_html) return alert(tr('regSemOrc'));
+  abreRegisto(false);
+  el('printable').innerHTML=r.orcamento_html;
+  el('printable').dataset.guardado='1';
+  el('printable').dataset.folha=r.folha||'';
+  preview(true);
+}
+/* reabrir = um separador novo com o trabalho; as Definições de agora não mudam */
+async function abrirRegisto(id){
+  const r=await registoCompleto(id);
+  if(ABAS[ABA]) ABAS[ABA].job=jobSnapshot();
+  ABAS.push({id:idAba(), job:null}); ABA=ABAS.length-1;
+  jobRepor({...r.snapshot.job, registo:{id:r.id, em:r.criado, estado:r.estado}});
+  abreRegisto(false); drawAbas(); guardaEstado();
+}
+async function reporDefs(id){
+  if(!confirm(tr('regReporConfirma',{id}))) return;
+  const r=await registoCompleto(id);
+  apply(r.snapshot.defs); calc(); guardaEstado();
+}
+async function apagaRegisto(id){
+  if(!confirm(tr('regApagar',{id}))) return;
+  try{ await apiReg('registos/apagar',{id}); }catch(e){ return alert(tr('regErro',{e:e.message})); }
+  if(REG&&REG.id===id){ REG=null; desenhaRegEstado(); guardaEstado(); }
+  carregaRegisto();
+}
+function drawClientes(){
+  el('cli_lista').innerHTML=CLIS.map(c=>`<div class="ritem">
+      <div class="l1"><span class="cli" onclick="filtraCliente(${c.id})"><b>${htmlEsc(c.nome)}</b></span><b>${eur(c.faturado)}</b></div>
+      <div class="l2">${[tr('regNTrab',{n:c.n}), c.contacto, c.nif?'NIF '+c.nif:'', c.notas].filter(Boolean).map(htmlEsc).join(' · ')}</div>
+      <div class="acts">
+        <button class="ghost" onclick="usaCliente(${c.id})">➜ ${tr('cliUsar')}</button>
+        <button class="ghost" onclick="editaCliente(${c.id})">✏️</button>
+        <button class="ghost" onclick="apagaCliente(${c.id})">🗑</button>
+      </div></div>`).join('') || `<div class="rsum">${tr('cliVazio')}</div>`;
+}
+const CLI_F=['nome','contacto','nif','notas'];
+function limpaCliente(){ el('cli_id').value=''; CLI_F.forEach(k=>el('cli_'+k).value=''); }
+function editaCliente(id){
+  const c=CLIS.find(x=>x.id===id); if(!c) return;
+  el('cli_id').value=c.id; CLI_F.forEach(k=>el('cli_'+k).value=c[k]||''); el('cli_nome').focus();
+}
+async function guardaCliente(){
+  const o={id:el('cli_id').value}; CLI_F.forEach(k=>o[k]=el('cli_'+k).value);
+  try{ await apiReg('clientes',o); }catch(e){ return alert(e.message); }
+  limpaCliente(); carregaRegisto();
+}
+async function apagaCliente(id){
+  const c=CLIS.find(x=>x.id===id);
+  if(!c || !confirm(tr('cliApagar',{nome:c.nome, n:c.n}))) return;
+  try{ await apiReg('clientes/apagar',{id}); }catch(e){ return alert(e.message); }
+  carregaRegisto();
+}
+/* escolher o cliente para o orçamento à vista */
+function usaCliente(id){
+  const c=CLIS.find(x=>x.id===id); if(!c) return;
+  el('j_cliente').value=c.nome; calc(); guardaEstado(); abreRegisto(false);
+}
+function regTab(t){
+  ['trab','cli'].forEach(k=>{ el('rc_'+k).style.display=k===t?'':'none'; el('rt_'+k).classList.toggle('on',k===t); });
+}
+function abreMenu(on=true){
+  el('menu').classList.toggle('on',on);
+  el('veu').classList.toggle('on',on||el('reg').classList.contains('on'));
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ abreMenu(false); abreRegisto(false); } });
+function abreRegisto(on=true){
+  el('reg').classList.toggle('on',on);
+  el('veu').classList.toggle('on',on||el('menu').classList.contains('on'));
+  if(on) carregaRegisto();
 }
 
 /* ============ armazenamento local ============ */
-const VERSAO='1.15.0';
+const VERSAO='1.25.1';
 const store={
   get(k,d){ try{ const v=localStorage.getItem('fatia:'+k); return v?JSON.parse(v):d; }catch(_){ return d; } },
   set(k,v){ try{ localStorage.setItem('fatia:'+k,JSON.stringify(v)); return true; }catch(_){ return false; } },
@@ -3787,6 +4876,7 @@ const store={
 };
 const I18N={
   pt:{
+    forgeDivision:"DL Forge é a divisão de software e jogos da DungenLabs. O Fatia faz parte das suas ferramentas.",
     infoTipLabel:'Informação',
     /* ---- seletor de filamentos + ligação ao Bobina ---- */
     fpTitulo:'Filamentos',
@@ -3807,6 +4897,30 @@ const I18N={
     mgFaltam:'faltam {g} g por atribuir',
     mgPassa:'passa {g} g do total da mesa',
     /* ---- dar baixa no Bobina ---- */
+    crTitulo:'Credores',
+    crSub:'As dívidas abertas do Giro, em direto. Orienta uma fatia do lucro deste trabalho a quem tens a pagar — o pagamento entra logo no Giro.',
+    crALer:'a ler…',
+    crLucro:'Lucro do trabalho',
+    crOrientar:'A orientar',
+    crNota:'Nada disto aparece no orçamento do cliente. O valor sai do <b>lucro</b> deste trabalho — o que sobra depois dos custos — e é lançado no Giro como um pagamento normal, que de lá segue para o Rumo.',
+    crTodos:'Todos',
+    crEmpresa:'Da empresa',
+    crVazio:'Sem dívidas abertas no Giro.',
+    crVazioFiltro:'Nada em aberto para este titular.',
+    crVazioEmpresa:'Nenhuma dívida em nome da empresa. No Giro, põe o titular na dívida — ou vê aqui a carteira toda.',
+    crEmDireto:'em direto',
+    crUltima:'última leitura',
+    crSemGiro:'Giro em baixo',
+    crAbater:'Abater',
+    crFaltam:'faltam {n} × {v}',
+    crFalta1:'falta 1 × {v}',
+    crAte:'até {d}',
+    crDe:'de {quem}',
+    crEsteMes:'{v} este mês',
+    crSemPct:'Escolhe a percentagem do lucro a orientar.',
+    crSemLucro:'Este trabalho ainda não tem lucro para orientar.',
+    crConfirma:'Abater {v} a «{nome}»? Fica registado no Giro como pagamento deste trabalho.',
+    crFeito:'{v} abatidos a «{nome}» — faltam {s}.',
     bxTitulo:'Dar baixa no Bobina',
     bxSub:'Escolhe a mesa que já foi impressa. Cada mesa fica com a sua baixa e pode ser anulada à parte.',
     bxBotao:'Dar baixa no Bobina — {g}',
@@ -3815,6 +4929,7 @@ const I18N={
     bxDarMesa:'Dar baixa da mesa {m}',
     bxEditarMesa:'editar',
     bxCancelar:'Cancelar',
+    bxOk:'OK',
     bxAEnviar:'A dar baixa…',
     bxTirar:'Tirar esta bobine',
     bxOutra:'+ outra bobine',
@@ -3840,10 +4955,6 @@ const I18N={
     bxVazio:'vazia',
     bxNaCaixa:'na caixa',
     bxMontada:'na impressora',
-    bxqTitulo:'Este trabalho já foi impresso?',
-    bxqTxt:'Se já foi, escolhe no menu que mesas queres dar baixa. Há {g} em {n} mesa(s) com filamento do Bobina. Se ainda não, o orçamento abre à mesma e o botão fica no cartão das mesas.',
-    bxqSim:'Já foi — escolher mesas',
-    bxqNao:'Ainda não',
     dtAuto:'Vem do <b>Bobina</b>: é a última vez que ele viu preços nas lojas.',
     dtManual:'À mão. O <b>Bobina</b> tem preços de <b>{d}</b>.',
     dtManualT:'Escrever a data à mão',
@@ -3892,7 +5003,8 @@ const I18N={
     bobHaMin:'há {n} min',
     bobHaHoras:'há {n} h',
     tagline:'Preços de impressão 3D — a partir do teu slicer',
-    tGuardarPreset:'Guardar o estado atual como preset',
+    tGuardarPreset:'Guardar ou atualizar o preset',
+    tRenomearPreset:'Renomear o preset selecionado',
     tApagarPreset:'Apagar o preset selecionado',
     bExportar:'↓ Exportar',
     bImportar:'↑ Importar',
@@ -3934,6 +5046,11 @@ const I18N={
     modName:'Modelo',
     modNamePh:'Ex.: Suporte do sensor',
     modHours:'Tempo',
+    mfAdd:'＋ Filamento',
+    mfAddT:'Junta um filamento a esta mesa — uma vez por cor, numa impressão multicor',
+    mfDef:'↳ {n} (o das Definições)',
+    fpParaMesa:'A juntar à mesa {n} — toca num filamento para o acrescentar.',
+    modTools:'Custo de ferramentas',
     modAdd:'+ Adicionar modelo',
     modDelTitle:'Remover modelo',
     modShow:'Detalhar os modelos no orçamento do cliente',
@@ -3942,6 +5059,23 @@ const I18N={
     modRateHint:'A <b>modelação 3D</b> é o desenho antes de imprimir — CAD, reparar malhas, preparar suportes. Cobra-se por hora, à parte da impressão, e leva a mesma margem de mão de obra.',
     modLine:'Modelação 3D — {n} modelo(s)',
     modWork:'de trabalho de desenho',
+    modSetTitle:'🧊 Modelação 3D',
+    modFmarg:'Margem sobre ferramentas',
+    modAssin:'Assinatura mensal de ferramentas',
+    modHmes:'Horas de modelação por mês (estimativa)',
+    modTaxa:'Câmbio do dólar',
+    modFerHint:'O <b>custo de ferramentas</b> de cada modelo e a assinatura rateada por hora entram na linha «Modelação 3D» do orçamento, já com a margem acima. O cliente vê só essa linha. Com assinatura a 0 € ou sem horas por mês, não há rateio. O câmbio converte em euros o custo importado das sessões, que vem em dólares.',
+    modRatLido:'Rateio: {v} por hora de modelação, somado a cada modelo.',
+    modImport:'Importar o custo de uma sessão',
+    cclTitulo:'Importar custo de uma sessão',
+    cclSub:'Escolhe uma das sessões recentes ou cola o id. Soma o uso de tokens da sessão e dos sub-agentes, aos preços de cada modelo.',
+    cclId:'Id da sessão',
+    cclVer:'Calcular',
+    cclSubst:'Substituir',
+    cclSomar:'Somar ao atual',
+    cclRes:'{tok} tokens · {usd} $ → <b>{eur}</b>',
+    cclSemPreco:'Sem preço conhecido para: {m} — esses tokens ficaram de fora.',
+    cclCarrega:'A ler…',
     notaOn:'Mostrar a nota de validade no rodapé do orçamento',
     notaHint:'É a primeira linha do rodapé do orçamento. Desligada, o rodapé começa logo no prazo de produção. Sai sempre, tenhas ou não a tua empresa ligada.',
     licSub:'Licença de utilização · versão <span id="lic_v"></span>',
@@ -3979,10 +5113,77 @@ const I18N={
     memSavedNow:'Memória guardada agora.',
     memSavedAuto:'Memória remota atualizada.',
     presetsEmpty:'— presets guardados —',
-    presetPrompt:'Nome do preset (ex.: "PLA Ender", "Resina cliente X"):',
+    presetPrompt:'Nome do preset. Deixa o nome como está para atualizar o que tens escolhido:',
     presetNoSave:'O browser não deixou guardar. Usa Exportar.',
     presetDelete:'Apagar o preset "{name}"?',
+    presetOverwrite:'Já tens um preset chamado "{name}". Substituir o que lá está?',
+    presetRename:'Novo nome para o preset "{name}":',
     presetPickFirst:'Escolhe primeiro um preset na lista.',
+    /* ---- separadores ---- */
+    abaSemNome:'Orçamento {n}',
+    abaNova:'Orçamento',
+    abaNovaT:'Abrir outro orçamento sem perder este',
+    abaFecharT:'Fechar este orçamento',
+    abaFechar:'Fechar "{nome}"? O trabalho que está neste separador perde-se.',
+    /* ---- desconto por palavras ---- */
+    tierLido:'Ou seja:',
+    tierLidoItem:'a partir de {q} peças, {p}% de desconto',
+    tierLidoZero:'Sem desconto por quantidade',
+    tierLidoNenhum:'Sem escalões definidos — o desconto fica todo à mão.',
+    tiersHint:'Escreve <b>peças:%</b> separados por vírgula. <b>3:5</b> lê-se «a partir de 3 peças, 5% de desconto».',
+    descHint:'Só sobre base + mão de obra.',
+    descLido:'A dar {p}% — o escalão a partir de {q} peças.',
+    descLidoCedo:'A dar {p}% — o escalão das {q} peças, e este trabalho tem {n}.',
+    descLidoSolto:'A dar {p}%, escritos à mão — não é nenhum dos escalões.',
+    descDesde:'a partir de {q} peças',
+    descLabel:'Desconto',
+    descQtdEsc:'{p}% por quantidade — a partir de {q} peças',
+    descQtdSo:'{p}% por quantidade',
+    descPromoLinha:'promoção de {p}%',
+    descArred:'arredondamento a favor do cliente',
+    /* ---- registo de impressos ---- */
+    foRotulo:'Folha de obra',
+    bMenu:'☰ Menu', bRegistoMenu:'📒 Registo e clientes', mTrabalho:'Trabalho', mVista:'Vista', mIdioma:'Idioma',
+    mDados:'Dados', mSobre:'Sobre', mLicenca:'Licença',
+    bRegisto:'📒 Registo', bImpresso:'🖨 Imprimir / registar', bImpressoOutra:'✅ Impresso — registar outra impressão', bImpressoJa:'✅ Já saiu da impressora',
+    impqTitulo:'Registar este trabalho', impqMandado:'🖨 Mandado imprimir', impqImpresso:'✅ Já impresso',
+    impqOk:'Registar', impqCancelar:'Cancelar',
+    impqResumo:'<b style="display:inline;font-size:13px">{cli}</b> · {proj} · <b style="display:inline;font-size:13px">{total}</b><br>Fica no registo com as Definições de hoje e o orçamento do cliente como está.',
+    impqPasso:'Estava como mandado imprimir (#{id}) — passa a impresso no mesmo registo.',
+    impqBaixa:'Dar baixa do filamento no Bobina — {g} em {n} mesa(s)',
+    regFeitoMandado:'Mandado imprimir a {d} · registo #{id}.',
+    estMandado:'mandado imprimir', estImpresso:'impresso', regPassaImp:'já impresso',
+    promoLido:'−{v} nos serviços', promoLidoTot:'{l} → total {t}',
+    promoAcima:'Sem promoção o total já é {t} — não há nada a descontar para lá chegar.',
+    promoAbaixo:'Mesmo com 100% o total fica em {t} (são os portes) — não desce mais.',
+    regTitulo:'📒 Registo de trabalhos', regTabTrab:'Trabalhos', regTabCli:'Clientes',
+    regFeito:'No registo como #{id}, impresso a {d}.',
+    regJaFoi:'Este orçamento já está no registo (#{id}, de {d}). Registar outra impressão?',
+    regSemCliente:'sem cliente', regTodos:'Todos os clientes',
+    regErro:'O registo não respondeu: {e}',
+    regSoma:'{n} trabalho(s) · faturado {t} · lucro {l}',
+    regLucro:'lucro', regVerDefs:'Definições usadas', regVerOrc:'orçamento', regAbrir:'reabrir', regReporDefs:'repor definições',
+    regVazio:'Ainda nada registado — o botão verde por baixo do total põe cá o orçamento.',
+    regSemOrc:'Este registo não tem o orçamento guardado.',
+    regReporConfirma:'Repor as Definições do registo #{id}? As de agora são substituídas (os trabalhos abertos ficam).',
+    regApagar:'Apagar o registo #{id}? Não se desfaz.',
+    regNTrab:'{n} trabalho(s)',
+    cliNome:'Nome', cliContacto:'Contacto', cliNotas:'Notas', cliGuardar:'Guardar cliente', cliNovo:'Novo', cliUsar:'usar no orçamento',
+    cliVazio:'Sem clientes. Nascem sozinhos ao registar um trabalho, ou cria-os aqui.',
+    cliApagar:'Apagar o cliente «{nome}»? Os {n} trabalho(s) dele ficam no registo, com o nome.',
+    /* ---- desconto de pacote ---- */
+    pacSrv_mod:'Modelação', pacSrv_imp:'Impressão', pacSrv_pos:'Acabamento',
+    pacTudo:'todos os serviços', pacSobre:'sobre {alvo}',
+    pacLinha:'Desconto de pacote {p}% · {juntos}',
+    pacDet:'pacote {juntos}: {p}% {sobre}',
+    pacLido:'Lê-se: com pelo menos {n} de {lista} no mesmo trabalho, {p}% {sobre}.',
+    pacLidoOff:'Desligado — nenhum orçamento leva desconto de pacote.',
+    pacLidoNunca:'Pedes {n} serviços mas só {k} contam — assim nunca ativa.',
+    pacJobOff:'Desligado nas Definições (💰 Margens de lucro).',
+    pacJobFalta:'Ativa com {n} de {lista} — este trabalho tem {k}.',
+    pacJobDesl:'Este trabalho tinha direito a {p}% ({juntos}) — tirado só deste orçamento.',
+    pacJobNada:'Chega ao pacote, mas não entra neste trabalho nenhum dos serviços onde ele desconta.',
+    pacJobSim:'{p}% por juntar {juntos}, {sobre}: −{v}',
     invalidFile:'Ficheiro inválido',
     foldTitle:'Clica para esconder ou mostrar',
     updateFileMode:'A verificação automática precisa que a página seja servida por http(s). Aberta do disco, o browser bloqueia. Usa <b>Importar</b> com um ficheiro de dados.',
@@ -3993,6 +5194,7 @@ const I18N={
     installUnavailable:'O teu browser não oferece instalação nesta página. No Chrome ou Edge: menu ⋮ → "Instalar Fatia". No telemóvel: partilhar → "Adicionar ao ecrã principal".'
   },
   en:{
+    forgeDivision:"DL Forge is the software and games division of DungenLabs. Fatia is one of its tools.",
     infoTipLabel:'Information',
     /* ---- filament picker + live Bobina link ---- */
     fpTitulo:'Filaments',
@@ -4011,6 +5213,30 @@ const I18N={
     mgT:'Grams of this material on this plate — your slicer tells you. Left blank, the rest is split evenly.',
     mgFaltam:'{g} g still unassigned',
     mgPassa:'{g} g over the plate total',
+    crTitulo:'Creditors',
+    crSub:'Your open debts in Giro, live. Send a slice of this job\u2019s profit to whoever you owe — the payment lands in Giro straight away.',
+    crALer:'reading…',
+    crLucro:'Job profit',
+    crOrientar:'Sending',
+    crNota:'None of this shows on the client quote. The amount comes out of this job\u2019s <b>profit</b> — what is left after costs — and is logged in Giro as a normal payment, which flows on to Rumo.',
+    crTodos:'All',
+    crEmpresa:'Company',
+    crVazio:'No open debts in Giro.',
+    crVazioFiltro:'Nothing open for this holder.',
+    crVazioEmpresa:'No debt held by the company. Set the holder on the debt in Giro — or show the whole book here.',
+    crEmDireto:'live',
+    crUltima:'last reading',
+    crSemGiro:'Giro is down',
+    crAbater:'Pay off',
+    crFaltam:'{n} × {v} left',
+    crFalta1:'1 × {v} left',
+    crAte:'until {d}',
+    crDe:'held by {quem}',
+    crEsteMes:'{v} this month',
+    crSemPct:'Pick the share of the profit to send.',
+    crSemLucro:'This job has no profit to send yet.',
+    crConfirma:'Pay {v} towards “{nome}”? It is logged in Giro as a payment from this job.',
+    crFeito:'{v} paid towards “{nome}” — {s} left.',
     bxTitulo:'Log usage in Bobina',
     bxSub:'Choose the plate that has already printed. Each plate gets its own inventory entry and can be undone separately.',
     bxBotao:'Log usage in Bobina — {g}',
@@ -4019,6 +5245,7 @@ const I18N={
     bxDarMesa:'Log plate {m}',
     bxEditarMesa:'edit',
     bxCancelar:'Cancel',
+    bxOk:'OK',
     bxAEnviar:'Logging…',
     bxTirar:'Remove this spool',
     bxOutra:'+ another spool',
@@ -4044,10 +5271,6 @@ const I18N={
     bxVazio:'empty',
     bxNaCaixa:'boxed',
     bxMontada:'on the printer',
-    bxqTitulo:'Has this job been printed?',
-    bxqTxt:'If it has, choose in the menu which plates to log. There is {g} across {n} plate(s) with Bobina filament. If not, the quote opens anyway and the button stays on the plates card.',
-    bxqSim:'Yes — choose plates',
-    bxqNao:'Not yet',
     dtAuto:'From <b>Bobina</b>: the last time it saw shop prices.',
     dtManual:'Set by hand. <b>Bobina</b> has prices from <b>{d}</b>.',
     dtManualT:'Type the date by hand',
@@ -4096,7 +5319,8 @@ const I18N={
     bobHaMin:'{n} min ago',
     bobHaHoras:'{n} h ago',
     tagline:'3D printing prices — from your slicer',
-    tGuardarPreset:'Save the current state as a preset',
+    tGuardarPreset:'Save or update the preset',
+    tRenomearPreset:'Rename the selected preset',
     tApagarPreset:'Delete the selected preset',
     bExportar:'↓ Export',
     bImportar:'↑ Import',
@@ -4138,6 +5362,11 @@ const I18N={
     modName:'Model',
     modNamePh:'e.g. Sensor bracket',
     modHours:'Time',
+    mfAdd:'＋ Filament',
+    mfAddT:'Add a filament to this bed — once per colour, for a multicolour print',
+    mfDef:'↳ {n} (the one in Settings)',
+    fpParaMesa:'Adding to bed {n} — tap a filament to add it.',
+    modTools:'Tool cost',
     modAdd:'+ Add model',
     modDelTitle:'Remove model',
     modShow:'List the models on the client quote',
@@ -4146,6 +5375,23 @@ const I18N={
     modRateHint:'<b>3D modelling</b> is the design work before printing — CAD, mesh repair, support prep. It is charged by the hour, separately from printing, and carries the same labour margin.',
     modLine:'3D modelling — {n} model(s)',
     modWork:'of design work',
+    modSetTitle:'🧊 3D modelling',
+    modFmarg:'Margin on tools',
+    modAssin:'Monthly tool subscription',
+    modHmes:'Modelling hours per month (estimate)',
+    modTaxa:'Dollar exchange rate',
+    modFerHint:'Each model\'s <b>tool cost</b> and the subscription spread per hour go into the «3D modelling» line of the quote, with the margin above. The client only sees that line. With the subscription at 0 € or no hours per month, nothing is spread. The exchange rate turns the imported session cost, in dollars, into euros.',
+    modRatLido:'Spread: {v} per modelling hour, added to each model.',
+    modImport:'Import the cost of a session',
+    cclTitulo:'Import session cost',
+    cclSub:'Pick a recent session or paste its id. Adds up token usage of the session and its sub-agents, at each model\'s prices.',
+    cclId:'Session id',
+    cclVer:'Calculate',
+    cclSubst:'Replace',
+    cclSomar:'Add to current',
+    cclRes:'{tok} tokens · {usd} $ → <b>{eur}</b>',
+    cclSemPreco:'No known price for: {m} — those tokens were left out.',
+    cclCarrega:'Reading…',
     notaOn:'Show the validity note in the quote footer',
     notaHint:'It is the first line of the quote footer. Switched off, the footer starts at the production lead time. It prints whether or not your company block is on.',
     licSub:'Usage licence · version <span id="lic_v"></span>',
@@ -4183,10 +5429,77 @@ const I18N={
     memSavedNow:'Memory saved now.',
     memSavedAuto:'Remote memory updated.',
     presetsEmpty:'— saved presets —',
-    presetPrompt:'Preset name (e.g. "PLA Ender", "Resin client X"):',
+    presetPrompt:'Preset name. Leave the name as it is to update the one you have selected:',
     presetNoSave:'The browser did not allow saving. Use Export.',
     presetDelete:'Delete preset "{name}"?',
+    presetOverwrite:'You already have a preset called "{name}". Replace it?',
+    presetRename:'New name for preset "{name}":',
     presetPickFirst:'Pick a preset from the list first.',
+    /* ---- tabs ---- */
+    abaSemNome:'Quote {n}',
+    abaNova:'Quote',
+    abaNovaT:'Open another quote without losing this one',
+    abaFecharT:'Close this quote',
+    abaFechar:'Close "{nome}"? The work in this tab is lost.',
+    /* ---- discount in plain words ---- */
+    tierLido:'In other words:',
+    tierLidoItem:'from {q} pieces on, {p}% off',
+    tierLidoZero:'No quantity discount',
+    tierLidoNenhum:'No tiers set — the discount stays entirely manual.',
+    tiersHint:'Write <b>pieces:%</b> separated by commas. <b>3:5</b> reads as "from 3 pieces on, 5% off".',
+    descHint:'On base + labour only.',
+    descLido:'Giving {p}% — the tier from {q} pieces on.',
+    descLidoCedo:'Giving {p}% — the {q}-piece tier, and this job has {n}.',
+    descLidoSolto:'Giving {p}%, typed by hand — it matches none of the tiers.',
+    descDesde:'from {q} pieces on',
+    descLabel:'Discount',
+    descQtdEsc:'{p}% quantity discount — from {q} pieces on',
+    descQtdSo:'{p}% quantity discount',
+    descPromoLinha:'{p}% promotion',
+    descArred:'rounded down in your favour',
+    /* ---- print log ---- */
+    foRotulo:'Work order',
+    bMenu:'☰ Menu', bRegistoMenu:'📒 Log and clients', mTrabalho:'Job', mVista:'View', mIdioma:'Language',
+    mDados:'Data', mSobre:'About', mLicenca:'Licence',
+    bRegisto:'📒 Log', bImpresso:'🖨 Print / log', bImpressoOutra:'✅ Printed — log another print', bImpressoJa:'✅ Off the printer',
+    impqTitulo:'Log this job', impqMandado:'🖨 Sent to print', impqImpresso:'✅ Already printed',
+    impqOk:'Log', impqCancelar:'Cancel',
+    impqResumo:'<b style="display:inline;font-size:13px">{cli}</b> · {proj} · <b style="display:inline;font-size:13px">{total}</b><br>It goes into the log with today\'s Settings and the client quote as it stands.',
+    impqPasso:'It was sent to print (#{id}) — becomes printed in the same entry.',
+    impqBaixa:'Deduct the filament in Bobina — {g} across {n} plate(s)',
+    regFeitoMandado:'Sent to print on {d} · entry #{id}.',
+    estMandado:'sent to print', estImpresso:'printed', regPassaImp:'printed now',
+    promoLido:'−{v} off the services', promoLidoTot:'{l} → total {t}',
+    promoAcima:'Without a promotion the total is already {t} — nothing to discount.',
+    promoAbaixo:'Even at 100% the total stays at {t} (that is shipping) — it goes no lower.',
+    regTitulo:'📒 Job log', regTabTrab:'Jobs', regTabCli:'Clients',
+    regFeito:'In the log as #{id}, printed on {d}.',
+    regJaFoi:'This quote is already in the log (#{id}, {d}). Log another print?',
+    regSemCliente:'no client', regTodos:'All clients',
+    regErro:'The log did not answer: {e}',
+    regSoma:'{n} job(s) · billed {t} · profit {l}',
+    regLucro:'profit', regVerDefs:'Settings used', regVerOrc:'quote', regAbrir:'reopen', regReporDefs:'restore settings',
+    regVazio:'Nothing logged yet — the green button under the total puts the quote here.',
+    regSemOrc:'This entry has no saved quote.',
+    regReporConfirma:'Restore the Settings from entry #{id}? Current ones are replaced (open jobs stay).',
+    regApagar:'Delete entry #{id}? This cannot be undone.',
+    regNTrab:'{n} job(s)',
+    cliNome:'Name', cliContacto:'Contact', cliNotas:'Notes', cliGuardar:'Save client', cliNovo:'New', cliUsar:'use in quote',
+    cliVazio:'No clients. They appear when a job is logged, or create them here.',
+    cliApagar:'Delete client “{nome}”? Their {n} job(s) stay in the log, with the name.',
+    /* ---- bundle discount ---- */
+    pacSrv_mod:'Modelling', pacSrv_imp:'Printing', pacSrv_pos:'Finishing',
+    pacTudo:'all services', pacSobre:'off {alvo}',
+    pacLinha:'Bundle discount {p}% · {juntos}',
+    pacDet:'{juntos} bundle: {p}% {sobre}',
+    pacLido:'Reads: with at least {n} of {lista} in the same job, {p}% {sobre}.',
+    pacLidoOff:'Off — no quote gets a bundle discount.',
+    pacLidoNunca:'You ask for {n} services but only {k} count — it will never kick in.',
+    pacJobOff:'Off in Settings (💰 Profit margins).',
+    pacJobFalta:'Kicks in with {n} of {lista} — this job has {k}.',
+    pacJobDesl:'This job qualified for {p}% ({juntos}) — removed from this quote only.',
+    pacJobNada:'Qualifies for the bundle, but none of the services it discounts is in this job.',
+    pacJobSim:'{p}% for bundling {juntos}, {sobre}: −{v}',
     invalidFile:'Invalid file',
     foldTitle:'Click to hide or show',
     updateFileMode:'Automatic checks need the page to be served over http(s). Opened from disk, the browser blocks them. Use <b>Import</b> with a data file.',
@@ -4207,15 +5520,21 @@ function aplicarIdioma(){
   document.documentElement.lang=IDIOMA==='en'?'en':'pt-PT';
   const sel=el('lang_sel'); if(sel) sel.value=IDIOMA;
   const tipDe=n=>n.classList&&n.classList.contains('hintpop') ? n.querySelector('.tipbox') : null;
+  /* um rótulo pode ter um "?" mudado lá para dentro: reescrever o texto não o leva */
+  const poe=(n,v,html)=>{
+    const ficam=[...n.querySelectorAll(':scope > .hintpop, :scope > .chev')];
+    if(html) n.innerHTML=v; else n.textContent=v;
+    ficam.forEach(f=>n.appendChild(f));
+  };
   document.querySelectorAll('[data-i18n]').forEach(n=>{
     const t=tipDe(n);
     if(t) t.textContent=tr(n.dataset.i18n);
-    else n.textContent=tr(n.dataset.i18n);
+    else poe(n,tr(n.dataset.i18n),false);
   });
   document.querySelectorAll('[data-i18n-html]').forEach(n=>{
     const t=tipDe(n);
     if(t) t.innerHTML=tr(n.dataset.i18nHtml);
-    else n.innerHTML=tr(n.dataset.i18nHtml);
+    else poe(n,tr(n.dataset.i18nHtml),true);
   });
   document.querySelectorAll('[data-i18n-title]').forEach(n=>{ n.title=tr(n.dataset.i18nTitle); });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(n=>{ n.placeholder=tr(n.dataset.i18nPlaceholder); });
@@ -4232,6 +5551,7 @@ function aplicarIdioma(){
   if(typeof aplicaBlocos==='function') aplicaBlocos();
   if(typeof drawTaxPresets==='function') drawTaxPresets();
   if(typeof desenhaBotaoBaixa==='function') desenhaBotaoBaixa();
+  if(typeof renderCredores==='function') renderCredores();
   if(typeof aplicaDataPrecos==='function') aplicaDataPrecos(false);
   document.querySelectorAll('.card h2').forEach(h=>{ h.title=tr('foldTitle'); });
   /* traduzir um h3 reescreve-lhe o texto todo: o chevron tem de voltar */
@@ -4241,17 +5561,77 @@ function aplicarIdioma(){
   });
 }
 let INFO_TIP_SEQ=0;
+/* As dicas longas passam a viver dentro de um "?": o texto continua todo lá,
+   com a formatação que tinha, mas deixa de encher o formulário.
+
+   Duas coisas que a primeira versão não fazia e davam textos à solta:
+
+   - **ter um `id` não é razão para ficar de fora.** Só ficam as dicas VIVAS --
+     as que dizem alguma coisa que tem de se ver sem procurar (o aviso do
+     filamento) ou que têm um botão lá dentro (a baixa dada, com o "anular").
+     Marcam-se com `.viva`, e não pelo id.
+   - **corre outra vez a cada desenho.** Há dicas escritas por JS -- o rodapé
+     das fontes, a data dos preços -- cujo conteúdo é reescrito por cima; aí o
+     popup desaparecia e ficava o texto cru. Por isso o teste é "já tem um
+     tipbox lá dentro?" e não "já passei por aqui?". */
 function ligaInfoPopups(){
-  document.querySelectorAll('.hint:not(.hintpop)').forEach(h=>{
-    if(h.id || h.classList.contains('filaviso')) return;
-    const conteudo=h.innerHTML.trim();
-    if(!conteudo) return;
-    const id='tip_'+(++INFO_TIP_SEQ);
-    h.classList.add('hintpop');
-    h.innerHTML=`<button type="button" class="tipbtn" aria-label="${htmlEsc(tr('infoTipLabel'))}" aria-describedby="${id}">?</button>
-      <span class="tipbox" id="${id}" role="tooltip">${conteudo}</span>`;
+  document.querySelectorAll('.hint,.src').forEach(h=>{
+    if(h.classList.contains('filaviso')||h.classList.contains('viva')) return;
+    if(!h.querySelector('.tipbox')){
+      const conteudo=h.innerHTML.trim();
+      if(!conteudo) return;
+      const id='tip_'+(++INFO_TIP_SEQ);
+      h.classList.add('hintpop');
+      h.innerHTML=`<button type="button" class="tipbtn" aria-label="${htmlEsc(tr('infoTipLabel'))}" aria-describedby="${id}">?</button>
+        <span class="tipbox" id="${id}" role="tooltip">${conteudo}</span>`;
+    }
+    /* a mudança de sítio corre também nas passagens seguintes: na primeira as
+       secções ainda não estão montadas e não há título onde pôr o "?" */
+    if(h.dataset.junto) return;
+    const conteudo=h.querySelector('.tipbox').innerHTML;          /* já foi mudado: um redesenho não o volta a mexer */
+    const alvo=sitioDoTip(h);
+    if(!alvo) return;
+    h.dataset.junto='1'; h.classList.add('tipjunto');
+    /* duas dicas soltas na mesma secção: um "?" só, com as duas lá dentro */
+    const ja=!h.id && alvo.tagName==='H3' && [...alvo.children].find(c=>c.classList.contains('tipjunto')&&!c.id);
+    if(ja){ ja.querySelector('.tipbox').insertAdjacentHTML('beforeend','<br><br>'+conteudo); h.remove(); return; }
+    alvo.insertBefore(h, alvo.querySelector(':scope > .chev'));
   });
 }
+/* Onde o "?" fica, em vez de numa linha sua, por esta ordem:
+   - dentro de um campo (<div><label>…</label>…) — no rótulo do campo;
+   - num bloco que começa por um interruptor — no fim do interruptor;
+   - a seguir a uma fila de campos — no rótulo que a dica nomeia a negrito;
+   - solta numa secção — no título da secção.
+   Fora disto (resultados, <details>) fica onde está. */
+function sitioDoTip(h){
+  const par=h.parentElement; if(!par) return null;
+  const solta=par.classList.contains('subsec')||par.classList.contains('card');
+  const prim=par.firstElementChild;
+  if(!solta && prim && prim!==h && prim.tagName==='LABEL') return prim;
+  let ant=h.previousElementSibling;
+  while(ant && (ant.classList.contains('hint')||ant.classList.contains('hintpop'))) ant=ant.previousElementSibling;
+  if(!solta) return null;
+  if(ant && ant.matches('.row,.bigmarg')){
+    const b=semAcentos((h.querySelector('.tipbox b')||{}).textContent||'').trim();
+    const l=b && [...ant.querySelectorAll('label:not(.toggle)')].find(l=>semAcentos(l.textContent).includes(b));
+    if(l) return l;
+  }
+  const h3=par.classList.contains('subsec') ? par.previousElementSibling : null;
+  return h3 && h3.tagName==='H3' ? h3 : null;
+}
+/* Um "?" lá em baixo na página abria o balão para fora do ecrã. Mede-se ao
+   passar por cima -- é a única altura em que se sabe onde ele está. */
+function ladoDoPopup(e){
+  const p=e.target.closest&&e.target.closest('.hintpop');
+  if(!p) return;
+  const r=p.getBoundingClientRect();
+  p.classList.toggle('pcima', r.bottom>window.innerHeight-230);
+  p.classList.toggle('pesq', r.left+370>window.innerWidth);
+}
+document.addEventListener('click',e=>{ if(e.target.closest&&e.target.closest('h3 .tipbtn')) e.stopPropagation(); },true);
+document.addEventListener('mouseover',ladoDoPopup,{passive:true});
+document.addEventListener('focusin',ladoDoPopup,{passive:true});
 function mudarIdioma(lang){
   IDIOMA=I18N[lang]?lang:'pt';
   store.set('idioma',IDIOMA);
@@ -4264,9 +5644,12 @@ function estado(){
   o.favs=favs; o.custom=custom; o.simples=SIMPLES; o.fechados=[...FECHADOS]; o.idioma=IDIOMA;
   o.blocos={...BLOCOS};
   o.preset=el('p_sel').value;
-  ['j_cliente','j_projeto','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
-   'r_g','r_t','r_e'].forEach(i=>o[i]=el(i).value);
-  ['j_ajusta','j_round','r_usar','j_mostrar_maq','j_mostrar_mod'].forEach(i=>o[i]=el(i).checked);
+  J_VAL.forEach(i=>o[i]=el(i).value);
+  J_CHK.forEach(i=>o[i]=el(i).checked);
+  /* os separadores viajam com o estado: memória remota e Exportar incluídos */
+  if(ABAS[ABA]) ABAS[ABA].job=jobSnapshot();
+  o.abas=ABAS.map(a=>({id:a.id, job:a.job}));
+  o.aba=ABA;
   return o;
 }
 function repor(o){
@@ -4275,9 +5658,8 @@ function repor(o){
   if(o.favs) favs=o.favs;
   if(o.custom) custom=o.custom;
   drawPrinters(); if(o.printer!==undefined) el('s_printer').value=o.printer;
-  ['j_cliente','j_projeto','j_pecas','j_manual','j_pol','j_pint','j_desc','j_promo','j_portes','j_portes_man',
-   'r_g','r_t','r_e'].forEach(i=>{ if(o[i]!==undefined) el(i).value=o[i]; });
-  ['j_ajusta','j_round','r_usar','j_mostrar_maq','j_mostrar_mod'].forEach(i=>{ if(o[i]!==undefined) el(i).checked=o[i]; });
+  J_VAL.forEach(i=>{ if(o[i]!==undefined) el(i).value=o[i]; });
+  J_CHK.forEach(i=>{ if(o[i]!==undefined) el(i).checked=o[i]; });
   /* estados guardados antes da 1.8.0 traziam "Projeto — Cliente" num campo só */
   if(o.j_projeto===undefined && (o.j_cliente||'').includes(' — ')){
     const [proj,...resto]=o.j_cliente.split(' — ');
@@ -4291,12 +5673,23 @@ function repor(o){
   aplicarIdioma();
   /* depois do aplicarIdioma, que redesenha a lista de presets */
   if(o.preset && presets()[o.preset]) el('p_sel').value=o.preset;
+  /* Um estado antigo — ou um preset, que de propósito não os traz — não tem
+     separadores: nesse caso ficam os que já estavam abertos, e o trabalho
+     acabado de repor passa a ser o do separador à vista. */
+  if(Array.isArray(o.abas) && o.abas.length){
+    ABAS=o.abas.map(a=>({id:a.id||idAba(), job:a.job||null}));
+    ABA=Math.min(Math.max(0,+o.aba||0),ABAS.length-1);
+    REG=(ABAS[ABA].job||{}).registo||null;
+    FO=(ABAS[ABA].job||{}).folha||null;
+  }
+  drawAbas();
 }
 let guardaT;
 function guardaEstado(){
   clearTimeout(guardaT);
   guardaT=setTimeout(()=>{
     store.set('ultimo',estado());
+    drawAbas();                 /* o nome e o total do separador seguem o que se escreve */
     agendarMemoriaRemota();
   },400);
 }
@@ -4420,12 +5813,38 @@ function drawPresets(){
     +ks.map(k=>`<option>${htmlEsc(k)}</option>`).join('');
   s.value=ks.includes(keep)?keep:'';
 }
+/* "PLA Ender" e "pla ender " são o mesmo preset para quem os escreve. Sem isto,
+   uma maiúscula ou um acento trocado bastavam para nascer um preset gémeo. */
+const chaveNome = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+                        .toLowerCase().replace(/\s+/g,' ').trim();
 function guardarPreset(){
-  const n=(prompt(tr('presetPrompt'))||'').trim();
+  const p=presets(), ks=Object.keys(p), atual=el('p_sel').value;
+  /* pré-preenchido com o preset à vista: Enter atualiza-o, e atualizar deixa de
+     obrigar a reescrever o nome à letra */
+  const n=(prompt(tr('presetPrompt'), atual)||'').trim();
   if(!n) return;
-  const p=presets(); p[n]=estado(); p[n].preset=n;
+  const chave=ks.find(k=>chaveNome(k)===chaveNome(n)) || n;
+  if(ks.includes(chave) && chave!==atual && !confirm(tr('presetOverwrite',{name:chave}))) return;
+  p[chave]=estado(); p[chave].preset=chave;
+  /* um preset é a oficina, não os trabalhos em curso: carregá-lo não pode
+     varrer os separadores abertos */
+  delete p[chave].abas; delete p[chave].aba;
   if(!store.set('presets',p)) return alert(tr('presetNoSave'));
-  drawPresets(); el('p_sel').value=n; agendarMemoriaRemota();
+  drawPresets(); el('p_sel').value=chave; agendarMemoriaRemota();
+}
+function renomearPreset(){
+  const n=el('p_sel').value;
+  if(!n) return alert(tr('presetPickFirst'));
+  const novo=(prompt(tr('presetRename',{name:n}), n)||'').trim();
+  if(!novo || novo===n) return;
+  const p=presets();
+  const choque=Object.keys(p).find(k=>k!==n && chaveNome(k)===chaveNome(novo));
+  if(choque && !confirm(tr('presetOverwrite',{name:choque}))) return;
+  const alvo=choque||novo;
+  p[alvo]=p[n]; p[alvo].preset=alvo;
+  if(alvo!==n) delete p[n];
+  if(!store.set('presets',p)) return alert(tr('presetNoSave'));
+  drawPresets(); el('p_sel').value=alvo; agendarMemoriaRemota();
 }
 function carregarPreset(){
   const n=el('p_sel').value; if(!n) return;
@@ -4617,23 +6036,26 @@ el('j_mostrar_mod').addEventListener('change',calc);
 ['s_tax_nome','s_tax_rate'].forEach(i=>el(i).addEventListener('input',marcarTaxCustom));
 /* o :not(#filpick *) tira a caixa de procura do seletor: escrever lá dentro
    não é mexer no orçamento, e a cada tecla corria um calc() inteiro */
-document.querySelectorAll('input:not(#filpick input),select:not(#filpick select)')
+document.querySelectorAll('input:not(#filpick input):not(#reg input):not(#ccl input),select:not(#filpick select):not(#reg select)')
   .forEach(i=>i.addEventListener('input',calc));
 el('s_auto_kwh').addEventListener('change',toggleAuto);
 ['s_iva','s_kwh_add'].forEach(i=>el(i).addEventListener('input',applySpot));
 /* j_pecas é derivado das mesas: quem mexe no escalão de desconto é mudaPecas() */
-document.querySelectorAll('input:not(#filpick input),select:not(#filpick select)').forEach(i=>{
+document.querySelectorAll('input:not(#filpick input):not(#reg input):not(#ccl input),select:not(#filpick select):not(#reg select)').forEach(i=>{
   i.addEventListener('input',guardaEstado); i.addEventListener('change',guardaEstado);
 });
 ligaPicker();
 ligaBobina();
+ligaGiro();
 const ultimo=store.get('ultimo',null);
 if(ultimo){ try{ repor(ultimo); }catch(_){ calc(); } } else calc();
+drawAbas();
 aplicarIdioma();
 ligaInfoPopups();
 mostrarLicenca();
 procurarAtualizacoes(true);
 iniciarMemoriaRemota();
+carregaRegisto();
 </script>
 </body>
 </html>
