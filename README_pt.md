@@ -118,11 +118,7 @@ Contacta **hubertkenobi@gmail.com** antes de começares. Termos completos em [`L
 
 ---
 
-<p align="center">
-  <i>Fatia — powered by <b>DL X</b></i><br>
-  <sub><i>DL X é a divisão de investigação e produto da <b>DungenLabs</b>, laboratório de engenharia em Lisboa —
-  a metade do laboratório que constrói para si própria: protótipos experimentais, produtos próprios
-  fabricados em casa (extrusão FDM, filamento reforçado com fibra e fundição em resina), parcerias e
-  tecnologia à procura de uso.</i></sub><br>
-  <sub><a href="https://dlx.dungenlabs.com">dlx.dungenlabs.com</a> · <a href="https://dungenlabs.com">dungenlabs.com</a></sub>
-</p>
+<p align="center">DL Forge é a divisão de software e jogos da DungenLabs. O Fatia faz parte das suas ferramentas.</p>
+
+
+<p align="center"><a href="https://dlforge.dungenlabs.com"><img src="docs/branding/dlforge-logo.svg" alt="DL Forge" width="120"></a><br><a href="https://dlforge.dungenlabs.com">DL Forge</a></p>
